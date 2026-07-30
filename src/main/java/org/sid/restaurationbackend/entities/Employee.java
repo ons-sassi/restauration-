@@ -1,0 +1,4 @@
+package org.sid.restaurationbackend.entities;
+
+public class Employee {
+}
