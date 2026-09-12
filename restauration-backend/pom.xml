@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+            http://maven.apache.org/POM/4.0.0
+            https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <!-- ===================================================== -->
+    <!-- SPRING BOOT                                           -->
+    <!-- ===================================================== -->
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.15</version>
+        <relativePath/>
+    </parent>
+
+
+    <!-- ===================================================== -->
+    <!-- PROJECT INFORMATION                                   -->
+    <!-- ===================================================== -->
+
+    <groupId>org.sid</groupId>
+
+    <artifactId>restauration-backend</artifactId>
+
+    <version>0.0.1-SNAPSHOT</version>
+
+    <name>restauration-backend</name>
+
+    <description>
+        Backend application for restaurant management
+    </description>
+
+
+    <!-- ===================================================== -->
+    <!-- PROPERTIES                                            -->
+    <!-- ===================================================== -->
+
+    <properties>
+
+        <!-- Java -->
+        <java.version>17</java.version>
+
+        <!-- Encoding -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.resources.sourceEncoding>UTF-8</project.resources.sourceEncoding>
+
+        <!-- Logback security fix -->
+        <logback.version>1.5.25</logback.version>
+
+        <!-- Jackson -->
+        <jackson.version>2.22.1</jackson.version>
+
+        <!-- JJWT -->
+        <jjwt.version>0.12.6</jjwt.version>
+
+    </properties>
+
+
+    <!-- ===================================================== -->
+    <!-- DEPENDENCY MANAGEMENT                                 -->
+    <!-- ===================================================== -->
+
+    <dependencyManagement>
+
+        <dependencies>
+
+            <!-- Jackson BOM -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+
+    <!-- ===================================================== -->
+    <!-- DEPENDENCIES                                          -->
+    <!-- ===================================================== -->
+
+    <dependencies>
+
+
+        <!-- ================================================= -->
+        <!-- SPRING WEB / REST                                 -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- SPRING DATA JPA                                   -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- SPRING SECURITY                                   -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- SPRING AOP                                        -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- JJWT API                                           -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- JJWT IMPLEMENTATION                                -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- JJWT JACKSON                                       -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- SQL SERVER                                         -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- LOMBOK                                             -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- DEVTOOLS                                           -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- TEST                                               -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+        <!-- ================================================= -->
+        <!-- SPRING SECURITY TEST                               -->
+        <!-- ================================================= -->
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+    </dependencies>
+
+
+    <!-- ===================================================== -->
+    <!-- BUILD                                                 -->
+    <!-- ===================================================== -->
+
+    <build>
+
+        <plugins>
+
+
+            <!-- ================================================= -->
+            <!-- SPRING BOOT MAVEN PLUGIN                         -->
+            <!-- ================================================= -->
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+
+            <!-- ================================================= -->
+            <!-- MAVEN COMPILER                                   -->
+            <!-- ================================================= -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+
+                <configuration>
+
+                    <annotationProcessorPaths>
+
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+
+                    </annotationProcessorPaths>
+
+                </configuration>
+
+            </plugin>
+
+
+        </plugins>
+
+    </build>
+
+</project>
