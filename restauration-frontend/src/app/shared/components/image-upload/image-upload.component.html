@@ -1,0 +1,32 @@
+<label class="upload">
+
+  @if (previewUrl) {
+
+    <img
+      [src]="previewUrl"
+      alt="Aperçu"
+    />
+
+  } @else {
+
+    <span class="upload-icon">
+      +
+    </span>
+
+    <strong>
+      {{ label }}
+    </strong>
+
+    <small>
+      PNG, JPG ou WEBP
+    </small>
+
+  }
+
+  <input
+    type="file"
+    accept="image/png,image/jpeg,image/webp"
+    (change)="selectImage($event)"
+  />
+
+</label>

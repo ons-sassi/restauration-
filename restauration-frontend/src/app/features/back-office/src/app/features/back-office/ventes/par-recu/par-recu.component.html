@@ -1,0 +1,152 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>Ventes par reçu</h1>
+      <p>Liste des reçus émis pour chaque vente</p>
+    </div>
+  </div>
+
+  <section class="filters">
+    <div class="field">
+      <label for="dateDebut">Date début</label>
+      <input id="dateDebut" type="date" [(ngModel)]="dateDebut" />
+    </div>
+
+    <div class="field">
+      <label for="dateFin">Date fin</label>
+      <input id="dateFin" type="date" [(ngModel)]="dateFin" />
+    </div>
+
+    <div class="field">
+      <label for="pointDeVente">Point de vente</label>
+      <select id="pointDeVente" [(ngModel)]="pointDeVenteId">
+
+        <option [ngValue]="null">Tous les points de vente</option>
+
+        <option
+          *ngFor="let pdv of pointDeVentes"
+          [ngValue]="pdv.id_pdv"
+        >
+          {{ pdv.nomPdv }}
+        </option>
+
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="rechercher()"
+      [disabled]="loading"
+    >
+      <span *ngIf="!loading">Appliquer</span>
+      <span *ngIf="loading">Chargement...</span>
+    </button>
+  </section>
+
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement des reçus...</p>
+  </div>
+
+  <ng-container *ngIf="!loading && !errorMessage">
+
+    <section class="stats">
+
+      <div class="stat-card">
+        <div class="stat-label">Montant total (TTC)</div>
+        <div class="stat-value">
+          {{ totalMontantTtc | number:'1.2-2' }} DT
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Reçus émis</div>
+        <div class="stat-value">
+          {{ totalNombreRecus }}
+        </div>
+      </div>
+
+    </section>
+
+    <section class="table-card">
+
+      <div class="table-header">
+        <div>
+          <h2>Reçus émis</h2>
+          <p>Détail des reçus pour chaque vente</p>
+        </div>
+        <span class="article-count">
+          {{ ventes.length }} reçu(s)
+        </span>
+      </div>
+
+      <div class="table-container" *ngIf="ventes.length > 0">
+        <table>
+
+          <thead>
+            <tr>
+              <th>N° reçu</th>
+              <th>Date d'émission</th>
+              <th>Point de vente</th>
+              <th>Mode de paiement</th>
+              <th class="text-right">Montant TTC</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let vente of ventes">
+
+              <td>
+                <strong class="receipt-number">{{ vente.numeroRecu }}</strong>
+              </td>
+
+              <td>
+                {{ vente.dateEmission | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+
+              <td>
+                {{ vente.pointDeVente }}
+              </td>
+
+              <td>
+                <div class="payment-name">
+                  <div class="payment-icon">💳</div>
+                  <span>{{ vente.modePaiement }}</span>
+                </div>
+              </td>
+
+              <td class="text-right">
+                <strong class="amount">
+                  {{ vente.montantTtc | number:'1.2-2' }} DT
+                </strong>
+              </td>
+
+            </tr>
+
+            <tr class="total-row">
+              <td colspan="4"><strong>Total</strong></td>
+              <td class="text-right">
+                <strong>{{ totalMontantTtc | number:'1.2-2' }} DT</strong>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+      <div class="empty-state" *ngIf="ventes.length === 0">
+        <h3>Aucun reçu trouvé</h3>
+        <p>Aucun reçu ne correspond aux filtres sélectionnés.</p>
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

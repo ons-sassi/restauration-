@@ -1,0 +1,473 @@
+/* =========================================================
+   DESIGN SYSTEM GLOBAL - RESTAURATION APP
+   ========================================================= */
+:root {
+  --app-primary: #1675d1;
+  --app-primary-hover: #1265b5;
+  --app-primary-soft: #edf6ff;
+  --app-text: #202938;
+  --app-text-secondary: #596579;
+  --app-text-muted: #8992a1;
+  --app-text-light: #a0a8b3;
+  --app-bg: #f7f9fc;
+  --app-surface: #ffffff;
+  --app-border: #e5e9ef;
+  --app-border-input: #dce2e9;
+  --app-success: #2f9e5b;
+  --app-success-soft: #edf9f1;
+  --app-warning: #e88a23;
+  --app-warning-soft: #fff4e7;
+  --app-danger: #c43d3d;
+  --app-danger-soft: #fff1f1;
+  --app-info: #7656d6;
+  --app-info-soft: #f3efff;
+  --app-radius-sm: 8px;
+  --app-radius-md: 10px;
+  --app-radius-lg: 12px;
+  --app-shadow: 0 3px 14px rgba(31, 41, 55, 0.04);
+  --app-shadow-hover: 0 6px 20px rgba(31, 41, 55, 0.07);
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: Inter, Roboto, "Segoe UI", Arial, sans-serif;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+button, input, select, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+
+/* Common application primitives */
+.app-surface,
+.table-card,
+.products-card,
+.filters-card,
+.filters,
+.stat-card,
+.panel,
+.loading-card,
+.card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.btn-primary,
+.primary-button,
+.refresh-button,
+.secondary-button,
+.btn-secondary {
+  min-height: 40px;
+  border-radius: var(--app-radius-sm);
+  font-weight: 600;
+  transition: background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .12s ease;
+}
+
+.btn-primary,
+.primary-button {
+  border: 1px solid var(--app-primary);
+  background: var(--app-primary);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled),
+.primary-button:hover:not(:disabled) {
+  background: var(--app-primary-hover);
+  border-color: var(--app-primary-hover);
+}
+
+.btn-secondary,
+.secondary-button,
+.refresh-button {
+  border: 1px solid var(--app-border-input);
+  background: #fff;
+  color: var(--app-text-secondary);
+}
+
+.btn-secondary:hover:not(:disabled),
+.secondary-button:hover:not(:disabled),
+.refresh-button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cfd7e1;
+}
+
+button:disabled { cursor: not-allowed; opacity: .55; }
+
+input, select, textarea {
+  border-color: var(--app-border-input);
+  color: var(--app-text);
+  background: #fff;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #80b9e8;
+  box-shadow: 0 0 0 3px rgba(22, 117, 209, .09);
+}
+
+.page-header h1,
+.page-heading h2,
+.header h1 { color: var(--app-text); }
+
+.page-header p,
+.page-heading p,
+.header p { color: var(--app-text-muted); }
+
+.error-message,
+.alert-error {
+  border-color: #f2caca;
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+  border-radius: var(--app-radius-sm);
+}
+
+.stat-card:hover,
+.table-card:hover,
+.products-card:hover {
+  box-shadow: var(--app-shadow-hover);
+}
+
+@media (max-width: 900px) {
+  .stats-grid,
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 600px) {
+  .stats-grid,
+  .stats { grid-template-columns: 1fr !important; }
+}
+
+/* =========================================================
+   DESIGN SYSTEM — ESPACE CLIENT
+   Palette chaleureuse, moderne, pensée pour un usage mobile.
+   Namespacé "--client-*" / ".client-*" pour ne jamais impacter
+   le back-office, le PDV ou le business (qui restent sur --app-*).
+   ========================================================= */
+:root {
+  --client-primary: #ff5a36;
+  --client-primary-dark: #e8461f;
+  --client-primary-light: #ffe4d9;
+  --client-accent: #1a6a5e;
+  --client-accent-soft: #e3f4ef;
+  --client-bg: #fbf7f2;
+  --client-surface: #ffffff;
+  --client-text: #24262b;
+  --client-text-secondary: #6b6a72;
+  --client-text-muted: #9997a1;
+  --client-border: #efe8e0;
+  --client-success: #1f9d63;
+  --client-success-soft: #e7f7ef;
+  --client-warning: #e0982a;
+  --client-warning-soft: #fdf2e2;
+  --client-danger: #e4453f;
+  --client-danger-soft: #fdeceb;
+  --client-radius-sm: 10px;
+  --client-radius-md: 16px;
+  --client-radius-lg: 22px;
+  --client-radius-pill: 999px;
+  --client-shadow-sm: 0 2px 10px rgba(36, 26, 18, 0.06);
+  --client-shadow-md: 0 10px 30px rgba(36, 26, 18, 0.08);
+  --client-shadow-lg: 0 20px 48px rgba(36, 26, 18, 0.14);
+  --client-font-display: 'Poppins', Inter, 'Segoe UI', sans-serif;
+  --client-font-body: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --client-nav-height: 70px;
+}
+
+.client-app {
+  font-family: var(--client-font-body);
+  background: var(--client-bg);
+  color: var(--client-text);
+  min-height: 100vh;
+}
+
+.client-app h1,
+.client-app h2,
+.client-app h3 {
+  font-family: var(--client-font-display);
+  color: var(--client-text);
+  letter-spacing: -0.01em;
+}
+
+.client-app.with-bottom-nav {
+  padding-bottom: calc(var(--client-nav-height) + 20px);
+}
+
+/* ---------- Top bar ---------- */
+.client-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  background: var(--client-surface);
+  border-bottom: 1px solid var(--client-border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.client-topbar h1 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.client-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--client-border);
+  background: var(--client-surface);
+  color: var(--client-text-secondary);
+  border-radius: var(--client-radius-pill);
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: background .15s ease, transform .12s ease, border-color .15s ease;
+}
+
+.client-back-btn:hover { background: var(--client-bg); border-color: #e3d9cd; }
+.client-back-btn:active { transform: scale(0.97); }
+
+/* ---------- Cards & surfaces ---------- */
+.client-card {
+  background: var(--client-surface);
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-lg);
+  box-shadow: var(--client-shadow-sm);
+}
+
+/* ---------- Buttons ---------- */
+.client-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 22px;
+  border-radius: var(--client-radius-pill);
+  font-weight: 700;
+  font-size: 15px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .15s ease, background .15s ease, opacity .15s ease;
+}
+
+.client-btn:active { transform: scale(0.98); }
+.client-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.client-btn-primary {
+  background: var(--client-primary);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(255, 90, 54, 0.32);
+}
+
+.client-btn-primary:hover:not(:disabled) {
+  background: var(--client-primary-dark);
+  box-shadow: 0 12px 28px rgba(255, 90, 54, 0.4);
+}
+
+.client-btn-secondary {
+  background: var(--client-surface);
+  color: var(--client-text);
+  border-color: var(--client-border);
+}
+
+.client-btn-secondary:hover:not(:disabled) { background: var(--client-bg); }
+
+.client-btn-ghost {
+  background: transparent;
+  color: var(--client-text-secondary);
+  border: none;
+  min-height: auto;
+  padding: 6px 8px;
+}
+
+/* ---------- Inputs ---------- */
+.client-app input,
+.client-app select,
+.client-app textarea {
+  width: 100%;
+  border: 1.5px solid var(--client-border);
+  background: var(--client-bg);
+  color: var(--client-text);
+  border-radius: var(--client-radius-sm);
+  padding: 12px 14px;
+  font-size: 14.5px;
+  font-family: inherit;
+}
+
+.client-app input:focus,
+.client-app select:focus,
+.client-app textarea:focus {
+  outline: none;
+  border-color: var(--client-primary);
+  background: var(--client-surface);
+  box-shadow: 0 0 0 4px var(--client-primary-light);
+}
+
+.client-app label { font-weight: 600; font-size: 13.5px; color: var(--client-text-secondary); }
+
+/* ---------- Chips / badges ---------- */
+.client-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--client-radius-pill);
+  background: var(--client-surface);
+  border: 1.5px solid var(--client-border);
+  color: var(--client-text-secondary);
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.client-chip.active {
+  background: var(--client-text);
+  border-color: var(--client-text);
+  color: #fff;
+}
+
+.client-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: var(--client-radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.client-badge-success { background: var(--client-success-soft); color: var(--client-success); }
+.client-badge-warning { background: var(--client-warning-soft); color: var(--client-warning); }
+.client-badge-danger { background: var(--client-danger-soft); color: var(--client-danger); }
+.client-badge-neutral { background: var(--client-bg); color: var(--client-text-secondary); }
+.client-badge-accent { background: var(--client-accent-soft); color: var(--client-accent); }
+
+/* ---------- Empty / error / loading states ---------- */
+.client-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 60px 24px;
+  color: var(--client-text-secondary);
+}
+
+.client-state .state-emoji { font-size: 44px; margin-bottom: 6px; }
+.client-state h3 { margin: 0; font-size: 17px; }
+.client-state p { margin: 0; font-size: 14px; max-width: 320px; }
+
+.client-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--client-danger-soft);
+  color: var(--client-danger);
+  border-radius: var(--client-radius-sm);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.client-success-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--client-success-soft);
+  color: var(--client-success);
+  border-radius: var(--client-radius-sm);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.client-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 90, 54, 0.25);
+  border-top-color: var(--client-primary);
+  animation: client-spin .7s linear infinite;
+}
+
+.client-spinner.large { width: 34px; height: 34px; border-width: 4px; }
+
+@keyframes client-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Bottom navigation ---------- */
+.client-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--client-surface);
+  border-top: 1px solid var(--client-border);
+  box-shadow: 0 -8px 24px rgba(36, 26, 18, 0.06);
+  height: var(--client-nav-height);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.client-nav-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  border: none;
+  background: none;
+  color: var(--client-text-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  flex: 1;
+}
+
+.client-nav-item .nav-icon { font-size: 21px; line-height: 1; }
+.client-nav-item.active { color: var(--client-primary); }
+
+.client-nav-badge {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  background: var(--client-primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+/* ---------- Section headings inside pages ---------- */
+.client-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 26px 20px 12px;
+}
+
+.client-section-title h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}

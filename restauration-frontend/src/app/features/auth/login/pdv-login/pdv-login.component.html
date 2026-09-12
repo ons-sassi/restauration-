@@ -1,0 +1,190 @@
+<div
+  class="login-page"
+  tabindex="0"
+  (keydown)="onKeyboardKey($event)"
+>
+
+  <div class="login-card">
+
+    <!-- BRAND -->
+    <div class="brand">
+
+      <div class="brand-logo">
+        <span>🍽️</span>
+      </div>
+
+      <h1>
+        Le Bistrot
+      </h1>
+
+      <p>
+        Point de vente
+      </p>
+
+    </div>
+
+
+    <!-- HEADER -->
+    <div class="login-header">
+
+      <h2>
+        Connexion au PDV
+      </h2>
+
+      <p>
+        Entrez votre code PIN personnel
+        pour accéder au point de vente.
+      </p>
+
+    </div>
+
+
+    <!-- ERROR -->
+    @if (errorMessage) {
+
+      <div class="error-message">
+
+        <span class="error-icon">
+          !
+        </span>
+
+        {{ errorMessage }}
+
+      </div>
+
+    }
+
+
+    <!-- PIN -->
+    <div class="pin-container">
+
+      <div class="pin-label">
+        Code PIN
+      </div>
+
+
+      <div class="pin-display">
+
+        @for (
+          dot of [0, 1, 2, 3, 4, 5];
+          track dot
+          ) {
+
+          <span
+            class="pin-dot"
+            [class.active]="
+              pin.length > dot
+            "
+          ></span>
+
+        }
+
+      </div>
+
+    </div>
+
+
+    <!-- KEYPAD -->
+    <div class="keypad">
+
+      @for (
+        digit of ['1','2','3','4','5','6','7','8','9'];
+        track digit
+        ) {
+
+        <button
+          type="button"
+          class="key"
+          [disabled]="loading"
+          (click)="addDigit(digit)"
+        >
+          {{ digit }}
+        </button>
+
+      }
+
+
+      <button
+        type="button"
+        class="key action"
+        [disabled]="loading"
+        (click)="clearPin()"
+      >
+        C
+      </button>
+
+
+      <button
+        type="button"
+        class="key"
+        [disabled]="loading"
+        (click)="addDigit('0')"
+      >
+        0
+      </button>
+
+
+      <button
+        type="button"
+        class="key action"
+        [disabled]="loading"
+        (click)="deleteDigit()"
+      >
+        ←
+      </button>
+
+    </div>
+
+
+    <!-- LOGIN -->
+    <button
+      type="button"
+      class="login-button"
+      [disabled]="
+        loading ||
+        pin.length < 4
+      "
+      (click)="login()"
+    >
+
+      @if (loading) {
+
+        <span class="spinner"></span>
+
+        Connexion...
+
+      } @else {
+
+        Se connecter
+
+      }
+
+    </button>
+
+
+    <!-- BACK OFFICE -->
+    <div class="back-office-link">
+
+      <span>
+        Administrateur ?
+      </span>
+
+      <a
+        routerLink="/auth/back-office-login"
+      >
+        Accéder au Back Office
+      </a>
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <div class="footer">
+
+      © 2026 Le Bistrot
+
+    </div>
+
+  </div>
+
+</div>

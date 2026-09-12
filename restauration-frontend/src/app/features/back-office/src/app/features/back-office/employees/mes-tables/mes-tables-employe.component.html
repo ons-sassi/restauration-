@@ -1,0 +1,462 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        RESSOURCES HUMAINES
+      </span>
+
+      <h1>
+        Mes tables
+      </h1>
+
+      <p *ngIf="!estSuperAdmin">
+        Tables dont vous êtes responsable<span *ngIf="totalTables > 0"> — {{ nomEmployeConnecte }}</span>.
+        Glissez une table pour reproduire sa disposition réelle, cliquez pour voir ou changer son état.
+      </p>
+
+      <p *ngIf="estSuperAdmin">
+        Toutes les tables du restaurant sélectionné (vue Super Admin).
+        Glissez une table pour reproduire sa disposition réelle, cliquez pour voir ou changer son état.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn-secondary"
+        [disabled]="loading"
+        (click)="loadData()"
+      >
+        Actualiser
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR — ACTION RAPIDE (confirmer prise / table vidée)
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="actionRapideErrorMessage"
+  >
+    {{ actionRapideErrorMessage }}
+  </div>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+
+    {{ errorMessage }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadData()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CHARGEMENT
+  ====================================================== -->
+  <div
+    class="loading-container"
+    *ngIf="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <p>Chargement de vos tables...</p>
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU
+  ====================================================== -->
+  <ng-container *ngIf="!loading && !errorMessage">
+
+    <!-- =====================================================
+         AUCUNE TABLE ATTRIBUÉE
+    ====================================================== -->
+    <div
+      class="empty-state"
+      *ngIf="totalTables === 0 && !estSuperAdmin"
+    >
+
+      <h3>Aucune table ne vous est actuellement attribuée</h3>
+
+      <p>
+        Veuillez contacter le responsable de distribution des tables.
+      </p>
+
+    </div>
+
+    <div
+      class="empty-state"
+      *ngIf="totalTables === 0 && estSuperAdmin"
+    >
+
+      <h3>Aucune table n'existe pour ce restaurant</h3>
+
+      <p>
+        Créez des tables depuis la gestion des tables du restaurant.
+      </p>
+
+    </div>
+
+
+    <ng-container *ngIf="totalTables > 0">
+
+      <!-- =====================================================
+           STATISTIQUES
+      ====================================================== -->
+      <section class="stats">
+
+        <div class="stat-card">
+          <span class="stat-label">MES TABLES</span>
+          <span class="stat-value">{{ totalTables }}</span>
+        </div>
+
+        <div class="stat-card success">
+          <span class="stat-label">LIBRES</span>
+          <span class="stat-value">{{ totalLibres }}</span>
+        </div>
+
+        <div class="stat-card warning">
+          <span class="stat-label">OCCUPÉES</span>
+          <span class="stat-value">{{ totalOccupees }}</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">RÉSERVÉES</span>
+          <span class="stat-value">{{ totalReservees }}</span>
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           FILTRES
+      ====================================================== -->
+      <section class="filter-tabs">
+
+        <button
+          type="button"
+          *ngFor="let filtre of filtres"
+          class="filter-tab"
+          [class.active]="selectedFiltre === filtre.value"
+          (click)="selectionnerFiltre(filtre.value)"
+        >
+          {{ filtre.label }}
+        </button>
+
+      </section>
+
+
+      <!-- =====================================================
+           PLAN — GLISSER / DÉPOSER
+      ====================================================== -->
+      <section class="tables-panel">
+
+        <div class="plan-header">
+          <h2>Mes tables</h2>
+          <p>Glissez une table pour la repositionner. Cliquez pour voir ou changer son état.</p>
+        </div>
+
+        <div
+          class="plan-canvas"
+          #planCanvas
+          [style.height.px]="planHeight"
+          *ngIf="tablesFiltrees.length > 0"
+        >
+
+          <div
+            class="table-card"
+            *ngFor="let vm of tablesFiltrees"
+            [class.dragging]="draggingTableId === vm.table.id_table"
+            [style.left.px]="getPosition(vm.table).x"
+            [style.top.px]="getPosition(vm.table).y"
+            role="button"
+            tabindex="0"
+            (pointerdown)="onCardPointerDown($event, vm)"
+            (click)="onCardClick(vm)"
+            (keydown.enter)="ouvrirDetails(vm)"
+          >
+
+            <div class="table-item-header">
+              <span class="table-number">Table {{ vm.table.numeroTable }}</span>
+
+              <span
+                class="statut-badge"
+                [ngClass]="statutClass(vm.table.statut)"
+              >
+                {{ statutLabel(vm.table.statut) }}
+              </span>
+            </div>
+
+            <div class="table-capacity">
+              {{ vm.table.capacite }} places
+            </div>
+
+            <!-- SERVEUR RESPONSABLE (visible directement sur la carte) -->
+            <div class="table-employee">
+              Responsable :
+              <strong [class.non-attribue]="!vm.table.serveurAttribue">
+                {{ nomComplet(vm.table.serveurAttribue) }}
+              </strong>
+            </div>
+
+            <!-- PRISE EN CHARGE (lecture seule) -->
+            <div
+              class="prise-en-charge-badge active"
+              *ngIf="vm.priseEnChargeActive"
+            >
+              CLIENT PRÉSENT · Depuis {{ heureFormat(vm.priseEnChargeActive.dateDebut) }}
+            </div>
+
+            <!-- COMMANDE -->
+            <div
+              class="table-commande"
+              *ngIf="vm.commandeActive; else pasDeCommande"
+            >
+              Commande #{{ vm.commandeActive.id_commande }} · {{ statutCommandeLabel(vm.commandeActive.statut) }}
+            </div>
+
+            <ng-template #pasDeCommande>
+              <div class="table-commande none">
+                Aucune commande active
+              </div>
+            </ng-template>
+
+            <!-- RÉCLAMATION -->
+            <div
+              class="table-reclamation"
+              *ngIf="vm.reclamationActive"
+            >
+              ⚠ Réclamation en cours
+            </div>
+
+            <!-- ACTION RAPIDE : TABLE VIDÉE -->
+            <!-- La prise de table est désormais automatique dès que le
+                 client passe commande sur cette table (voir
+                 ClientCommandeServiceImpl côté backend) : il n'y a plus
+                 besoin de la confirmer manuellement ici. Seule reste
+                 l'action de libération une fois le client parti. -->
+            <div
+              class="table-quick-actions"
+              *ngIf="vm.table.statut === 'OCCUPEE'"
+            >
+
+              <button
+                type="button"
+                class="quick-action-btn free-table"
+                [disabled]="idTableActionRapideEnCours === vm.table.id_table"
+                (click)="marquerTableVide(vm, $event)"
+              >
+                {{ idTableActionRapideEnCours === vm.table.id_table ? '...' : 'Table vidée' }}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+        <div
+          class="empty-state"
+          *ngIf="tablesFiltrees.length === 0"
+        >
+
+          <h3>Aucune table ne correspond à ce filtre</h3>
+
+          <p>
+            Essayez un autre filtre.
+          </p>
+
+        </div>
+
+      </section>
+
+    </ng-container>
+
+  </ng-container>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL DÉTAILS + CHANGEMENT DE STATUT (simple clic)
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="selectedVm as vm"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Table {{ vm.table.numeroTable }}</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="statutSaving"
+        (click)="fermerDetails()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="detail-row">
+        <span class="detail-label">Capacité</span>
+        <span class="detail-value">{{ vm.table.capacite }} places</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Statut actuel</span>
+        <span
+          class="statut-badge"
+          [ngClass]="statutClass(vm.table.statut)"
+        >
+          {{ statutLabel(vm.table.statut) }}
+        </span>
+      </div>
+
+      <div
+        class="modal-error"
+        *ngIf="statutError"
+      >
+        {{ statutError }}
+      </div>
+
+      <div class="form-group">
+        <label>Nouvel état de la table</label>
+        <select
+          [(ngModel)]="nouveauStatut"
+          name="nouveauStatut"
+          [disabled]="statutSaving"
+        >
+          <option
+            *ngFor="let statut of statutsDisponibles"
+            [ngValue]="statut.value"
+          >
+            {{ statut.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-save"
+          [disabled]="statutSaving || nouveauStatut === vm.table.statut"
+          (click)="confirmerChangerStatut()"
+        >
+          {{ statutSaving ? 'Enregistrement...' : "Enregistrer l'état" }}
+        </button>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Employé responsable</span>
+        <span class="detail-value">{{ nomComplet(vm.table.serveurAttribue) }}</span>
+      </div>
+
+      <!-- PRISE EN CHARGE -->
+      <div class="detail-row">
+        <span class="detail-label">Prise en charge</span>
+        <span class="detail-value">
+          {{ vm.priseEnChargeActive ? 'Active' : 'Aucune' }}
+        </span>
+      </div>
+
+      <div
+        class="detail-row"
+        *ngIf="vm.priseEnChargeActive as prise"
+      >
+        <span class="detail-label">Début</span>
+        <span class="detail-value">{{ heureFormat(prise.dateDebut) }}</span>
+      </div>
+
+      <!-- COMMANDE -->
+      <ng-container *ngIf="vm.commandeActive; else detailsPasDeCommande">
+
+        <div class="detail-section-title">
+          Commande #{{ vm.commandeActive.id_commande }}
+        </div>
+
+        <div
+          class="ligne-commande"
+          *ngFor="let ligne of vm.lignes"
+        >
+          {{ ligne.quantite }} × {{ ligne.produit?.nom }}
+        </div>
+
+        <div
+          class="empty-lignes"
+          *ngIf="vm.lignes.length === 0"
+        >
+          Détail de la commande indisponible.
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Total</span>
+          <span class="detail-value">{{ vm.commandeActive.montant_total }} DT</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">État</span>
+          <span class="detail-value">{{ statutCommandeLabel(vm.commandeActive.statut) }}</span>
+        </div>
+
+      </ng-container>
+
+      <ng-template #detailsPasDeCommande>
+        <div class="detail-section-title">
+          Aucune commande active
+        </div>
+      </ng-template>
+
+      <!-- RÉCLAMATION -->
+      <div
+        class="reclamation-box"
+        *ngIf="vm.reclamationActive as reclamation"
+      >
+
+        <div class="detail-section-title">
+          ⚠ Réclamation
+        </div>
+
+        <p class="reclamation-sujet">{{ reclamation.sujet }}</p>
+        <p class="reclamation-description">{{ reclamation.description }}</p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

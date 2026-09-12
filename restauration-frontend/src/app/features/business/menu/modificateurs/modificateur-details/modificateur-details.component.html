@@ -1,0 +1,269 @@
+
+<div class="modificateur-details-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <span class="page-kicker">
+        MENU / MODIFICATEURS
+      </span>
+
+      <h1>
+        Détails du modificateur
+      </h1>
+
+      <p>
+        Consultez les informations de ce modificateur.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-back"
+      (click)="retour()"
+    >
+      <span>←</span>
+      Retour aux modificateurs
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    class="loading-card"
+    *ngIf="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <strong>
+      Chargement du modificateur...
+    </strong>
+
+    <span>
+      Veuillez patienter
+    </span>
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    class="error-card"
+    *ngIf="!loading && error"
+  >
+
+    <div class="error-icon">
+      !
+    </div>
+
+    <div class="error-content">
+
+      <strong>
+        Impossible de charger le modificateur
+      </strong>
+
+      <span>
+        {{ error }}
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="error-button"
+      (click)="retour()"
+    >
+      Retour
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       DETAILS
+  ====================================================== -->
+
+  <main
+    class="details-card"
+    *ngIf="!loading && modificateur"
+  >
+
+    <!-- ===================================================
+         AVATAR
+    ==================================================== -->
+
+    <div class="modificateur-avatar-panel">
+
+      <div class="modificateur-avatar">
+        <span>✎</span>
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         CONTENU
+    ==================================================== -->
+
+    <div class="details-content">
+
+      <!-- TOP -->
+      <div class="details-top">
+
+        <span class="category-badge">
+          {{ produitsCount }} produit(s) associé(s)
+        </span>
+
+        <span class="status-badge">
+
+          <span class="status-dot"></span>
+
+          Modificateur
+
+        </span>
+
+      </div>
+
+
+      <!-- NOM -->
+      <h2>
+        {{ modificateur.nom_modificateur }}
+      </h2>
+
+
+      <!-- DESCRIPTION -->
+      <p class="description">
+        Ce modificateur ajoute une option supplémentaire aux produits
+        <strong>{{ produitsNoms }}</strong>, avec un supplément de prix
+        appliqué automatiquement lors de la commande.
+      </p>
+
+
+      <!-- =================================================
+           STATISTIQUES
+      ================================================== -->
+
+      <div class="info-grid">
+
+        <!-- PRIX SUPPLEMENTAIRE -->
+        <div class="info-card">
+
+          <span class="info-label">
+            SUPPLÉMENT DE PRIX
+          </span>
+
+          <strong class="price">
+            + {{ modificateur.prix_supplementaire | number: '1.2-2' }} €
+          </strong>
+
+        </div>
+
+
+        <!-- NOMBRE DE PRODUITS -->
+        <div class="info-card">
+
+          <span class="info-label">
+            PRODUITS ASSOCIÉS
+          </span>
+
+          <strong>
+            {{ produitsCount }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           LISTE DES PRODUITS ASSOCIES
+      ================================================== -->
+
+      <div
+        class="produits-associes"
+        *ngIf="produitsCount > 0"
+      >
+
+        <span class="info-label">
+          PRODUITS ASSOCIÉS
+        </span>
+
+        <div class="produits-associes-list">
+
+          <div
+            class="info-card clickable"
+            *ngFor="let produit of produits"
+            (click)="voirProduit(produit.id_element)"
+          >
+
+            <span class="info-label">
+              PRODUIT
+            </span>
+
+            <strong class="restaurant-name">
+              {{ produit.nom }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ACTIONS
+      ================================================== -->
+
+      <div class="details-actions">
+
+        <!-- SUPPRIMER -->
+        <button
+          *ngIf="canDeleteModificateur()"
+          type="button"
+          class="btn-danger"
+          (click)="supprimer()"
+        >
+          Supprimer
+        </button>
+
+        <!-- RETOUR -->
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="retour()"
+        >
+          Retour
+        </button>
+
+        <!-- MODIFIER -->
+        <button
+          *ngIf="canEditModificateur()"
+          type="button"
+          class="btn-primary"
+          (click)="modifier()"
+        >
+          Modifier le modificateur
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>

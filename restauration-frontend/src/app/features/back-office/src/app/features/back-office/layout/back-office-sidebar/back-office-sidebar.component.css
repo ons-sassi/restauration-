@@ -1,0 +1,399 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.back-office-sidebar {
+  width: 250px;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-right: 1px solid #e7ecf2;
+
+  transition: width 0.2s ease;
+}
+
+.back-office-sidebar.collapsed {
+  width: 76px;
+}
+
+
+/* ========================================================= */
+/* BRAND */
+/* ========================================================= */
+
+.sidebar-brand {
+  height: 78px;
+
+  padding: 0 18px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  border-bottom: 1px solid var(--app-border);
+
+  box-sizing: border-box;
+}
+
+.brand-logo {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: var(--app-primary-soft);
+
+  color: var(--app-primary);
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.brand-logo-image {
+  object-fit: cover;
+
+  background: var(--app-border);
+}
+
+.brand-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-content strong {
+  color: #202737;
+
+  font-size: 14px;
+}
+
+.brand-content span {
+  margin-top: 3px;
+
+  color: #8c96a6;
+
+  font-size: 10px;
+}
+
+
+/* ========================================================= */
+/* NAVIGATION */
+/* ========================================================= */
+
+.sidebar-navigation {
+  flex: 1;
+
+  padding: 18px 12px;
+
+  overflow-y: auto;
+}
+
+.menu-group {
+  margin-bottom: 7px;
+}
+
+
+/* ========================================================= */
+/* MODULE */
+/* ========================================================= */
+
+.module-button {
+  width: 100%;
+  height: 44px;
+
+  padding: 0 12px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  box-sizing: border-box;
+
+  border: none;
+  border-radius: 9px;
+
+  background: transparent;
+
+  color: #4b5668;
+
+  font-family: inherit;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.module-button:hover {
+  background: #f5f9fd;
+  color: var(--app-primary);
+}
+
+.module-button.active {
+  background: var(--app-primary-soft);
+  color: var(--app-primary);
+  font-weight: 600;
+}
+
+
+/* ========================================================= */
+/* MODULE LABEL */
+/* ========================================================= */
+
+.module-label {
+  flex: 1;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* ========================================================= */
+/* FLÈCHE */
+/* ========================================================= */
+
+.module-arrow {
+  font-size: 18px;
+
+  line-height: 1;
+
+  transition:
+    transform 0.2s ease;
+}
+
+.module-arrow.open {
+  transform: rotate(90deg);
+}
+
+
+/* ========================================================= */
+/* ICON */
+/* ========================================================= */
+
+.menu-icon {
+  width: 19px;
+  height: 19px;
+
+  flex: 0 0 19px;
+
+  position: relative;
+}
+
+.menu-icon::before {
+  content: '';
+
+  position: absolute;
+
+  inset: 2px;
+
+  border: 1.6px solid currentColor;
+
+  border-radius: 4px;
+}
+
+
+/* ========================================================= */
+/* SOUS-MENU */
+/* ========================================================= */
+
+.submenu {
+  margin-left: 20px;
+
+  padding-left: 17px;
+
+  border-left: 1px solid #e5eaf0;
+}
+
+
+/* ========================================================= */
+/* SOUS-MENU ITEM */
+/* ========================================================= */
+
+.submenu-item {
+  min-height: 38px;
+
+  padding: 8px 10px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  box-sizing: border-box;
+
+  border-radius: 7px;
+
+  color: #697586;
+
+  text-decoration: none;
+
+  font-size: 12px;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.submenu-item:hover {
+  background: #f7faff;
+
+  color: var(--app-primary);
+}
+
+.submenu-item.active {
+  background: var(--app-primary-soft);
+
+  color: var(--app-primary);
+
+  font-weight: 600;
+}
+
+
+/* ========================================================= */
+/* PETIT POINT SOUS-MENU */
+/* ========================================================= */
+
+.submenu-dot {
+  width: 5px;
+  height: 5px;
+
+  flex: 0 0 5px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+
+/* ========================================================= */
+/* COLLAPSED */
+/* ========================================================= */
+
+.collapsed .sidebar-brand {
+  justify-content: center;
+
+  padding: 0;
+}
+
+.collapsed .module-button {
+  justify-content: center;
+
+  padding: 0;
+}
+
+.collapsed .menu-group {
+  margin-bottom: 5px;
+}
+
+
+/* ========================================================= */
+/* BOTTOM */
+/* ========================================================= */
+
+.sidebar-bottom {
+  padding: 12px;
+
+  border-top: 1px solid var(--app-border);
+}
+
+.collapse-button {
+  width: 100%;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #f5f8fb;
+
+  color: #667085;
+
+  cursor: pointer;
+
+  font-size: 11px;
+}
+
+.collapse-button:hover {
+  background: #edf4fa;
+
+  color: var(--app-primary);
+}
+
+
+/* =========================================================
+   UNIFIED COMPONENT OVERRIDES
+   ========================================================= */
+.page-header, .page-heading {
+  gap: 16px;
+}
+
+.page-header h1, .page-heading h2 {
+  font-weight: 700;
+}
+
+.filters, .filters-card {
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.btn-primary, .primary-button {
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+  color: #fff;
+}
+
+.btn-secondary, .secondary-button, .refresh-button {
+  background: #fff;
+  border-color: var(--app-border-input);
+  color: var(--app-text-secondary);
+}
+
+.table-card, .products-card, .stat-card, .panel {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.field input, .field select, .filter-field input, .filter-field select,
+.filter-group input, .filter-group select, .form-group input,
+.form-group select, .form-group textarea, .search-box input {
+  border-color: var(--app-border-input);
+  border-radius: var(--app-radius-sm);
+}
+
+.field input:focus, .field select:focus, .filter-field input:focus,
+.filter-field select:focus, .filter-group input:focus, .filter-group select:focus,
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus,
+.search-box input:focus {
+  border-color: #80b9e8;
+  box-shadow: 0 0 0 3px rgba(22,117,209,.09);
+}

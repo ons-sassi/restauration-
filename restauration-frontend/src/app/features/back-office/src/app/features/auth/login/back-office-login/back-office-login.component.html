@@ -1,0 +1,287 @@
+
+<div class="login-page">
+
+  <div class="login-card">
+
+    <!-- ===================================================== -->
+    <!-- LOGO -->
+    <!-- ===================================================== -->
+
+    <div class="brand">
+
+      <div class="brand-logo">
+        <span>🍽️</span>
+      </div>
+
+      <h1>
+        Le Bistrot
+      </h1>
+
+      <p>
+        Back Office
+      </p>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- TITRE -->
+    <!-- ===================================================== -->
+
+    <div class="login-header">
+
+      <h2>
+        Bienvenue
+      </h2>
+
+      <p>
+        Connectez-vous à votre espace
+        d'administration.
+      </p>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- ERREUR -->
+    <!-- ===================================================== -->
+
+    @if (errorMessage) {
+
+      <div class="error-message">
+
+        <span class="error-icon">
+          !
+        </span>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- FORMULAIRE -->
+    <!-- ===================================================== -->
+
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+
+
+      <!-- =================================================== -->
+      <!-- EMAIL -->
+      <!-- =================================================== -->
+
+      <div class="form-group">
+
+        <label for="email">
+          Adresse email
+        </label>
+
+        <div class="input-wrapper">
+
+          <span class="input-icon">
+            ✉
+          </span>
+
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="votre@email.com"
+            autocomplete="email"
+          />
+
+        </div>
+
+
+        @if (
+          email?.touched &&
+          email?.invalid
+          ) {
+
+          <div class="field-error">
+
+            @if (email?.errors?.['required']) {
+              L'adresse email est obligatoire.
+            }
+
+            @if (email?.errors?.['email']) {
+              Veuillez saisir une adresse email valide.
+            }
+
+          </div>
+
+        }
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- MOT DE PASSE -->
+      <!-- =================================================== -->
+
+      <div class="form-group">
+
+        <div class="label-row">
+
+          <label for="password">
+            Mot de passe
+          </label>
+
+          <a
+            routerLink="/auth/forgot-password"
+            class="forgot-link"
+          >
+            Mot de passe oublié ?
+          </a>
+
+        </div>
+
+
+        <div class="input-wrapper">
+
+          <span class="input-icon">
+            🔒
+          </span>
+
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="mot_de_passe"
+            placeholder="Votre mot de passe"
+            autocomplete="current-password"
+          />
+
+
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePassword()"
+          >
+
+            @if (showPassword) {
+              Masquer
+            } @else {
+              Afficher
+            }
+
+          </button>
+
+        </div>
+
+
+        @if (
+          motDePasse?.touched &&
+          motDePasse?.invalid
+          ) {
+
+          <div class="field-error">
+
+            Le mot de passe est obligatoire.
+
+          </div>
+
+        }
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- CONNEXION -->
+      <!-- =================================================== -->
+
+      <button
+        type="submit"
+        class="login-button"
+        [disabled]="
+          loading ||
+          loginForm.invalid
+        "
+      >
+
+        @if (loading) {
+
+          <span class="spinner"></span>
+
+          Connexion...
+
+        } @else {
+
+          Se connecter
+
+        }
+
+      </button>
+
+    </form>
+
+
+    <!-- ===================================================== -->
+    <!-- SEPARATEUR -->
+    <!-- ===================================================== -->
+
+    <div class="separator">
+
+      <span>
+        ou
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- PDV -->
+    <!-- ===================================================== -->
+
+    <button
+      type="button"
+      class="pdv-button"
+      (click)="goToPdv()"
+    >
+
+      <span class="pdv-icon">
+        ⌨
+      </span>
+
+      <span>
+        Se connecter au PDV avec un PIN
+      </span>
+
+    </button>
+
+
+    <!-- ===================================================== -->
+    <!-- RETOUR -->
+    <!-- ===================================================== -->
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="goBack()"
+    >
+      Retour
+    </button>
+
+
+    <!-- ===================================================== -->
+    <!-- FOOTER -->
+    <!-- ===================================================== -->
+
+    <div class="footer">
+
+      <span>
+        © 2026 Le Bistrot
+      </span>
+
+    </div>
+
+  </div>
+
+</div>

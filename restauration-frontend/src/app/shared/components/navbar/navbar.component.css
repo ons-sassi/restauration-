@@ -1,0 +1,361 @@
+:host {
+  display: block;
+}
+
+.navbar {
+  height: 78px;
+
+  padding: 0 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e8edf4;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================
+   MENU
+   ========================= */
+
+.menu-button {
+  display: none;
+
+  width: 38px;
+  height: 38px;
+
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+
+  padding: 8px;
+}
+
+.menu-button span {
+  display: block;
+
+  height: 2px;
+
+  margin: 4px 0;
+
+  background: #3f4b5e;
+
+  border-radius: 2px;
+}
+
+
+/* =========================
+   SEARCH
+   ========================= */
+
+.search-box {
+  width: 375px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 14px;
+
+  border: 1px solid #dce3ec;
+
+  border-radius: 11px;
+
+  box-sizing: border-box;
+}
+
+.search-box:focus-within {
+  border-color: var(--app-primary);
+
+  box-shadow: 0 0 0 3px rgba(22, 117, 209, 0.08);
+}
+
+.search-box input {
+  width: 100%;
+
+  border: none;
+  outline: none;
+
+  font-size: 13px;
+
+  color: #263143;
+}
+
+.search-box input::placeholder {
+  color: #9099a8;
+}
+
+.search-icon {
+  width: 15px;
+  height: 15px;
+
+  margin-right: 11px;
+
+  border: 1.7px solid #566174;
+
+  border-radius: 50%;
+
+  position: relative;
+}
+
+.search-icon::after {
+  content: '';
+
+  position: absolute;
+
+  width: 7px;
+  height: 1.7px;
+
+  right: -5px;
+  bottom: -2px;
+
+  background: #566174;
+
+  transform: rotate(45deg);
+}
+
+
+/* =========================
+   ACTIONS
+   ========================= */
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+}
+
+.separator {
+  width: 1px;
+  height: 34px;
+
+  background: #e5eaf0;
+}
+
+
+/* =========================
+   NOTIFICATION
+   ========================= */
+
+.notification-button {
+  width: 34px;
+  height: 38px;
+
+  border: none;
+  background: transparent;
+
+  position: relative;
+
+  cursor: pointer;
+}
+
+.bell-icon {
+  position: absolute;
+
+  width: 16px;
+  height: 17px;
+
+  left: 8px;
+  top: 9px;
+
+  border: 1.7px solid #465166;
+
+  border-radius: 9px 9px 4px 4px;
+
+  border-bottom: 0;
+}
+
+.bell-icon::before {
+  content: '';
+
+  position: absolute;
+
+  left: -3px;
+  bottom: -1px;
+
+  width: 20px;
+  height: 1.7px;
+
+  background: #465166;
+}
+
+.notification-badge {
+  position: absolute;
+
+  top: 0;
+  right: -2px;
+
+  min-width: 19px;
+  height: 19px;
+
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 20px;
+
+  background: #6ea9df;
+
+  color: #ffffff;
+
+  font-size: 10px;
+}
+
+
+/* =========================
+   PROFILE
+   ========================= */
+
+.profile-button {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+
+  text-align: left;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--app-primary-soft);
+
+  color: var(--app-primary);
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-info strong {
+  max-width: 150px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: #202737;
+
+  font-size: 13px;
+}
+
+.profile-info small {
+  margin-top: 3px;
+
+  color: #8b95a7;
+
+  font-size: 11px;
+}
+
+.profile-arrow {
+  margin-left: 4px;
+
+  color: #465166;
+
+  font-size: 18px;
+}
+
+
+@media (max-width: 800px) {
+
+  .navbar {
+    padding: 0 18px;
+  }
+
+  .menu-button {
+    display: block;
+  }
+
+  .search-box {
+    width: 40%;
+  }
+
+  .profile-info,
+  .profile-arrow,
+  .separator {
+    display: none;
+  }
+}
+
+
+/* =========================================================
+   UNIFIED COMPONENT OVERRIDES
+   ========================================================= */
+.page-header, .page-heading {
+  gap: 16px;
+}
+
+.page-header h1, .page-heading h2 {
+  font-weight: 700;
+}
+
+.filters, .filters-card {
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.btn-primary, .primary-button {
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+  color: #fff;
+}
+
+.btn-secondary, .secondary-button, .refresh-button {
+  background: #fff;
+  border-color: var(--app-border-input);
+  color: var(--app-text-secondary);
+}
+
+.table-card, .products-card, .stat-card, .panel {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.field input, .field select, .filter-field input, .filter-field select,
+.filter-group input, .filter-group select, .form-group input,
+.form-group select, .form-group textarea, .search-box input {
+  border-color: var(--app-border-input);
+  border-radius: var(--app-radius-sm);
+}
+
+.field input:focus, .field select:focus, .filter-field input:focus,
+.filter-field select:focus, .filter-group input:focus, .filter-group select:focus,
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus,
+.search-box input:focus {
+  border-color: #80b9e8;
+  box-shadow: 0 0 0 3px rgba(22,117,209,.09);
+}

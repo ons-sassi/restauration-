@@ -1,0 +1,53 @@
+<div class="app-shell">
+
+
+  <div
+    class="back-office-layout"
+    [class.sidebar-collapsed]="sidebarCollapsed"
+  >
+
+
+    <!-- =========================
+         SIDEBAR
+         ========================= -->
+
+    <app-back-office-sidebar
+      [collapsed]="sidebarCollapsed"
+    >
+    </app-back-office-sidebar>
+
+
+    <!-- =========================
+         MAIN
+         ========================= -->
+
+    <div class="layout-main">
+
+
+      <!-- HEADER -->
+
+      <app-back-office-header
+        (menuClicked)="toggleSidebar()"
+      >
+      </app-back-office-header>
+
+
+      <!-- CONTENT -->
+
+      <main class="layout-content">
+
+        <router-outlet></router-outlet>
+
+      </main>
+
+
+      <!-- FOOTER -->
+
+      <app-back-office-footer>
+      </app-back-office-footer>
+
+    </div>
+
+  </div>
+
+</div>

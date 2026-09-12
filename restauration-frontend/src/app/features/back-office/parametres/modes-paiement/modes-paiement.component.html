@@ -1,0 +1,356 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        PARAMÈTRES
+      </span>
+
+      <h1>
+        Méthodes de paiement
+      </h1>
+
+      <p>
+        Gérez les méthodes de paiement acceptées dans votre restaurant.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      *ngIf="canGerer()"
+      (click)="nouveauMode()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Ajouter une méthode</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="error"
+  >
+
+    {{ error }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadModesPaiement()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       STATISTIQUES GLOBALES
+  ====================================================== -->
+  <section class="stats">
+
+    <div class="stat-card">
+      <span class="stat-label">TOTAL MÉTHODES</span>
+      <span class="stat-value">{{ totalModes }}</span>
+    </div>
+
+    <div class="stat-card info">
+      <span class="stat-label">ACTIVES</span>
+      <span class="stat-value">{{ totalModesActifs }}</span>
+    </div>
+
+    <div class="stat-card warning">
+      <span class="stat-label">INACTIVES</span>
+      <span class="stat-value">{{ totalModesInactifs }}</span>
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       LISTE DES MÉTHODES DE PAIEMENT
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- ===================================================
+         FILTRES
+    ==================================================== -->
+    <div class="filters">
+
+      <div class="search-box">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher une méthode de paiement..."
+        />
+
+      </div>
+
+      <select
+        class="filter-select"
+        [(ngModel)]="statutFiltre"
+      >
+        <option value="">Tous les statuts</option>
+        <option value="ACTIF">Actif</option>
+        <option value="INACTIF">Inactif</option>
+      </select>
+
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+    ==================================================== -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des méthodes de paiement...</p>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLEAU
+    ==================================================== -->
+    <div
+      class="table-container"
+      *ngIf="!loading && modesPaiementFiltres.length > 0"
+    >
+
+      <table>
+
+        <thead>
+
+        <tr>
+          <th>Méthode de paiement</th>
+          <th class="text-center">Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let mode of modesPaiementFiltres; trackBy: trackByMode"
+        >
+
+          <td>
+            <div class="mode-name">{{ mode.libelle }}</div>
+          </td>
+
+          <td class="text-center">
+
+            <button
+              type="button"
+              class="status-badge"
+              [class.unavailable]="!mode.actif"
+              [disabled]="!canGerer()"
+              (click)="basculerStatut(mode)"
+            >
+              <span class="status-dot"></span>
+              {{ mode.actif ? 'Actif' : 'Inactif' }}
+            </button>
+
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn edit"
+                *ngIf="canGerer()"
+                (click)="modifierMode(mode)"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                class="action-btn delete"
+                *ngIf="canGerer()"
+                (click)="supprimerMode(mode)"
+              >
+                Retirer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ===================================================
+         EMPTY
+    ==================================================== -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && modesPaiementFiltres.length === 0"
+    >
+
+      <h3>Aucune méthode de paiement trouvée</h3>
+
+      <p>Aucune méthode de paiement ne correspond aux critères sélectionnés.</p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser les filtres
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL - AJOUT / MODIFICATION
+========================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="modalOuvert"
+  (click)="fermerModal()"
+>
+
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-header">
+
+      <h2>
+        {{ isEditMode ? 'Modifier la méthode de paiement' : 'Nouvelle méthode de paiement' }}
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form
+      class="modal-body"
+      (ngSubmit)="enregistrer()"
+    >
+
+      <div
+        class="form-error"
+        *ngIf="formError"
+      >
+        {{ formError }}
+      </div>
+
+      <div class="form-grid">
+
+        <!-- LIBELLÉ -->
+        <div class="form-group full">
+
+          <label for="libelle">
+            Nom de la méthode <span>*</span>
+          </label>
+
+          <input
+            id="libelle"
+            type="text"
+            name="libelle"
+            [(ngModel)]="formulaire.libelle"
+            placeholder="Ex. Espèces, Carte bancaire, TPE..."
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- STATUT -->
+        <div class="form-group full">
+
+          <label for="actif">
+            Statut
+          </label>
+
+          <select
+            id="actif"
+            name="actif"
+            [(ngModel)]="formulaire.actif"
+          >
+            <option [ngValue]="true">Actif</option>
+            <option [ngValue]="false">Inactif</option>
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="fermerModal()"
+          [disabled]="saving"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn-save"
+          *ngIf="canGerer()"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Enregistrement...' : isEditMode ? 'Enregistrer' : 'Ajouter' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

@@ -1,0 +1,99 @@
+<header class="navbar">
+
+  <!-- Menu mobile -->
+  <button
+    type="button"
+    class="menu-button"
+    (click)="onMenuClick()"
+    aria-label="Ouvrir le menu"
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+
+  <!-- Recherche -->
+  <div class="search-box">
+
+    <span class="search-icon"></span>
+
+    <input
+      type="search"
+      [placeholder]="searchPlaceholder"
+      (input)="onSearch($event)"
+    />
+
+  </div>
+
+
+  <!-- Partie droite -->
+  <div class="navbar-actions">
+
+    <!-- Notifications -->
+    <button
+      type="button"
+      class="notification-button"
+      (click)="onNotificationClick()"
+      aria-label="Notifications"
+    >
+
+      <span class="bell-icon"></span>
+
+      @if (notificationCount > 0) {
+        <span class="notification-badge">
+          {{ notificationCount > 99 ? '99+' : notificationCount }}
+        </span>
+      }
+
+    </button>
+
+
+    <div class="separator"></div>
+
+
+    <!-- Profil -->
+    <button
+      type="button"
+      class="profile-button"
+      (click)="onProfileClick()"
+    >
+
+      @if (userImage) {
+
+        <img
+          class="avatar"
+          [src]="userImage"
+          [alt]="userName"
+        />
+
+      } @else {
+
+        <span class="avatar avatar-initials">
+          {{ initials }}
+        </span>
+
+      }
+
+
+      <span class="profile-info">
+
+        <strong>
+          {{ userName || 'Utilisateur' }}
+        </strong>
+
+        <small>
+          {{ userRole }}
+        </small>
+
+      </span>
+
+      <span class="profile-arrow">
+       ⌄
+      </span>
+
+    </button>
+
+  </div>
+
+</header>

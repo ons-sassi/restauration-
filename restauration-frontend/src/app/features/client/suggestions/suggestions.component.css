@@ -1,0 +1,38 @@
+.page-margin { margin: 18px 20px; }
+
+.form-card { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.submit-btn { align-self: flex-end; }
+
+.suggestions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.suggestion-card { padding: 16px; }
+
+.suggestion-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.suggestion-content {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.suggestion-date {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--client-text-muted);
+}

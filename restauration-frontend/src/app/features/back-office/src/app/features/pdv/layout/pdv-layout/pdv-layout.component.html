@@ -1,0 +1,43 @@
+<div
+  class="pdv-layout"
+  [class.sidebar-collapsed]="sidebarCollapsed"
+>
+
+
+  <!-- =========================
+       SIDEBAR
+  ========================== -->
+
+  <app-pdv-sidebar
+    class="pdv-sidebar-container"
+    [collapsed]="sidebarCollapsed"
+  >
+  </app-pdv-sidebar>
+
+
+  <!-- =========================
+       PARTIE DROITE
+  ========================== -->
+
+  <div class="pdv-main">
+
+
+    <!-- HEADER -->
+
+    <app-pdv-header
+      (menuClicked)="toggleSidebar()"
+    >
+    </app-pdv-header>
+
+
+    <!-- CONTENU -->
+
+    <main class="pdv-content">
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </div>
+
+</div>

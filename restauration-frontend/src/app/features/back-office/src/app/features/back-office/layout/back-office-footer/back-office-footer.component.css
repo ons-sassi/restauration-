@@ -1,0 +1,80 @@
+:host {
+  display: block;
+}
+
+.back-office-footer {
+  min-height: 46px;
+
+  padding: 0 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  box-sizing: border-box;
+
+  border-top: 1px solid #e7ecf2;
+
+  background: #ffffff;
+
+  color: #929baa;
+
+  font-size: 10px;
+}
+
+@media (max-width: 600px) {
+
+  .back-office-footer {
+    padding: 0 17px;
+  }
+}
+
+
+/* =========================================================
+   UNIFIED COMPONENT OVERRIDES
+   ========================================================= */
+.page-header, .page-heading {
+  gap: 16px;
+}
+
+.page-header h1, .page-heading h2 {
+  font-weight: 700;
+}
+
+.filters, .filters-card {
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.btn-primary, .primary-button {
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+  color: #fff;
+}
+
+.btn-secondary, .secondary-button, .refresh-button {
+  background: #fff;
+  border-color: var(--app-border-input);
+  color: var(--app-text-secondary);
+}
+
+.table-card, .products-card, .stat-card, .panel {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.field input, .field select, .filter-field input, .filter-field select,
+.filter-group input, .filter-group select, .form-group input,
+.form-group select, .form-group textarea, .search-box input {
+  border-color: var(--app-border-input);
+  border-radius: var(--app-radius-sm);
+}
+
+.field input:focus, .field select:focus, .filter-field input:focus,
+.filter-field select:focus, .filter-group input:focus, .filter-group select:focus,
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus,
+.search-box input:focus {
+  border-color: #80b9e8;
+  box-shadow: 0 0 0 3px rgba(22,117,209,.09);
+}

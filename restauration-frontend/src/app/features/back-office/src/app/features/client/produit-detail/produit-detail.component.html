@@ -1,0 +1,215 @@
+<div class="produit-detail-page client-app">
+  <header class="client-topbar detail-topbar">
+    <button type="button" class="client-back-btn" (click)="retourMenu()">← Menu</button>
+    @if (produit) {
+      <button
+        type="button"
+        class="favori-btn"
+        [class.active]="estFavori"
+        [disabled]="favoriEnCours"
+        (click)="toggleFavori()"
+        [title]="estFavori ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+      >
+        {{ estFavori ? '♥' : '♡' }}
+      </button>
+    }
+  </header>
+
+  @if (loading) {
+    <div class="client-state">
+      <div class="client-spinner large"></div>
+      <p>Chargement du produit...</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="client-state">
+      <div class="state-emoji">😕</div>
+      <h3>Introuvable</h3>
+      <p>{{ errorMessage }}</p>
+    </div>
+  } @else if (produit) {
+    <img class="produit-hero" [src]="(produit.image | mediaUrl) || 'assets/images/default-product.png'" [alt]="produit.nom" />
+
+    <div class="produit-body">
+      <h1>{{ produit.nom }}</h1>
+
+      @if (produit.description) {
+        <p class="description">{{ produit.description }}</p>
+      }
+
+      <div class="meta-row">
+        <span class="client-badge client-badge-accent">{{ produit.prix | number: '1.2-2' }} DT</span>
+        @if (produit.temps_preparation) {
+          <span class="client-badge client-badge-neutral">⏱ {{ produit.temps_preparation }} min</span>
+        }
+      </div>
+
+      <!-- ===================== MODIFICATEURS ===================== -->
+      @if (modificateurs.length > 0) {
+        <section class="modificateurs-section">
+          <h2>Personnaliser</h2>
+
+          <div class="modificateurs-list">
+            @for (modificateur of modificateurs; track modificateur.id_modificateur) {
+              <label class="modificateur-item" [class.selected]="isModificateurSelected(modificateur)">
+                <input
+                  type="checkbox"
+                  [checked]="isModificateurSelected(modificateur)"
+                  (change)="toggleModificateur(modificateur)"
+                />
+                <span class="modificateur-nom">{{ modificateur.nom_modificateur }}</span>
+                @if (modificateur.prix_supplementaire) {
+                  <span class="modificateur-prix">+{{ modificateur.prix_supplementaire | number: '1.2-2' }} DT</span>
+                }
+              </label>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ===================== QUANTITE ===================== -->
+      <section class="quantite-section">
+        <h2>Quantité</h2>
+
+        <div class="quantite-stepper">
+          <button type="button" (click)="decrementerQuantite()" [disabled]="quantite <= 1">−</button>
+          <span>{{ quantite }}</span>
+          <button type="button" (click)="incrementerQuantite()">+</button>
+        </div>
+      </section>
+
+      @if (ajoutConfirme) {
+        <div class="client-success-banner">✓ Ajouté au panier</div>
+      }
+    </div>
+
+    <div class="add-to-cart-bar">
+      <button type="button" class="client-btn client-btn-primary add-to-cart-btn" (click)="ajouterAuPanier()">
+        Ajouter au panier · {{ getPrixTotal() | number: '1.2-2' }} DT
+      </button>
+    </div>
+  }
+
+    <!-- ===================== PANIER LATERAL ===================== -->
+    <aside class="panier-sidebar" [class.ouvert]="panierOuvert" aria-label="Panier">
+      <button
+        type="button"
+        class="panier-onglet"
+        (click)="togglePanier()"
+        [attr.aria-expanded]="panierOuvert"
+        title="Afficher / masquer le panier"
+      >
+        <span class="panier-onglet-icon">🛒</span>
+        <span class="panier-onglet-text">Panier</span>
+        @if ((panierItemCount$ | async) !== null) {
+          <span class="panier-count">{{ panierItemCount$ | async }}</span>
+        }
+      </button>
+
+      @if (panierOuvert) {
+        <div class="panier-panel">
+          <div class="panier-header">
+            <div>
+              <h2>Mon panier</h2>
+              <span>{{ panierItemCount$ | async }} article(s)</span>
+            </div>
+            <button
+              type="button"
+              class="panier-close"
+              (click)="togglePanier()"
+              aria-label="Fermer le panier"
+            >
+              ×
+            </button>
+          </div>
+
+          @if ((panierItems$ | async); as panierItems) {
+            @if (panierItems.length === 0) {
+              <div class="panier-vide">
+                <div class="panier-vide-icon">🛒</div>
+                <h3>Votre panier est vide</h3>
+                <p>Ajoutez un produit pour le voir ici.</p>
+              </div>
+            } @else {
+              <div class="panier-items">
+                @for (item of panierItems; track item.ligneId) {
+                  <div class="panier-ligne">
+                    <img
+                      [src]="(item.produit.image | mediaUrl) || 'assets/images/default-product.png'"
+                      [alt]="item.produit.nom"
+                      class="panier-ligne-image"
+                    />
+
+                    <div class="panier-ligne-contenu">
+                      <div class="panier-ligne-top">
+                        <div class="panier-ligne-nom">{{ item.produit.nom }}</div>
+                        <button
+                          type="button"
+                          class="panier-supprimer"
+                          (click)="supprimerDuPanier(item)"
+                          aria-label="Supprimer cette ligne"
+                          title="Supprimer"
+                        >
+                          🗑
+                        </button>
+                      </div>
+
+                      @if (getPanierModificateurs(item)) {
+                        <div class="panier-ligne-mods">{{ getPanierModificateurs(item) }}</div>
+                      }
+
+                      <div class="panier-ligne-prix">
+                        {{ formatPrixPanier(item.prixUnitaire) }} / unité
+                      </div>
+
+                      <div class="panier-ligne-bottom">
+                        <div class="panier-stepper">
+                          <button
+                            type="button"
+                            (click)="decrementerPanier(item)"
+                            [disabled]="item.quantite <= 1"
+                            aria-label="Diminuer la quantité"
+                          >−</button>
+                          <span>{{ item.quantite }}</span>
+                          <button
+                            type="button"
+                            (click)="incrementerPanier(item)"
+                            aria-label="Augmenter la quantité"
+                          >+</button>
+                        </div>
+
+                        <strong>{{ formatPrixPanier(getPanierSousTotal(item)) }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="panier-resume">
+                <div class="panier-total">
+                  <span>Total</span>
+                  <strong>{{ formatPrixPanier(panierTotal$ | async) }}</strong>
+                </div>
+
+                <button
+                  type="button"
+                  class="client-btn client-btn-primary panier-commander"
+                  (click)="passerCommandeDepuisPanier()"
+                >
+                  Valider ma commande →
+                </button>
+
+                <button
+                  type="button"
+                  class="panier-voir-page"
+                  (click)="allerAuPanier()"
+                >
+                  Voir le panier complet
+                </button>
+              </div>
+            }
+          }
+        </div>
+      }
+    </aside>
+
+</div>

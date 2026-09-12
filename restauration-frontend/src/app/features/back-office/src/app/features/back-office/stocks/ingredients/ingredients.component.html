@@ -1,0 +1,485 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        GESTION DE STOCK
+      </span>
+
+      <h1>
+        Ingrédients
+      </h1>
+
+      <p>
+        Gérez la liste des ingrédients utilisés dans vos recettes.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      *ngIf="canManageIngredients()"
+      (click)="nouvelIngredient()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Nouvel ingrédient</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       STATISTIQUES
+  ====================================================== -->
+  <section class="stats">
+
+    <div class="stat-card">
+      <span class="stat-label">TOTAL INGRÉDIENTS</span>
+      <span class="stat-value">{{ totalIngredients }}</span>
+    </div>
+
+    <div class="stat-card warning">
+      <span class="stat-label">STOCK FAIBLE</span>
+      <span class="stat-value">{{ totalStockFaible }}</span>
+    </div>
+
+    <div class="stat-card info">
+      <span class="stat-label">PROCHE PÉREMPTION</span>
+      <span class="stat-value">{{ totalProchePeremption }}</span>
+    </div>
+
+    <div class="stat-card danger">
+      <span class="stat-label">PÉRIMÉS</span>
+      <span class="stat-value">{{ totalPerimes }}</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">FOURNISSEURS ACTIFS</span>
+      <span class="stat-value">{{ totalFournisseurs }}</span>
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="error"
+  >
+
+    {{ error }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadIngredients()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU PRINCIPAL
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- ===================================================
+         FILTRES
+    ==================================================== -->
+    <div class="filters">
+
+      <div class="search-box">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher un ingrédient..."
+        />
+
+      </div>
+
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedFournisseur"
+      >
+
+        <option [ngValue]="null">Tous les fournisseurs</option>
+
+        <option
+          *ngFor="let fournisseur of fournisseurs"
+          [ngValue]="fournisseur.id_fournisseur"
+        >
+          {{ fournisseur.nom }}
+        </option>
+
+      </select>
+
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedStatut"
+      >
+
+        <option value="tous">Tous les statuts</option>
+        <option value="normal">Normal</option>
+        <option value="stock-faible">Stock faible</option>
+        <option value="proche-peremption">Proche péremption</option>
+        <option value="perime">Périmé</option>
+
+      </select>
+
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+    ==================================================== -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des ingrédients...</p>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLEAU
+    ==================================================== -->
+    <div
+      class="table-container"
+      *ngIf="!loading && ingredientsFiltres.length > 0"
+    >
+
+      <table>
+
+        <thead>
+
+        <tr>
+          <th>Ingrédient</th>
+          <th class="text-center">Quantité en stock</th>
+          <th class="text-center">Seuil d'alerte</th>
+          <th>Date de péremption</th>
+          <th>Fournisseur</th>
+          <th>Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let ingredient of ingredientsFiltres; trackBy: trackByIngredient"
+        >
+
+          <td>
+            <div class="ingredient-name">{{ ingredient.nom }}</div>
+          </td>
+
+          <td class="text-center">
+            {{ ingredient.quantite_stock }} {{ ingredient.unite_mesure }}
+          </td>
+
+          <td class="text-center">
+            {{ ingredient.seuil_alerte }} {{ ingredient.unite_mesure }}
+          </td>
+
+          <td>
+            {{ ingredient.date_peremption ? (ingredient.date_peremption | date:'dd/MM/yyyy') : '—' }}
+          </td>
+
+          <td>
+            {{ getFournisseurNom(ingredient) }}
+          </td>
+
+          <td>
+            <app-status-badge
+              [status]="getStatutLabel(ingredient)"
+              [type]="getStatutType(ingredient)"
+            ></app-status-badge>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn edit"
+                *ngIf="canManageIngredients()"
+                (click)="modifierIngredient(ingredient)"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                class="action-btn delete"
+                *ngIf="canManageIngredients()"
+                (click)="supprimerIngredient(ingredient)"
+              >
+                Supprimer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ===================================================
+         EMPTY
+    ==================================================== -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && ingredientsFiltres.length === 0"
+    >
+
+      <h3>Aucun ingrédient trouvé</h3>
+
+      <p>Aucun ingrédient ne correspond aux critères sélectionnés.</p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser les filtres
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL - CRÉATION / MODIFICATION
+========================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="modalOuvert"
+  (click)="fermerModal()"
+>
+
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-header">
+
+      <h2>
+        {{ isEditMode ? "Modifier l'ingrédient" : 'Nouvel ingrédient' }}
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form
+      class="modal-body"
+      (ngSubmit)="enregistrer()"
+    >
+
+      <div
+        class="form-error"
+        *ngIf="formError"
+      >
+        {{ formError }}
+      </div>
+
+      <div class="form-grid">
+
+        <!-- NOM -->
+        <div class="form-group full">
+
+          <label for="nom">
+            Nom de l'ingrédient <span>*</span>
+          </label>
+
+          <input
+            id="nom"
+            type="text"
+            name="nom"
+            [(ngModel)]="formulaire.nom"
+            placeholder="Ex. Farine de blé"
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- UNITE -->
+        <div class="form-group">
+
+          <label for="unite">
+            Unité de mesure <span>*</span>
+          </label>
+
+          <input
+            id="unite"
+            type="text"
+            name="unite"
+            [(ngModel)]="formulaire.unite_mesure"
+            placeholder="kg, g, L, unité..."
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- FOURNISSEUR -->
+        <div class="form-group">
+
+          <label for="fournisseur">
+            Fournisseur
+          </label>
+
+          <select
+            id="fournisseur"
+            name="fournisseur"
+            [(ngModel)]="formulaire.fournisseurId"
+          >
+
+            <option [ngValue]="null">Aucun fournisseur</option>
+
+            <option
+              *ngFor="let fournisseur of fournisseurs"
+              [ngValue]="fournisseur.id_fournisseur"
+            >
+              {{ fournisseur.nom }}
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- QUANTITE -->
+        <div class="form-group">
+
+          <label for="quantite">
+            Quantité en stock <span>*</span>
+          </label>
+
+          <input
+            id="quantite"
+            type="number"
+            name="quantite"
+            [(ngModel)]="formulaire.quantite_stock"
+            min="0"
+            step="0.01"
+            placeholder="0"
+            required
+          />
+
+        </div>
+
+
+        <!-- SEUIL -->
+        <div class="form-group">
+
+          <label for="seuil">
+            Seuil d'alerte <span>*</span>
+          </label>
+
+          <input
+            id="seuil"
+            type="number"
+            name="seuil"
+            [(ngModel)]="formulaire.seuil_alerte"
+            min="0"
+            step="0.01"
+            placeholder="0"
+            required
+          />
+
+        </div>
+
+
+        <!-- DATE PEREMPTION -->
+        <div class="form-group full">
+
+          <label for="peremption">
+            Date de péremption
+          </label>
+
+          <input
+            id="peremption"
+            type="date"
+            name="peremption"
+            [(ngModel)]="formulaire.date_peremption"
+          />
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="fermerModal()"
+          [disabled]="saving"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn-save"
+          *ngIf="canManageIngredients()"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Enregistrement...' : isEditMode ? 'Enregistrer' : "Créer l'ingrédient" }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

@@ -1,0 +1,323 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+      <span class="page-kicker">GESTION DES CLIENTS</span>
+      <h1>Conseils clients</h1>
+      <p>
+        Consultez les suggestions et conseils partagés par vos clients, et
+        marquez-les comme pris en compte une fois qu'ils ont été étudiés
+        par l'équipe.
+      </p>
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       SUCCÈS / ERREUR
+  ====================================================== -->
+  <div class="success-message" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+
+    <button type="button" class="retry-link" (click)="loadSuggestions()">
+      Réessayer
+    </button>
+  </div>
+
+
+  <!-- =====================================================
+       CARTES DE SYNTHÈSE
+  ====================================================== -->
+  <section class="stats-bar" *ngIf="!loading">
+
+    <div class="stat-card">
+      <span class="stat-value">{{ suggestions.length }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+
+    <div class="stat-card non-traite">
+      <span class="stat-value">{{ nombreNonTraites }}</span>
+      <span class="stat-label">Non traités</span>
+    </div>
+
+    <div class="stat-card traite">
+      <span class="stat-value">{{ nombreTraites }}</span>
+      <span class="stat-label">Pris en compte</span>
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTRES
+  ====================================================== -->
+  <section class="filters-bar">
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+
+      <input
+        type="text"
+        placeholder="Rechercher par client ou par contenu..."
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+
+    <select [(ngModel)]="selectedFiltre">
+      <option value="tous">Tous les conseils</option>
+      <option value="non-traites">Non traités</option>
+      <option value="traites">Pris en compte</option>
+    </select>
+
+  </section>
+
+
+  <!-- =====================================================
+       CARTE PRINCIPALE
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- LOADING -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Chargement des conseils clients...</p>
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div class="table-container" *ngIf="!loading && suggestionsFiltrees.length > 0">
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>N°</th>
+          <th>Client</th>
+          <th>Conseil</th>
+          <th>Date</th>
+          <th class="text-center">Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let suggestion of suggestionsFiltrees">
+
+          <td>#{{ suggestion.id_suggestion }}</td>
+
+          <td class="client-name">{{ nomClient(suggestion) }}</td>
+
+          <td class="contenu-cell">{{ suggestion.contenu || '—' }}</td>
+
+          <td>{{ dateFormatee(suggestion.dateCreation) }}</td>
+
+          <td class="text-center">
+              <span
+                class="status-badge"
+                [ngClass]="{ 'traite': suggestion.priseEnCompte, 'non-traite': !suggestion.priseEnCompte }"
+              >
+                <span class="status-dot"></span>
+                {{ suggestion.priseEnCompte ? 'Pris en compte' : 'Non traité' }}
+              </span>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn view"
+                (click)="voirDetail(suggestion)"
+              >
+                Voir
+              </button>
+
+              <button
+                type="button"
+                class="action-btn toggle"
+                *ngIf="canGerer()"
+                [disabled]="idEnCoursDeMiseAJour === suggestion.id_suggestion"
+                (click)="basculerPriseEnCompte(suggestion)"
+              >
+                {{ suggestion.priseEnCompte ? 'Marquer non traité' : 'Marquer traité' }}
+              </button>
+
+              <button
+                type="button"
+                class="action-btn block"
+                *ngIf="canGerer()"
+                (click)="demanderSuppression(suggestion)"
+              >
+                Supprimer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div class="empty-state" *ngIf="!loading && suggestionsFiltrees.length === 0 && !errorMessage">
+      <h3>Aucun conseil client</h3>
+      <p>
+        {{
+          suggestions.length === 0
+            ? "Aucun conseil n'a été partagé par les clients pour le moment."
+            : 'Aucun conseil ne correspond à votre recherche.'
+        }}
+      </p>
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =====================================================
+     DÉTAIL D'UN CONSEIL CLIENT
+====================================================== -->
+<div class="modal-overlay" *ngIf="suggestionSelectionnee">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Conseil client #{{ suggestionSelectionnee.id_suggestion }}</h2>
+
+      <button type="button" class="modal-close" (click)="fermerDetail()">
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="detail-row">
+        <span class="detail-label">Client</span>
+        <span class="detail-value">{{ nomClient(suggestionSelectionnee) }}</span>
+      </div>
+
+      <div class="detail-row" *ngIf="suggestionSelectionnee.client?.email">
+        <span class="detail-label">Email</span>
+        <span class="detail-value">{{ suggestionSelectionnee.client.email }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Date</span>
+        <span class="detail-value">{{ dateFormatee(suggestionSelectionnee.dateCreation) }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Statut</span>
+        <span
+          class="status-badge"
+          [ngClass]="{
+            'traite': suggestionSelectionnee.priseEnCompte,
+            'non-traite': !suggestionSelectionnee.priseEnCompte
+          }"
+        >
+          <span class="status-dot"></span>
+          {{ suggestionSelectionnee.priseEnCompte ? 'Pris en compte' : 'Non traité' }}
+        </span>
+      </div>
+
+      <div class="detail-block">
+        <span class="detail-label">Contenu</span>
+        <p class="detail-text">{{ suggestionSelectionnee.contenu || '—' }}</p>
+      </div>
+
+      <div class="modal-actions">
+
+        <button type="button" class="btn-cancel" (click)="fermerDetail()">
+          Fermer
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          *ngIf="canGerer()"
+          [disabled]="idEnCoursDeMiseAJour === suggestionSelectionnee.id_suggestion"
+          (click)="basculerPriseEnCompte(suggestionSelectionnee)"
+        >
+          {{ suggestionSelectionnee.priseEnCompte ? 'Marquer non traité' : 'Marquer traité' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION SUPPRESSION
+====================================================== -->
+<div class="modal-overlay" *ngIf="suggestionASupprimer">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Supprimer ce conseil client ?</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="suppression"
+        (click)="annulerSuppression()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        Le conseil <strong>#{{ suggestionASupprimer.id_suggestion }}</strong> de
+        « {{ nomClient(suggestionASupprimer) }} » sera définitivement supprimé.
+        Cette action est irréversible.
+      </p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="suppression"
+          (click)="annulerSuppression()"
+        >
+          Retour
+        </button>
+
+        <button
+          type="button"
+          class="btn-save danger"
+          [disabled]="suppression"
+          (click)="confirmerSuppression()"
+        >
+          {{ suppression ? 'Suppression...' : 'Supprimer' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

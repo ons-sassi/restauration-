@@ -1,0 +1,251 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.auth-page {
+  min-height: 100vh;
+  padding: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top right, rgba(255, 90, 54, 0.10), transparent 34%),
+    var(--client-bg);
+}
+
+.auth-shell {
+  width: min(460px, 100%);
+}
+
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  background: var(--client-surface);
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-lg);
+  box-shadow: var(--client-shadow-sm);
+}
+
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--client-primary-light);
+}
+
+.brand-mark-icon {
+  font-size: 23px;
+}
+
+.header-copy {
+  min-width: 0;
+}
+
+.eyebrow {
+  color: var(--client-primary);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.header-copy h1 {
+  margin: 4px 0 4px;
+  color: var(--client-text);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.header-copy p {
+  margin: 0;
+  color: var(--client-text-muted);
+  font-size: 13px;
+}
+
+.change-button {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-sm);
+  background: #fff;
+  color: var(--client-text-secondary);
+  font-size: 11.5px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.change-button:hover {
+  border-color: #ffcbb5;
+  color: var(--client-primary);
+}
+
+.auth-card {
+  padding: 26px;
+  background: var(--client-surface);
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-lg);
+  box-shadow: var(--client-shadow-sm);
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 20px;
+  background: var(--client-bg);
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-md);
+}
+
+.tab {
+  height: 38px;
+  border: 0;
+  border-radius: var(--client-radius-sm);
+  background: transparent;
+  color: var(--client-text-secondary);
+  font-size: 12.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+.tab.active {
+  background: var(--client-surface);
+  color: var(--client-primary);
+  box-shadow: var(--client-shadow-sm);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field span {
+  color: var(--client-text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.field input {
+  height: 42px;
+  padding: 0 13px;
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-sm);
+  background: #fff;
+  color: var(--client-text);
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.field input:focus {
+  border-color: var(--client-primary);
+  box-shadow: 0 0 0 3px rgba(255, 90, 54, .12);
+}
+
+.field input::placeholder {
+  color: var(--client-text-muted);
+}
+
+.submit-button {
+  height: 44px;
+  margin-top: 4px;
+  border: 1px solid var(--client-primary);
+  border-radius: var(--client-radius-sm);
+  background: var(--client-primary);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: var(--client-primary-dark);
+  border-color: var(--client-primary-dark);
+}
+
+.submit-button:disabled {
+  cursor: wait;
+  opacity: .75;
+}
+
+.state-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid #f0d2d2;
+  border-radius: var(--client-radius-sm);
+  background: var(--client-danger-soft);
+  color: var(--client-danger);
+  font-size: 12.5px;
+}
+
+.state-icon {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 20px;
+  border-radius: 50%;
+  background: #fff;
+  font-weight: 800;
+}
+
+.spinner.small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, .4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 16px;
+  }
+
+  .auth-header,
+  .auth-card {
+    padding: 20px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}

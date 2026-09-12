@@ -1,0 +1,271 @@
+<div class="reductions-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+  <header class="page-header">
+
+    <div class="page-title">
+
+      <span class="page-kicker">
+        MENU
+      </span>
+
+      <h1>
+        Réductions
+      </h1>
+
+      <p>
+        Gérez les réductions et promotions applicables sur les ventes.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      *ngIf="canAddReduction()"
+      (click)="nouvelleReduction()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Nouvelle réduction</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       STATISTIQUES
+  ====================================================== -->
+  <section class="stats">
+
+    <article class="stat-card">
+      <div class="stat-icon blue"><span>●</span></div>
+      <div class="stat-content">
+        <span class="stat-label">TOTAL RÉDUCTIONS</span>
+        <strong>{{ totalReductions }}</strong>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon green"><span>✓</span></div>
+      <div class="stat-content">
+        <span class="stat-label">ACTIVES</span>
+        <strong>{{ reductionsActives }}</strong>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon purple"><span>%</span></div>
+      <div class="stat-content">
+        <span class="stat-label">EN POURCENTAGE</span>
+        <strong>{{ reductionsPourcentage }}</strong>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon orange"><span>DT</span></div>
+      <div class="stat-content">
+        <span class="stat-label">MONTANT FIXE</span>
+        <strong>{{ reductionsMontant }}</strong>
+      </div>
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div class="error-box" *ngIf="error">
+    <div class="error-icon">!</div>
+    <div class="error-content">
+      <strong>Une erreur est survenue</strong>
+      <span>{{ error }}</span>
+    </div>
+    <button type="button" class="error-button" (click)="loadReductions()">
+      Réessayer
+    </button>
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU PRINCIPAL
+  ====================================================== -->
+  <section class="reductions-card">
+
+    <!-- FILTRES -->
+    <div class="filters">
+
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher une réduction..."
+        />
+      </div>
+
+      <select class="filter-select" [(ngModel)]="selectedType">
+        <option value="tous">Tous les types</option>
+        <option [value]="TypeReduction.POURCENTAGE">Pourcentage</option>
+        <option [value]="TypeReduction.MONTANT_FIXE">Montant fixe</option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="selectedStatut">
+        <option value="tous">Tous les statuts</option>
+        <option value="active">Active</option>
+        <option value="a-venir">À venir</option>
+        <option value="expiree">Expirée</option>
+        <option value="desactivee">Désactivée</option>
+      </select>
+
+      <button type="button" class="btn-reset" (click)="resetFiltres()">
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- RESULTATS -->
+    <div class="results-bar" *ngIf="!loading">
+      <span>Réductions affichées :</span>
+      <strong>{{ reductionsFiltrees.length }}</strong>
+      <span>sur {{ reductions.length }}</span>
+    </div>
+
+
+    <!-- LOADING -->
+    <div class="loading-box" *ngIf="loading">
+      <div class="spinner"></div>
+      <strong>Chargement des réductions...</strong>
+      <span>Veuillez patienter</span>
+    </div>
+
+
+    <!-- EMPTY -->
+    <div class="empty-box" *ngIf="!loading && reductionsFiltrees.length === 0">
+      <div class="empty-icon">🏷</div>
+      <h3>Aucune réduction trouvée</h3>
+      <p>Aucune réduction ne correspond aux critères sélectionnés.</p>
+      <button type="button" class="btn-secondary" (click)="resetFiltres()">
+        Réinitialiser les filtres
+      </button>
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div class="table-wrapper" *ngIf="!loading && reductionsFiltrees.length > 0">
+
+      <table class="reductions-table">
+
+        <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Type</th>
+          <th>Valeur</th>
+          <th>Période</th>
+          <th>Conditions</th>
+          <th>Application</th>
+          <th>Statut</th>
+          <th class="col-actions">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr
+          *ngFor="let reduction of reductionsFiltrees; trackBy: trackByReduction"
+        >
+          <td class="cell-nom">
+            {{ reduction.nom_reduction }}
+          </td>
+
+          <td>
+            {{ libelleType(reduction.type) }}
+          </td>
+
+          <td class="cell-valeur">
+            {{ libelleValeur(reduction) }}
+          </td>
+
+          <td class="cell-periode">
+            <span>{{ reduction.date_debut | date:'dd/MM/yyyy' }}</span>
+            <span class="sep">→</span>
+            <span>{{ reduction.date_fin | date:'dd/MM/yyyy' }}</span>
+          </td>
+
+          <td class="cell-conditions">
+            {{ reduction.conditions_application || '—' }}
+          </td>
+
+          <td class="cell-application">
+              <span class="badge badge-scope">
+                {{
+                  reduction.application_produits === ApplicationReduction.PRODUITS_SPECIFIQUES
+                    ? (reduction.produits?.length || 0) + ' produit(s)'
+                    : 'Tous les produits'
+                }}
+              </span>
+            <span class="badge badge-scope" *ngIf="reduction.montant_minimum">
+                À partir de {{ reduction.montant_minimum }} DT
+              </span>
+            <span class="badge badge-auto" *ngIf="reduction.automatique">
+                Automatique
+              </span>
+            <span class="badge badge-scope">
+                {{ libelleApplications(reduction) }}
+              </span>
+          </td>
+
+          <td>
+              <span
+                class="badge"
+                [class.badge-active]="statutReduction(reduction) === 'active'"
+                [class.badge-a-venir]="statutReduction(reduction) === 'a-venir'"
+                [class.badge-expiree]="statutReduction(reduction) === 'expiree'"
+                [class.badge-desactivee]="statutReduction(reduction) === 'desactivee'"
+              >
+                {{ libelleStatut(statutReduction(reduction)) }}
+              </span>
+          </td>
+
+          <td class="col-actions">
+            <button
+              type="button"
+              class="action-btn toggle"
+              *ngIf="canEditReduction()"
+              [class.reactivate]="!estActive(reduction)"
+              [disabled]="togglingIds.has(reduction.id_reduction)"
+              (click)="toggleActive(reduction)"
+            >
+              {{ estActive(reduction) ? 'Désactiver' : 'Activer' }}
+            </button>
+
+            <button
+              type="button"
+              class="action-btn edit"
+              *ngIf="canEditReduction()"
+              (click)="modifierReduction(reduction)"
+            >
+              Modifier
+            </button>
+
+            <button
+              type="button"
+              class="action-btn delete"
+              *ngIf="canDeleteReduction()"
+              (click)="supprimerReduction(reduction)"
+            >
+              Supprimer
+            </button>
+          </td>
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

@@ -1,0 +1,239 @@
+<div class="recu-page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+    <div>
+      <h1>Détails du reçu</h1>
+      <p>
+        Personnalisez le contenu du reçu de caisse imprimé pour vos clients.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- MESSAGES -->
+
+  <div *ngIf="errorMessage" class="alert error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert success">
+    {{ successMessage }}
+  </div>
+
+
+  <!-- LOADING -->
+
+  <div *ngIf="loading" class="loading">
+    Chargement du modèle de reçu...
+  </div>
+
+
+  <div *ngIf="!loading" class="layout">
+
+    <!-- =====================================================
+         FORMULAIRE
+    ====================================================== -->
+
+    <form class="form-column" (ngSubmit)="enregistrer()">
+
+      <section class="card">
+
+        <div class="card-title">
+          <h2>Identification du modèle</h2>
+        </div>
+
+        <div class="form-group">
+          <label>Nom du modèle *</label>
+          <input
+            type="text"
+            [(ngModel)]="nomModele"
+            name="nomModele"
+            placeholder="Ex : Modèle par défaut"
+          />
+        </div>
+
+      </section>
+
+
+      <section class="card">
+
+        <div class="card-title">
+          <h2>Texte personnalisé</h2>
+          <p>Affiché en haut et en bas du ticket imprimé.</p>
+        </div>
+
+        <div class="form-group">
+          <label>En-tête du reçu</label>
+          <textarea
+            rows="3"
+            [(ngModel)]="enteteTexte"
+            name="enteteTexte"
+            placeholder="Ex : Bienvenue chez nous !"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Pied de page du reçu</label>
+          <textarea
+            rows="3"
+            [(ngModel)]="piedDePageTexte"
+            name="piedDePageTexte"
+            placeholder="Ex : Merci de votre visite, à bientôt !"
+          ></textarea>
+        </div>
+
+      </section>
+
+
+      <section class="card">
+
+        <div class="card-title">
+          <h2>Éléments affichés</h2>
+        </div>
+
+        <label class="toggle-row">
+          <input
+            type="checkbox"
+            [(ngModel)]="afficherLogo"
+            name="afficherLogo"
+          />
+          <span>Afficher le logo du restaurant</span>
+        </label>
+
+        <label class="toggle-row">
+          <input
+            type="checkbox"
+            [(ngModel)]="afficherInfosClient"
+            name="afficherInfosClient"
+          />
+          <span>Afficher les informations du client (nom, téléphone et e-mail)</span>
+        </label>
+
+        <label class="toggle-row">
+          <input
+            type="checkbox"
+            [(ngModel)]="afficherCommentaireClient"
+            name="afficherCommentaireClient"
+          />
+          <span>Afficher le commentaire laissé par le client</span>
+        </label>
+
+        <label class="toggle-row">
+          <input
+            type="checkbox"
+            [(ngModel)]="afficherModificateursCommande"
+            name="afficherModificateursCommande"
+          />
+          <span>Afficher les modificateurs choisis sur chaque article</span>
+        </label>
+
+        <label class="toggle-row">
+          <input
+            type="checkbox"
+            [(ngModel)]="afficherCategorieArticle"
+            name="afficherCategorieArticle"
+          />
+          <span>Afficher la catégorie / sous-catégorie de chaque article</span>
+        </label>
+
+        <label class="toggle-row">
+          <input
+            type="checkbox"
+            [(ngModel)]="afficherAllergiesClient"
+            name="afficherAllergiesClient"
+          />
+          <span>Afficher les allergies du client</span>
+        </label>
+
+      </section>
+
+      <section class="card">
+        <div class="card-title">
+          <h2>Ordre des éléments</h2>
+          <p>Le même ordre sera utilisé dans l'aperçu et chez le client.</p>
+        </div>
+        <div class="order-list">
+          <div class="order-row" *ngFor="let bloc of ordreElements; let i = index">
+            <span class="order-index">{{ i + 1 }}</span>
+            <span class="order-label">{{ labelBloc(bloc) }}</span>
+            <div class="order-actions">
+              <button type="button" (click)="deplacerBloc(i, -1)" [disabled]="i === 0">↑</button>
+              <button type="button" (click)="deplacerBloc(i, 1)" [disabled]="i === ordreElements.length - 1">↓</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title"><h2>Style du reçu</h2><p>Ces paramètres sont enregistrés en base et réutilisés par le client.</p></div>
+        <div class="style-grid">
+          <div class="form-group"><label>Largeur (px)</label><input type="number" min="220" max="500" [(ngModel)]="largeurTicket" name="largeurTicket" /></div>
+          <div class="form-group"><label>Taille du texte (px)</label><input type="number" min="8" max="24" [(ngModel)]="taillePolice" name="taillePolice" /></div>
+          <div class="form-group"><label>Police</label><select [(ngModel)]="famillePolice" name="famillePolice"><option value="Courier New">Courier New</option><option value="Arial">Arial</option><option value="Verdana">Verdana</option><option value="monospace">Monospace</option></select></div>
+          <div class="form-group"><label>Alignement</label><select [(ngModel)]="alignement" name="alignement"><option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option></select></div>
+        </div>
+        <label class="toggle-row"><input type="checkbox" [(ngModel)]="afficherLigneSeparation" name="afficherLigneSeparation" /><span>Afficher les séparateurs</span></label>
+      </section>
+
+
+      <!-- ACTIONS -->
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="annuler()">
+
+          Annuler
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="saving">
+
+          <span *ngIf="!saving">Enregistrer les modifications</span>
+          <span *ngIf="saving">Enregistrement...</span>
+
+        </button>
+
+      </div>
+
+    </form>
+
+
+    <!-- =====================================================
+         APERÇU
+    ====================================================== -->
+
+    <div class="preview-column">
+
+      <div class="preview-label">Aperçu du reçu</div>
+
+      <app-receipt-ticket
+        [modele]="modeleApercu"
+        [restaurant]="restaurant"
+        [lignes]="lignesApercu"
+        [total]="27.50"
+        clientNom="Sami Ben Ali"
+        clientTelephone="+216 20 000 000"
+        clientEmail="sami.benali@example.com"
+        adresseLivraison="12 Rue de la République, Tunis"
+        [afficherAdresseLivraison]="true"
+        allergies="Arachides, Fruits de mer"
+        commentaire="Service impeccable, merci !"
+      />
+
+      <p class="preview-note">
+        Aperçu indicatif — le rendu réel dépend de l'imprimante et du modèle de ticket.
+      </p>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,234 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+
+/* ================================
+   SIDEBAR
+================================ */
+
+.pdv-sidebar {
+  width: 100%;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-right: 1px solid #e6ebf1;
+
+  transition: width 0.2s ease;
+}
+
+
+/* ================================
+   BRAND
+================================ */
+
+.pdv-brand {
+  height: 78px;
+
+  padding: 0 17px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  box-sizing: border-box;
+
+  border-bottom: 1px solid var(--app-border);
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: var(--app-primary-soft);
+
+  color: var(--app-primary);
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-text strong {
+  color: #202737;
+
+  font-size: 13px;
+}
+
+.brand-text span {
+  margin-top: 3px;
+
+  color: #9099a8;
+
+  font-size: 9px;
+}
+
+
+/* ================================
+   NAVIGATION
+================================ */
+
+.pdv-navigation {
+  flex: 1;
+
+  padding: 20px 10px;
+
+  overflow-y: auto;
+}
+
+.navigation-title {
+  height: 25px;
+
+  padding: 0 12px;
+
+  color: #a0a8b5;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 0.7px;
+}
+
+
+/* ================================
+   MENU ITEMS
+================================ */
+
+.pdv-menu-item {
+  height: 48px;
+
+  padding: 0 13px;
+
+  margin-bottom: 5px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  box-sizing: border-box;
+
+  border-radius: 9px;
+
+  text-decoration: none;
+
+  color: #4c586b;
+
+  font-size: 13px;
+
+  transition: 0.15s;
+
+  cursor: pointer;
+}
+
+.pdv-menu-item:hover {
+  background: #f5f9fd;
+
+  color: var(--app-primary);
+}
+
+.pdv-menu-item.active {
+  background: var(--app-primary-soft);
+
+  color: var(--app-primary);
+
+  font-weight: 600;
+}
+
+
+/* ================================
+   ICONS
+================================ */
+
+.pdv-menu-icon {
+  width: 22px;
+  min-width: 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 17px;
+}
+
+
+/* ================================
+   STATUS
+================================ */
+
+.pdv-status {
+  min-height: 52px;
+
+  padding: 0 17px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  box-sizing: border-box;
+
+  border-top: 1px solid var(--app-border);
+
+  color: #7d8796;
+
+  font-size: 10px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #3bb273;
+}
+
+
+/* ================================
+   COLLAPSED
+================================ */
+
+.pdv-sidebar.collapsed
+.pdv-brand {
+  justify-content: center;
+
+  padding: 0;
+}
+
+.pdv-sidebar.collapsed
+.pdv-menu-item {
+  justify-content: center;
+
+  padding: 0;
+}
+
+.pdv-sidebar.collapsed
+.pdv-status {
+  justify-content: center;
+
+  padding: 0;
+}

@@ -1,0 +1,201 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+      <span class="page-kicker">GESTION DES CLIENTS</span>
+      <h1>Détail du client</h1>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="retour()">
+        Retour à la liste
+      </button>
+    </div>
+
+  </header>
+
+
+  <!-- LOADING -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement du client...</p>
+  </div>
+
+
+  <!-- ERREUR -->
+  <div class="error-message" *ngIf="!loading && error">
+    {{ error }}
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU
+  ====================================================== -->
+  <ng-container *ngIf="!loading && client">
+
+    <section class="detail-card">
+
+      <div class="detail-header">
+
+        <div class="client-identity">
+          <h2>{{ nomComplet(client) }}</h2>
+
+          <span
+            class="status-badge"
+            [class.unavailable]="estBloque(client)"
+          >
+            <span class="status-dot"></span>
+            {{ client.statut || '—' }}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          class="action-btn block"
+          *ngIf="canBloquerClient() && !estBloque(client)"
+          (click)="demanderBlocage()"
+        >
+          Bloquer le compte
+        </button>
+
+        <button
+          type="button"
+          class="action-btn unblock"
+          *ngIf="canBloquerClient() && estBloque(client)"
+          (click)="demanderBlocage()"
+        >
+          Débloquer le compte
+        </button>
+
+      </div>
+
+      <div class="info-grid">
+
+        <div class="info-item">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ client.email || '—' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Téléphone</span>
+          <span class="info-value">{{ client.telephone || '—' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Adresse</span>
+          <span class="info-value">{{ client.adresse || '—' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Préférences</span>
+          <span class="info-value">{{ client.preferences || '—' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Allergies</span>
+          <span class="info-value">{{ client.allergie || '—' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Code de parrainage</span>
+          <span class="info-value">{{ client.codeParrainage || '—' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Membre depuis</span>
+          <span class="info-value">{{ client.date_creation ? (client.date_creation | date: 'dd/MM/yyyy') : '—' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Dernière connexion</span>
+          <span class="info-value">{{ client.date_derniere_connection ? (client.date_derniere_connection | date: 'dd/MM/yyyy HH:mm') : '—' }}</span>
+        </div>
+
+      </div>
+
+    </section>
+    
+
+  </ng-container>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION BLOCAGE / DEBLOCAGE
+====================================================== -->
+<div class="modal-overlay" *ngIf="actionEnCours && client">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>
+        {{
+          actionEnCours === 'bloquer'
+            ? 'Bloquer ce compte client ?'
+            : 'Débloquer ce compte client ?'
+        }}
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="processingAction"
+        (click)="annulerAction()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        <ng-container *ngIf="actionEnCours === 'bloquer'; else debloquerTexte">
+          Le compte de « {{ nomComplet(client) }} » sera bloqué. Le client ne
+          pourra plus se connecter ni passer de commande tant que son compte
+          n'aura pas été débloqué.
+        </ng-container>
+        <ng-template #debloquerTexte>
+          Le compte de « {{ nomComplet(client) }} » sera réactivé. Le client
+          pourra à nouveau se connecter et passer des commandes.
+        </ng-template>
+      </p>
+
+      <p class="error-inline" *ngIf="errorAction">{{ errorAction }}</p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="processingAction"
+          (click)="annulerAction()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          [class.danger]="actionEnCours === 'bloquer'"
+          [disabled]="processingAction"
+          (click)="confirmerAction()"
+        >
+          {{
+            processingAction
+              ? 'Traitement...'
+              : (actionEnCours === 'bloquer' ? 'Bloquer' : 'Débloquer')
+          }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

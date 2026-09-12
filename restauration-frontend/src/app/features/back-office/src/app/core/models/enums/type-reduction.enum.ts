@@ -1,0 +1,9 @@
+export enum TypeReduction {
+  POURCENTAGE = 'POURCENTAGE',
+  MONTANT_FIXE = 'MONTANT_FIXE',
+}
+
+export enum ApplicationReduction {
+  TOUS_PRODUITS = 'TOUS_PRODUITS',
+  PRODUITS_SPECIFIQUES = 'PRODUITS_SPECIFIQUES',
+}

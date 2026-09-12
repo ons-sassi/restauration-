@@ -1,0 +1,227 @@
+<section class="report-page">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">VENTES</span>
+      <h2>Récapitulatif des ventes</h2>
+      <p>Analysez les ventes de votre restaurant sur la période sélectionnée.</p>
+    </div>
+
+    <button type="button" class="refresh-button" (click)="appliquerFiltres()" [disabled]="loading">
+      <span class="refresh-icon">↻</span>
+      Actualiser
+    </button>
+  </div>
+
+  <div class="filters-card">
+    <div class="filter-field">
+      <label for="dateDebut">Du</label>
+      <input id="dateDebut" type="date" [(ngModel)]="dateDebut" />
+    </div>
+
+    <div class="filter-field">
+      <label for="dateFin">Au</label>
+      <input id="dateFin" type="date" [(ngModel)]="dateFin" />
+    </div>
+
+    <div class="filter-field">
+      <label for="pdv">Point de vente</label>
+      <select id="pdv" [(ngModel)]="pointDeVenteId">
+        <option [ngValue]="null">Tous les points de vente connectés</option>
+        @for (pdv of pointDeVentes; track pdv.id_pdv) {
+          <option [ngValue]="pdv.id_pdv">{{ pdv.nomPdv }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="periode">Période du graphique</label>
+      <select id="periode" [(ngModel)]="periode">
+        @for (item of periodes; track item.value) {
+          <option [ngValue]="item.value">{{ item.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button type="button" class="secondary-button" (click)="reinitialiserFiltres()">
+        Réinitialiser
+      </button>
+      <button type="button" class="primary-button" (click)="appliquerFiltres()" [disabled]="loading">
+        Appliquer
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-card">
+      <span class="spinner"></span>
+      <span>Chargement du rapport…</span>
+    </div>
+  } @else {
+    <div class="stats-grid">
+      <article class="stat-card">
+        <div class="stat-icon blue">DT</div>
+        <div>
+          <span>Chiffre d'affaires</span>
+          <strong>{{ formaterMontant(recapitulatif.chiffreAffaires) }} DT</strong>
+          <small>Montant encaissé</small>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon violet">↗</div>
+        <div>
+          <span>Vente brute</span>
+          <strong>{{ formaterMontant(recapitulatif.venteBrute) }} DT</strong>
+          <small>Avant réductions</small>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon orange">−</div>
+        <div>
+          <span>Réductions</span>
+          <strong>{{ formaterMontant(recapitulatif.reductions) }} DT</strong>
+          <small>Total des remises</small>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon green">✓</div>
+        <div>
+          <span>Marge brute</span>
+          <strong>{{ formaterMontant(recapitulatif.margeBrute) }} DT</strong>
+          <small>Après coût des produits</small>
+        </div>
+      </article>
+    </div>
+
+    <div class="content-grid">
+      <section class="panel chart-panel">
+        <div class="panel-header">
+          <div>
+            <h3>Évolution des ventes</h3>
+            <p>{{ periodes.find(p => p.value === periode)?.label }} · {{ dateDebut | date:'dd/MM/yyyy' }} → {{ dateFin | date:'dd/MM/yyyy' }}</p>
+          </div>
+          <span class="period-badge">{{ periode }}</span>
+        </div>
+
+        @if (graph.length > 0) {
+          <div class="chart-wrap">
+            <svg viewBox="0 0 720 250" preserveAspectRatio="none" class="sales-chart" aria-label="Évolution des ventes">
+              <line x1="20" y1="20" x2="700" y2="20" class="grid-line"></line>
+              <line x1="20" y1="125" x2="700" y2="125" class="grid-line"></line>
+              <line x1="20" y1="230" x2="700" y2="230" class="axis-line"></line>
+
+              <polyline [attr.points]="graphPoints" class="chart-line"></polyline>
+
+              @for (item of graph; track $index) {
+                <circle
+                  [attr.cx]="graphX($index)"
+                  [attr.cy]="graphY(item.montant)"
+                  r="4"
+                  class="chart-point"
+                ></circle>
+              }
+            </svg>
+
+            <div class="chart-labels">
+              @for (item of graph; track $index) {
+                <span>{{ item.periode }}</span>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="empty-chart">
+            <div class="empty-icon">⌁</div>
+            <strong>Aucune vente sur cette période</strong>
+            <span>Modifiez les dates ou le point de vente pour afficher l'évolution.</span>
+          </div>
+        }
+      </section>
+
+      <section class="panel summary-panel">
+        <div class="panel-header">
+          <div>
+            <h3>Résumé</h3>
+            <p>Indicateurs de la période</p>
+          </div>
+        </div>
+
+        <div class="summary-list">
+          <div><span>Vente brute</span><strong>{{ formaterMontant(recapitulatif.venteBrute) }} DT</strong></div>
+          <div><span>Réductions</span><strong class="negative">− {{ formaterMontant(recapitulatif.reductions) }} DT</strong></div>
+          <div class="summary-total"><span>Vente nette</span><strong>{{ formaterMontant(recapitulatif.venteNette) }} DT</strong></div>
+        </div>
+
+        <div class="margin-box">
+          <span>Marge brute</span>
+          <strong>{{ formaterMontant(recapitulatif.margeBrute) }} DT</strong>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel sales-table-panel">
+      <div class="panel-header table-heading">
+        <div>
+          <h3>Ventes</h3>
+          <p>{{ ventesFiltrees.length }} vente(s) affichée(s)</p>
+        </div>
+
+        <div class="search-box">
+          <span>⌕</span>
+          <input
+            type="search"
+            [(ngModel)]="recherche"
+            placeholder="Rechercher une vente…"
+            aria-label="Rechercher une vente"
+          />
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Reçu</th>
+              <th>Date</th>
+              <th>Point de vente</th>
+              <th>Employé</th>
+              <th>Paiement</th>
+              <th class="amount-column">Brut</th>
+              <th class="amount-column">Réduction</th>
+              <th class="amount-column">Net</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (vente of ventesFiltrees; track trackByVente($index, vente)) {
+              <tr>
+                <td><span class="receipt-badge">{{ getNumeroRecu(vente) }}</span></td>
+                <td>{{ formaterDate(vente.date_vente) }}</td>
+                <td>{{ getPdv(vente) }}</td>
+                <td>{{ getNomEmploye(vente) }}</td>
+                <td><span class="payment-badge">{{ getModePaiement(vente) }}</span></td>
+                <td class="amount-column">{{ formaterMontant((vente.montant_ttc || 0) + (vente.montant_reduction || 0)) }} DT</td>
+                <td class="amount-column reduction">− {{ formaterMontant(vente.montant_reduction || 0) }} DT</td>
+                <td class="amount-column strong">{{ formaterMontant(vente.montant_ttc) }} DT</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8">
+                  <div class="empty-table">
+                    <strong>Aucune vente trouvée</strong>
+                    <span>Il n'y a aucune vente correspondant aux filtres actuels.</span>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>

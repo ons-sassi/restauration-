@@ -1,0 +1,78 @@
+<div class="historique-page client-app with-bottom-nav">
+  <header class="client-topbar">
+    <button type="button" class="client-back-btn" (click)="retourMenu()">← Menu</button>
+    <h1>Mes commandes</h1>
+    <span style="width: 70px"></span>
+  </header>
+
+  @if (loading) {
+    <div class="client-state">
+      <div class="client-spinner large"></div>
+      <p>Chargement...</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="client-error-banner page-margin">⚠️ {{ errorMessage }}</div>
+  } @else if (commandes.length === 0) {
+    <div class="client-state">
+      <div class="state-emoji">🧾</div>
+      <h3>Aucune commande</h3>
+      <p>Vos commandes passées apparaîtront ici.</p>
+      <button type="button" class="client-btn client-btn-primary" (click)="retourMenu()">Voir le menu</button>
+    </div>
+  } @else {
+    <ul class="commandes-list">
+      @for (commande of commandes; track commande.id_commande) {
+        <li class="commande-card client-card" [class.expanded]="expandedId === commande.id_commande">
+          <button type="button" class="commande-top" (click)="toggleDetail(commande)">
+            <div class="commande-top-main">
+              <span class="commande-numero">Commande n°{{ commande.id_commande }}</span>
+              <span class="commande-date">{{ commande.dateCommande | date: 'dd/MM/yyyy HH:mm' }} · {{ modeLabel(commande.modeCommande) }}</span>
+            </div>
+
+            <div class="commande-top-side">
+              <span class="commande-montant">{{ formatPrix(commande.montant_total) }}</span>
+              <span class="client-badge" [class]="statutClass(commande.statut)">
+                {{ statutLabel(commande.statut) }}
+              </span>
+              <span class="chevron">{{ expandedId === commande.id_commande ? '▲' : '▼' }}</span>
+            </div>
+          </button>
+
+          @if (expandedId === commande.id_commande) {
+            <div class="commande-detail">
+              @if (loadingLignesId === commande.id_commande) {
+                <p class="hint">Chargement du détail...</p>
+              } @else if (lignesErrorId === commande.id_commande) {
+                <div class="client-error-banner">Impossible de charger le détail de cette commande.</div>
+              } @else if (lignesDe(commande).length === 0) {
+                <p class="hint">Aucun détail disponible pour cette commande.</p>
+              } @else {
+                <div class="confirmation-recap">
+                  @for (ligne of lignesDe(commande); track ligne.id_ligne_commande) {
+                    <div class="recap-item">
+                      <span class="recap-qte">{{ ligne.quantite }}×</span>
+                      <span class="recap-nom">
+                        {{ ligne.nomProduit }}
+                        @if (ligne.modificateurs.length > 0) {
+                          <span class="recap-modificateurs">({{ ligne.modificateurs.join(', ') }})</span>
+                        }
+                      </span>
+                      <span class="recap-prix">{{ formatPrix(ligne.prixUnitaire * ligne.quantite) }}</span>
+                    </div>
+                  }
+
+                  <div class="recap-total">
+                    <span>Total</span>
+                    <span>{{ formatPrix(commande.montant_total) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <app-client-bottom-nav active="historique" />
+</div>

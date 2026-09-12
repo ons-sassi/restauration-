@@ -1,0 +1,287 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        GESTION DES CLIENTS
+      </span>
+
+      <h1>
+        Clients
+      </h1>
+
+      <p>
+        Consultez la liste de vos clients, triés par nombre de points
+        cadeau fidélité, recherchez un client et bloquez son compte
+        si nécessaire.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="retour()"
+      >
+        Retour
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+
+    {{ errorMessage }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadClients()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       FILTRES
+  ====================================================== -->
+  <section class="filters-bar">
+
+    <div class="search-box">
+
+      <span class="search-icon">🔍</span>
+
+      <input
+        type="text"
+        placeholder="Rechercher par nom, prénom, email ou téléphone..."
+        [(ngModel)]="searchTerm"
+      />
+
+    </div>
+
+    <select [(ngModel)]="selectedStatutCompte">
+      <option value="tous">Tous les statuts de compte</option>
+      <option *ngFor="let statut of statutsCompte" [value]="statut">
+        {{ statut }}
+      </option>
+    </select>
+
+  </section>
+
+
+  <!-- =====================================================
+       CARTE PRINCIPALE
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- LOADING -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des clients...</p>
+
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div
+      class="table-container"
+      *ngIf="!loading && clientsFiltres.length > 0"
+    >
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Client</th>
+          <th>Contact</th>
+          <th class="text-center">Compte</th>
+          <th class="text-right">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let client of clientsFiltres">
+
+          <td>
+            <div class="client-name">{{ nomComplet(client) }}</div>
+          </td>
+
+          <td>
+            <div class="contact-cell">
+              <span>{{ client.email || '—' }}</span>
+              <span class="contact-secondary">{{ client.telephone || '—' }}</span>
+            </div>
+          </td>
+
+          <td class="text-center">
+              <span
+                class="status-badge"
+                [class.unavailable]="estBloque(client)"
+              >
+                <span class="status-dot"></span>
+                {{ client.statut || '—' }}
+              </span>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn view"
+                (click)="voirClient(client)"
+              >
+                Voir
+              </button>
+
+              <button
+                type="button"
+                class="action-btn block"
+                *ngIf="canBloquerClient() && !estBloque(client)"
+                (click)="demanderBlocage(client)"
+              >
+                Bloquer
+              </button>
+
+              <button
+                type="button"
+                class="action-btn unblock"
+                *ngIf="canBloquerClient() && estBloque(client)"
+                (click)="demanderBlocage(client)"
+              >
+                Débloquer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && clientsFiltres.length === 0 && !errorMessage"
+    >
+
+      <h3>Aucun client trouvé</h3>
+
+      <p>
+        {{
+          clients.length === 0
+            ? 'Aucun client ne s’est encore inscrit.'
+            : 'Aucun client ne correspond à votre recherche.'
+        }}
+      </p>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION BLOCAGE / DEBLOCAGE
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="clientAction"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>
+        {{
+          actionEnCours === 'bloquer'
+            ? 'Bloquer ce compte client ?'
+            : 'Débloquer ce compte client ?'
+        }}
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="processingAction"
+        (click)="annulerAction()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        <ng-container *ngIf="actionEnCours === 'bloquer'; else debloquerTexte">
+          Le compte de « {{ nomComplet(clientAction) }} » sera bloqué. Le client
+          ne pourra plus se connecter ni passer de commande tant que son
+          compte n'aura pas été débloqué.
+        </ng-container>
+        <ng-template #debloquerTexte>
+          Le compte de « {{ nomComplet(clientAction) }} » sera réactivé. Le
+          client pourra à nouveau se connecter et passer des commandes.
+        </ng-template>
+      </p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="processingAction"
+          (click)="annulerAction()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          [class.danger]="actionEnCours === 'bloquer'"
+          [disabled]="processingAction"
+          (click)="confirmerAction()"
+        >
+          {{
+            processingAction
+              ? 'Traitement...'
+              : (actionEnCours === 'bloquer' ? 'Bloquer' : 'Débloquer')
+          }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

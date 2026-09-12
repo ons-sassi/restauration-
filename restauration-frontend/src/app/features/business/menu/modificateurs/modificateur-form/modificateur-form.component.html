@@ -1,0 +1,356 @@
+
+<div class="modificateur-form-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <span class="page-kicker">
+        MENU / MODIFICATEURS
+      </span>
+
+      <h1>
+        {{ isEditMode ? 'Modifier le modificateur' : 'Nouveau modificateur' }}
+      </h1>
+
+      <p>
+        {{
+          isEditMode
+            ? 'Modifiez les informations de ce modificateur.'
+            : 'Ajoutez un nouveau modificateur à un produit de votre menu.'
+        }}
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-back"
+      (click)="cancel()"
+    >
+      <span>←</span>
+      Retour aux modificateurs
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+  <div
+    class="loading-card"
+    *ngIf="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <strong>
+      Chargement du modificateur...
+    </strong>
+
+    <span>
+      Veuillez patienter
+    </span>
+
+  </div>
+
+
+  <!-- =====================================================
+       FORMULAIRE
+  ====================================================== -->
+  <form
+    *ngIf="!loading"
+    class="modificateur-form"
+    (ngSubmit)="save()"
+  >
+
+    <!-- ===================================================
+         MESSAGES
+    ==================================================== -->
+
+    <div
+      class="message message-error"
+      *ngIf="errorMessage"
+    >
+
+      <div class="message-icon">
+        !
+      </div>
+
+      <div>
+        <strong>
+          Une erreur est survenue
+        </strong>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+      </div>
+
+    </div>
+
+
+    <div
+      class="message message-success"
+      *ngIf="successMessage"
+    >
+
+      <div class="message-icon">
+        ✓
+      </div>
+
+      <div>
+        <strong>
+          Opération réussie
+        </strong>
+
+        <p>
+          {{ successMessage }}
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         INFORMATIONS GÉNÉRALES
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          01
+        </div>
+
+        <div>
+
+          <h2>
+            Informations générales
+          </h2>
+
+          <p>
+            Définissez le nom et le supplément de prix du modificateur.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <!-- NOM -->
+        <div class="field full">
+
+          <label for="nom">
+            Nom du modificateur
+            <span>*</span>
+          </label>
+
+          <input
+            id="nom"
+            type="text"
+            name="nom"
+            [(ngModel)]="modificateur.nom_modificateur"
+            placeholder="Ex. Extra fromage"
+            autocomplete="off"
+            required
+            [disabled]="!canSave() || saving"
+          />
+
+          <small>
+            Ce nom sera proposé au client lors de la commande du produit.
+          </small>
+
+        </div>
+
+
+        <!-- PRIX SUPPLEMENTAIRE -->
+        <div class="field">
+
+          <label for="prix">
+            Prix supplémentaire
+            <span>*</span>
+          </label>
+
+          <div class="unit-input">
+
+            <input
+              id="prix"
+              type="number"
+              name="prix"
+              [(ngModel)]="modificateur.prix_supplementaire"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              required
+              [disabled]="!canSave() || saving"
+            />
+
+            <span>
+              €
+            </span>
+
+          </div>
+
+          <small>
+            Montant ajouté au prix du produit lorsque ce modificateur est choisi.
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         PRODUITS ASSOCIÉS
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          02
+        </div>
+
+        <div>
+
+          <h2>
+            Produits associés
+          </h2>
+
+          <p>
+            Choisissez un ou plusieurs produits du menu auxquels ce modificateur s'applique.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <!-- PRODUITS -->
+        <div class="field full">
+
+          <label>
+            Produits
+            <span>*</span>
+          </label>
+
+          <div class="produits-checklist">
+
+            <label
+              class="produit-checkbox"
+              *ngFor="let produit of produitsDisponibles"
+            >
+
+              <input
+                type="checkbox"
+                [checked]="isProduitSelected(produit)"
+                (change)="toggleProduit(produit, $event)"
+                [disabled]="!canSave() || saving"
+              />
+
+              <span>
+                {{ produit.nom }}
+              </span>
+
+            </label>
+
+          </div>
+
+          <small>
+            {{ produitsSelectionnesCount }} produit(s) sélectionné(s).
+          </small>
+
+          <small
+            *ngIf="produitsDisponibles.length === 0"
+          >
+            Aucun produit disponible. Créez d'abord un produit dans le menu.
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         ACTIONS
+    ==================================================== -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn-cancel"
+        (click)="cancel()"
+        [disabled]="saving"
+      >
+        Annuler
+      </button>
+
+      <!-- CREATION -->
+      <button
+        *ngIf="!isEditMode && canAddModificateur()"
+        type="submit"
+        class="btn-save"
+        [disabled]="saving"
+      >
+
+        <span
+          class="button-spinner"
+          *ngIf="saving"
+        ></span>
+
+        <span>
+          {{
+            saving
+              ? 'Enregistrement...'
+              : 'Créer le modificateur'
+          }}
+        </span>
+
+      </button>
+
+
+      <!-- MODIFICATION -->
+      <button
+        *ngIf="isEditMode && canEditModificateur()"
+        type="submit"
+        class="btn-save"
+        [disabled]="saving"
+      >
+
+        <span
+          class="button-spinner"
+          *ngIf="saving"
+        ></span>
+
+        <span>
+          {{
+            saving
+              ? 'Enregistrement...'
+              : 'Enregistrer les modifications'
+          }}
+        </span>
+
+      </button>
+
+    </div>
+
+  </form>
+
+</div>
+

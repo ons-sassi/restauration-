@@ -1,0 +1,351 @@
+<div class="product-details-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <span class="page-kicker">
+        MENU / PRODUITS
+      </span>
+
+      <h1>
+        Détails du produit
+      </h1>
+
+      <p>
+        Consultez les informations et la composition du produit.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-back"
+      (click)="retour()"
+    >
+      <span>←</span>
+      Retour aux produits
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    class="loading-card"
+    *ngIf="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <strong>
+      Chargement du produit...
+    </strong>
+
+    <span>
+      Veuillez patienter
+    </span>
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    class="error-card"
+    *ngIf="!loading && error"
+  >
+
+    <div class="error-icon">
+      !
+    </div>
+
+    <div class="error-content">
+
+      <strong>
+        Impossible de charger le produit
+      </strong>
+
+      <span>
+        {{ error }}
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="error-button"
+      (click)="retour()"
+    >
+      Retour
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       DETAILS
+  ====================================================== -->
+
+  <main
+    class="details-card"
+    *ngIf="!loading && produit"
+  >
+
+    <!-- ===================================================
+         IMAGE
+    ==================================================== -->
+
+    <div class="product-image">
+
+      <img
+        *ngIf="produit.image"
+        [src]="produit.image | mediaUrl"
+        [alt]="produit.nom"
+      />
+
+      <div
+        class="no-image"
+        *ngIf="!produit.image"
+      >
+        <span>🍽</span>
+
+        <small>
+          Aucune image
+        </small>
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         CONTENU
+    ==================================================== -->
+
+    <div class="details-content">
+
+      <!-- TOP -->
+      <div class="details-top">
+
+        <span class="category-badge">
+          {{ categorieNom }}
+        </span>
+
+        <span
+          class="status-badge"
+          [class.unavailable]="!produit.disponible"
+        >
+
+          <span class="status-dot"></span>
+
+          {{
+            produit.disponible
+              ? 'Disponible'
+              : 'Indisponible'
+          }}
+
+        </span>
+
+      </div>
+
+
+      <!-- NOM -->
+      <h2>
+        {{ produit.nom }}
+      </h2>
+
+
+      <!-- DESCRIPTION -->
+      <p class="description">
+
+        {{
+          produit.description ||
+          'Aucune description disponible pour ce produit.'
+        }}
+
+      </p>
+
+
+      <!-- =================================================
+           STATISTIQUES
+      ================================================== -->
+
+      <div class="info-grid">
+
+        <!-- PRIX -->
+        <div class="info-card">
+
+          <span class="info-label">
+            PRIX DE VENTE
+          </span>
+
+          <strong class="price">
+            {{ produit.prix | number:'1.2-2' }}
+            <small>DT</small>
+          </strong>
+
+        </div>
+
+
+        <!-- PREPARATION -->
+        <div class="info-card">
+
+          <span class="info-label">
+            PRÉPARATION
+          </span>
+
+          <strong>
+            {{ produit.temps_preparation }}
+            <small>min</small>
+          </strong>
+
+        </div>
+
+
+        <!-- INGREDIENTS -->
+        <div class="info-card">
+
+          <span class="info-label">
+            INGRÉDIENTS
+          </span>
+
+          <strong>
+            {{ produit.ingredients?.length || 0 }}
+          </strong>
+
+        </div>
+
+
+        <!-- RESTAURANT -->
+        <div class="info-card">
+
+          <span class="info-label">
+            RESTAURANT
+          </span>
+
+          <strong class="restaurant-name">
+            {{ restaurantNom }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           INGREDIENTS
+      ================================================== -->
+
+      <section class="ingredients-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <h3>
+              Ingrédients
+            </h3>
+
+            <p>
+              Composition du produit
+            </p>
+
+          </div>
+
+          <span class="ingredients-count">
+            {{ produit.ingredients?.length || 0 }}
+          </span>
+
+        </div>
+
+
+        <!-- LISTE -->
+        <div
+          class="ingredient-list"
+          *ngIf="produit.ingredients?.length"
+        >
+
+          <div
+            class="ingredient-item"
+            *ngFor="let ingredient of produit.ingredients"
+          >
+
+            <div class="ingredient-avatar">
+              {{ ingredient.nom.charAt(0).toUpperCase() }}
+            </div>
+
+            <div class="ingredient-info">
+
+              <strong>
+                {{ ingredient.nom }}
+              </strong>
+
+              <span>
+                {{ ingredient.unite_mesure }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+        <div
+          class="ingredients-empty"
+          *ngIf="!produit.ingredients?.length"
+        >
+
+          <span>
+            Aucun ingrédient associé
+          </span>
+
+          <small>
+            Ce produit ne contient actuellement aucun ingrédient enregistré.
+          </small>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           ACTIONS
+      ================================================== -->
+
+      <div class="details-actions">
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="retour()"
+        >
+          Retour
+        </button>
+
+        <button
+          *ngIf="canModifier"
+          type="button"
+          class="btn-primary"
+          (click)="modifier()"
+        >
+          Modifier le produit
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>

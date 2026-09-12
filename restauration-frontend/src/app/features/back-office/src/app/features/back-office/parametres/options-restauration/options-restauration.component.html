@@ -1,0 +1,272 @@
+<div class="page">
+
+  <header class="page-header">
+    <div class="heading">
+      <span class="page-kicker">PARAMÈTRES</span>
+      <h1>Options de restauration</h1>
+      <p>Gérez les informations générales du restaurant actuellement sélectionné.</p>
+    </div>
+
+    <div class="header-actions">
+      @if (isSuperAdmin) {
+        <button type="button" class="btn-secondary" (click)="changerRestaurant()">
+          Changer de restaurant
+        </button>
+
+        <button type="button" class="btn-primary" (click)="ajouterRestaurant()">
+          <span class="plus">+</span>
+          Ajouter un restaurant
+        </button>
+      }
+
+      @if (canGerer() && restaurant) {
+        <button type="button" class="btn-primary" (click)="modifierRestaurant()">
+          Modifier les informations
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (error) {
+    <div class="message error-message">
+      <span class="message-icon">!</span>
+      <span>{{ error }}</span>
+      <button type="button" class="retry-link" (click)="loadRestaurant()">Réessayer</button>
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="message success-message">
+      <span class="message-icon">✓</span>
+      <span>{{ successMessage }}</span>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <p>Chargement du restaurant...</p>
+    </div>
+  }
+
+  @if (!loading && restaurant) {
+    <section class="restaurant-card">
+
+      <div class="restaurant-card-header">
+        <div class="restaurant-identity">
+          @if (restaurant.logo) {
+            <img [src]="restaurant.logo | mediaUrl" class="restaurant-logo" alt="" />
+          } @else {
+            <div class="restaurant-logo placeholder">
+              {{ restaurant.nomRestaurant?.charAt(0) || 'R' }}
+            </div>
+          }
+
+          <div>
+            <span class="section-kicker">RESTAURANT SÉLECTIONNÉ</span>
+            <h2>{{ restaurant.nomRestaurant }}</h2>
+            <p>{{ restaurant.adresse || 'Adresse non renseignée' }}</p>
+          </div>
+        </div>
+
+        <span class="status-badge" [class.unavailable]="!estActif">
+          <span class="status-dot"></span>
+          {{ libelleStatut(restaurant.statut) }}
+        </span>
+      </div>
+
+      <div class="details-grid">
+        <div class="detail">
+          <span class="detail-label">Devise</span>
+          <strong>{{ libelleDevise(restaurant.devise) }}</strong>
+        </div>
+
+        <div class="detail">
+          <span class="detail-label">Langue par défaut</span>
+          <strong>{{ libelleLangue(restaurant.langue_par_defaut) }}</strong>
+        </div>
+
+        <div class="detail">
+          <span class="detail-label">Ouverture</span>
+          <strong>{{ restaurant.horaires_ouverture || '—' }}</strong>
+        </div>
+
+        <div class="detail">
+          <span class="detail-label">Fermeture</span>
+          <strong>{{ restaurant.horaires_fermeture || '—' }}</strong>
+        </div>
+      </div>
+
+    </section>
+  }
+
+  @if (!loading && !restaurant && !error) {
+    <div class="empty-state">
+      <div class="empty-icon">🏪</div>
+      <h2>Aucun restaurant sélectionné</h2>
+      <p>Le Super Admin doit sélectionner un restaurant avant d’ouvrir ses paramètres.</p>
+      @if (isSuperAdmin) {
+        <button type="button" class="btn-primary" (click)="changerRestaurant()">
+          Choisir un restaurant
+        </button>
+      }
+    </div>
+  }
+
+</div>
+
+@if (modalOuvert) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <div>
+          <span class="page-kicker">{{ modeCreation ? 'NOUVEAU RESTAURANT' : 'RESTAURANT' }}</span>
+          <h2>{{ modeCreation ? 'Ajouter un restaurant' : 'Modifier le restaurant' }}</h2>
+        </div>
+
+        <button type="button" class="modal-close" (click)="fermerModal()">×</button>
+      </div>
+
+      <form class="modal-body" (ngSubmit)="enregistrer()">
+
+        @if (formError) {
+          <div class="form-error">{{ formError }}</div>
+        }
+
+        <div class="form-grid">
+
+          <div class="form-group full">
+            <label for="nomRestaurant">Nom du restaurant <span>*</span></label>
+            <input
+              id="nomRestaurant"
+              type="text"
+              name="nomRestaurant"
+              [(ngModel)]="formulaire.nomRestaurant"
+              placeholder="Ex. Le Gourmet Tunis"
+              autocomplete="off"
+              required
+            />
+          </div>
+
+          <div class="form-group full">
+            <label for="adresse">Adresse <span>*</span></label>
+            <input
+              id="adresse"
+              type="text"
+              name="adresse"
+              [(ngModel)]="formulaire.adresse"
+              placeholder="Ex. Avenue Habib Bourguiba, Tunis"
+              autocomplete="off"
+              required
+            />
+          </div>
+
+          <div class="form-group full">
+            <label>Logo</label>
+
+            <div class="photo-upload">
+              <div class="photo-upload-preview">
+                @if (logoAffiche) {
+                  <img [src]="logoAffiche" alt="Logo du restaurant" />
+                } @else {
+                  <span>{{ formulaire.nomRestaurant?.charAt(0) || 'R' }}</span>
+                }
+              </div>
+
+              <div class="photo-upload-actions">
+                <button
+                  type="button"
+                  class="btn-cancel"
+                  [disabled]="uploadLogoEnCours || modeCreation"
+                  (click)="logoInput.click()"
+                >
+                  {{ uploadLogoEnCours ? 'Envoi en cours...' : 'Choisir une image' }}
+                </button>
+
+                <span class="hint-inline photo-upload-hint">
+                  @if (modeCreation) {
+                    Créez d'abord le restaurant, puis modifiez-le pour ajouter un logo.
+                  } @else {
+                    JPG, PNG, GIF ou WEBP — 5 Mo max.
+                  }
+                </span>
+              </div>
+
+              <input
+                #logoInput
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                class="photo-upload-input"
+                (change)="onLogoSelectionne($event)"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="devise">Devise</label>
+            <select id="devise" name="devise" [(ngModel)]="formulaire.devise">
+              @for (devise of devises; track devise) {
+                <option [value]="devise">{{ libelleDevise(devise) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="langue_par_defaut">Langue par défaut</label>
+            <select
+              id="langue_par_defaut"
+              name="langue_par_defaut"
+              [(ngModel)]="formulaire.langue_par_defaut"
+            >
+              @for (langue of langues; track langue) {
+                <option [value]="langue">{{ libelleLangue(langue) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="horaires_ouverture">Heure d'ouverture</label>
+            <input
+              id="horaires_ouverture"
+              type="time"
+              name="horaires_ouverture"
+              [(ngModel)]="formulaire.horaires_ouverture"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="horaires_fermeture">Heure de fermeture</label>
+            <input
+              id="horaires_fermeture"
+              type="time"
+              name="horaires_fermeture"
+              [(ngModel)]="formulaire.horaires_fermeture"
+            />
+          </div>
+
+          <div class="form-group full">
+            <label for="statut">Statut</label>
+            <select id="statut" name="statut" [(ngModel)]="formulaire.statut">
+              @for (statut of statuts; track statut) {
+                <option [value]="statut">{{ libelleStatut(statut) }}</option>
+              }
+            </select>
+          </div>
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="fermerModal()" [disabled]="saving">
+            Annuler
+          </button>
+
+          <button type="submit" class="btn-save" [disabled]="saving">
+            {{ saving ? 'Enregistrement...' : (modeCreation ? 'Créer le restaurant' : 'Enregistrer') }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

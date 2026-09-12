@@ -1,0 +1,407 @@
+<div class="vente-categorie-page">
+
+  <!-- ====================================================== -->
+  <!-- EN-TÊTE -->
+  <!-- ====================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Vente par catégorie</h1>
+
+      <p>
+        Analyse des ventes regroupées par catégorie
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- FILTRES -->
+  <!-- ====================================================== -->
+
+  <section class="filters-card">
+
+    <div class="filter-group">
+
+      <label for="dateDebut">
+        Date de début
+      </label>
+
+      <input
+        id="dateDebut"
+        type="date"
+        [(ngModel)]="dateDebut"
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="dateFin">
+        Date de fin
+      </label>
+
+      <input
+        id="dateFin"
+        type="date"
+        [(ngModel)]="dateFin"
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="pointDeVente">
+        Point de vente
+      </label>
+
+      <select
+        id="pointDeVente"
+        [(ngModel)]="pointDeVenteId"
+      >
+
+        <option [ngValue]="null">Tous les points de vente</option>
+
+        <option
+          *ngFor="let pdv of pointDeVentes"
+          [ngValue]="pdv.id_pdv"
+        >
+          {{ pdv.nomPdv }}
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="filter-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="rechercher()"
+        [disabled]="loading"
+      >
+
+        {{ loading ? 'Chargement...' : 'Rechercher' }}
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="reinitialiser()"
+        [disabled]="loading"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- ERREUR -->
+  <!-- ====================================================== -->
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+
+      <span>!</span>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- INDICATEURS -->
+  <!-- ====================================================== -->
+
+  <section class="stats-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Catégories
+      </div>
+
+      <div class="stat-value">
+        {{ ventes.length }}
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Quantité vendue
+      </div>
+
+      <div class="stat-value">
+        {{ totalQuantite }}
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Chiffre d'affaires
+      </div>
+
+      <div class="stat-value">
+        {{ totalChiffreAffaires | number:'1.2-2' }} DT
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Marge brute
+      </div>
+
+      <div class="stat-value">
+        {{ totalMargeBrute | number:'1.2-2' }} DT
+      </div>
+
+      <div class="stat-subvalue">
+        {{ tauxMarge | number:'1.1-1' }} %
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- TABLEAU -->
+  <!-- ====================================================== -->
+
+  <section class="table-card">
+
+    <div class="table-header">
+
+      <div>
+
+        <h2>
+          Détail des ventes
+        </h2>
+
+        <span>
+          {{ ventes.length }} catégorie(s)
+        </span>
+
+      </div>
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="loading-container">
+
+        <div class="spinner"></div>
+
+        <span>
+          Chargement des données...
+        </span>
+
+      </div>
+
+    }
+
+
+    @else if (ventes.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          —
+        </div>
+
+        <h3>
+          Aucune vente trouvée
+        </h3>
+
+        <p>
+          Aucune vente ne correspond aux filtres sélectionnés.
+        </p>
+
+      </div>
+
+    }
+
+
+    @else {
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+          <tr>
+
+            <th>
+              #
+            </th>
+
+            <th>
+              Catégorie
+            </th>
+
+            <th class="text-right">
+              Quantité
+            </th>
+
+            <th class="text-right">
+              Chiffre d'affaires
+            </th>
+
+            <th class="text-right">
+              Coût
+            </th>
+
+            <th class="text-right">
+              Marge brute
+            </th>
+
+            <th class="text-right">
+              Marge %
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              vente of ventes;
+              track vente.categorieId ?? $index;
+              let i = $index
+              ) {
+
+              <tr>
+
+                <td class="index-cell">
+                  {{ i + 1 }}
+                </td>
+
+
+                <td>
+
+                  <div class="category-name">
+
+                    <span class="category-icon">
+                      C
+                    </span>
+
+                    <span>
+                      {{ vente.categorie }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <td class="text-right">
+
+                  <span class="quantity-badge">
+                    {{ vente.quantiteVendue }}
+                  </span>
+
+                </td>
+
+
+                <td class="text-right amount">
+                  {{ vente.chiffreAffaires | number:'1.2-2' }} DT
+                </td>
+
+
+                <td class="text-right cost">
+                  {{ vente.cout | number:'1.2-2' }} DT
+                </td>
+
+
+                <td class="text-right margin">
+                  {{ vente.margeBrute | number:'1.2-2' }} DT
+                </td>
+
+
+                <td class="text-right">
+
+                  {{
+                    vente.chiffreAffaires > 0
+                      ? (vente.margeBrute / vente.chiffreAffaires * 100 | number:'1.1-1')
+                      : '0'
+                  }} %
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+
+          <tfoot>
+
+          <tr>
+
+            <td colspan="2">
+              Total
+            </td>
+
+            <td class="text-right">
+              {{ totalQuantite }}
+            </td>
+
+            <td class="text-right">
+              {{ totalChiffreAffaires | number:'1.2-2' }} DT
+            </td>
+
+            <td class="text-right">
+              {{ totalCout | number:'1.2-2' }} DT
+            </td>
+
+            <td class="text-right">
+              {{ totalMargeBrute | number:'1.2-2' }} DT
+            </td>
+
+            <td class="text-right">
+              {{ tauxMarge | number:'1.1-1' }} %
+            </td>
+
+          </tr>
+
+          </tfoot>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

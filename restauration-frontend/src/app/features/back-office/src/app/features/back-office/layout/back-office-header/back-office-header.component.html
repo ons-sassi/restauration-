@@ -1,0 +1,100 @@
+<header class="back-office-header">
+
+  <!-- LEFT -->
+  <div class="header-left">
+
+    <div class="page-title">
+
+      <h1>
+        {{ pageTitle }}
+      </h1>
+
+      <p>
+        {{ pageSubtitle }}
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- RIGHT -->
+  <div class="header-right">
+
+    <!-- RESTAURANT -->
+    <div class="restaurant-info">
+
+      @if (getRestaurantLogo()) {
+        <img
+          class="restaurant-logo"
+          [src]="getRestaurantLogo() | mediaUrl"
+          alt=""
+        />
+      } @else {
+        <span class="restaurant-icon">
+          🍽️
+        </span>
+      }
+
+      <div class="restaurant-text">
+
+        <span class="restaurant-label">
+          Restaurant
+        </span>
+
+        <strong>
+          {{ getRestaurantName() }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- USER -->
+    <div
+      class="user-info"
+      routerLink="/back-office/mon-compte"
+      title="Mon compte"
+    >
+
+      <div class="avatar">
+        @if (getUserPhoto()) {
+          <img
+            class="user-avatar-image"
+            [src]="getUserPhoto()!"
+            alt="Photo de profil"
+          />
+        } @else {
+          {{ getUserInitials() }}
+        }
+      </div>
+
+      <div class="user-text">
+
+        <strong>
+          {{ getUserDisplayName() }}
+        </strong>
+
+        <span>
+          {{ getUserRole() }}
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- LOGOUT -->
+    <button
+      type="button"
+      class="logout-button"
+      (click)="logout()"
+      title="Déconnexion"
+    >
+      ↪
+    </button>
+
+  </div>
+
+</header>

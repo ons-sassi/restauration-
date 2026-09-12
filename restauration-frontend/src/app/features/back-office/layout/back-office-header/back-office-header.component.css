@@ -1,0 +1,331 @@
+:host {
+  display: block;
+}
+
+.back-office-header {
+  height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 28px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e8ecf1;
+}
+
+
+/* ==========================
+   LEFT
+========================== */
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.page-title h1 {
+  margin: 0;
+
+  color: var(--app-text);
+
+  font-size: 21px;
+
+  font-weight: 700;
+}
+
+.page-title p {
+  margin: 4px 0 0;
+
+  color: var(--app-text-muted);
+
+  font-size: 12px;
+}
+
+
+/* ==========================
+   RIGHT
+========================== */
+
+.header-right {
+  display: flex;
+
+  align-items: center;
+
+  gap: 22px;
+}
+
+
+/* ==========================
+   RESTAURANT
+========================== */
+
+.restaurant-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding-right: 20px;
+
+  border-right: 1px solid #e8ecf1;
+}
+
+.restaurant-icon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: var(--app-primary-soft);
+
+  font-size: 18px;
+}
+
+.restaurant-logo {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 10px;
+
+  object-fit: cover;
+
+  flex-shrink: 0;
+}
+
+.restaurant-text {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.restaurant-label {
+  color: #9aa2ae;
+
+  font-size: 10px;
+}
+
+.restaurant-text strong {
+  max-width: 150px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: var(--app-text-secondary);
+
+  font-size: 12px;
+}
+
+
+/* ==========================
+   USER
+========================== */
+
+.user-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+
+  border-radius: var(--app-radius-sm, 8px);
+
+  padding: 4px 6px;
+
+  transition: background 0.15s ease;
+}
+
+.user-info:hover {
+  background: var(--app-primary-soft, rgba(22, 117, 209, 0.08));
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  overflow: hidden;
+
+  background: var(--app-primary);
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-avatar-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.user-text {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.user-text strong {
+  max-width: 180px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: var(--app-text-secondary);
+
+  font-size: 12px;
+}
+
+.user-text span {
+  color: #9aa2ae;
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+}
+
+
+/* ==========================
+   LOGOUT
+========================== */
+
+.logout-button {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e1e6ed;
+
+  border-radius: 9px;
+
+  background: white;
+
+  color: var(--app-text-muted);
+
+  font-size: 18px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.logout-button:hover {
+  border-color: #ef4444;
+
+  background: #fff5f5;
+
+  color: #ef4444;
+}
+
+
+/* ==========================
+   RESPONSIVE
+========================== */
+
+@media (max-width: 850px) {
+
+  .restaurant-info {
+    display: none;
+  }
+
+  .header-right {
+    gap: 10px;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .back-office-header {
+    padding: 0 15px;
+  }
+
+  .user-text {
+    display: none;
+  }
+
+}
+
+
+/* =========================================================
+   UNIFIED COMPONENT OVERRIDES
+   ========================================================= */
+.page-header, .page-heading {
+  gap: 16px;
+}
+
+.page-header h1, .page-heading h2 {
+  font-weight: 700;
+}
+
+.filters, .filters-card {
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.btn-primary, .primary-button {
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+  color: #fff;
+}
+
+.btn-secondary, .secondary-button, .refresh-button {
+  background: #fff;
+  border-color: var(--app-border-input);
+  color: var(--app-text-secondary);
+}
+
+.table-card, .products-card, .stat-card, .panel {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.field input, .field select, .filter-field input, .filter-field select,
+.filter-group input, .filter-group select, .form-group input,
+.form-group select, .form-group textarea, .search-box input {
+  border-color: var(--app-border-input);
+  border-radius: var(--app-radius-sm);
+}
+
+.field input:focus, .field select:focus, .filter-field input:focus,
+.filter-field select:focus, .filter-group input:focus, .filter-group select:focus,
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus,
+.search-box input:focus {
+  border-color: #80b9e8;
+  box-shadow: 0 0 0 3px rgba(22,117,209,.09);
+}

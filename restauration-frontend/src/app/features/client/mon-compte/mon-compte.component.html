@@ -1,0 +1,173 @@
+<div class="compte-page client-app with-bottom-nav">
+  <header class="client-topbar">
+    <button type="button" class="client-back-btn" (click)="retourMenu()">← Menu</button>
+    <h1>Mon compte</h1>
+    <span style="width: 70px"></span>
+  </header>
+
+  @if (errorMessage) {
+    <div class="client-error-banner page-margin">⚠️ {{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="client-success-banner page-margin">✓ {{ successMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="client-state">
+      <div class="client-spinner large"></div>
+      <p>Chargement...</p>
+    </div>
+  } @else if (compte) {
+    <form class="compte-form" (ngSubmit)="enregistrer()">
+      <!-- ===================== IDENTITÉ ===================== -->
+      <section class="client-card identity-card">
+        <div class="avatar-big">
+          @if (photoAffichee) {
+            <img [src]="photoAffichee" alt="Photo de profil" class="avatar-img" />
+          } @else {
+            {{ initiales }}
+          }
+        </div>
+
+        <div class="identity-meta">
+          <strong>{{ prenom }} {{ nom }}</strong>
+          <span>{{ email }}</span>
+        </div>
+      </section>
+
+      <!-- ============= INFORMATIONS PERSONNELLES ============= -->
+      <section class="client-card">
+        <h2>Informations personnelles</h2>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nom *</label>
+            <input type="text" [(ngModel)]="nom" name="nom" placeholder="Nom de famille" />
+          </div>
+
+          <div class="form-group">
+            <label>Prénom *</label>
+            <input type="text" [(ngModel)]="prenom" name="prenom" placeholder="Prénom" />
+          </div>
+
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="email" name="email" placeholder="exemple&#64;email.com" />
+          </div>
+
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input type="tel" [(ngModel)]="telephone" name="telephone" placeholder="+216 00 000 000" />
+          </div>
+
+          <div class="form-group span-2">
+            <label>Photo de profil</label>
+
+            <div class="photo-upload">
+              <div class="photo-upload-preview">
+                @if (photoAffichee) {
+                  <img [src]="photoAffichee" alt="Photo de profil" />
+                } @else {
+                  <span>{{ initiales }}</span>
+                }
+              </div>
+
+              <div class="photo-upload-actions">
+                <button
+                  type="button"
+                  class="client-btn client-btn-secondary"
+                  [disabled]="uploadPhotoEnCours"
+                  (click)="photoInput.click()"
+                >
+                  {{ uploadPhotoEnCours ? 'Envoi en cours...' : 'Choisir une image' }}
+                </button>
+
+                <span class="hint-inline photo-upload-hint">JPG, PNG, GIF ou WEBP — 5 Mo max.</span>
+              </div>
+
+              <input
+                #photoInput
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                class="photo-upload-input"
+                (change)="onPhotoSelectionnee($event)"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== PROFIL CLIENT ===================== -->
+      <section class="client-card">
+        <h2>Profil</h2>
+
+        <div class="form-grid">
+          <div class="form-group span-2">
+            <label>Adresse</label>
+            <input type="text" [(ngModel)]="adresse" name="adresse" placeholder="Votre adresse de livraison" />
+          </div>
+
+          <div class="form-group span-2">
+            <label>Allergies</label>
+            <textarea
+              [(ngModel)]="allergie"
+              name="allergie"
+              rows="2"
+              placeholder="Allergies ou intolérances à signaler au restaurant"
+            ></textarea>
+          </div>
+
+          <div class="form-group span-2">
+            <label>Préférences</label>
+            <textarea
+              [(ngModel)]="preferences"
+              name="preferences"
+              rows="2"
+              placeholder="Préférences alimentaires (végétarien, sans gluten...)"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== MOT DE PASSE ===================== -->
+      <section class="client-card">
+        <h2>Mot de passe</h2>
+        <p class="hint-inline">Laissez ces champs vides pour conserver votre mot de passe actuel.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nouveau mot de passe</label>
+            <input
+              type="password"
+              [(ngModel)]="nouveauMotDePasse"
+              name="nouveauMotDePasse"
+              placeholder="Laisser vide pour ne pas changer"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Confirmer le mot de passe</label>
+            <input
+              type="password"
+              [(ngModel)]="confirmationMotDePasse"
+              name="confirmationMotDePasse"
+              placeholder="Confirmer le nouveau mot de passe"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== ACTIONS ===================== -->
+      <div class="actions">
+        <button type="button" class="client-btn client-btn-secondary" (click)="annuler()">Annuler</button>
+
+        <button type="submit" class="client-btn client-btn-primary" [disabled]="saving">
+          {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  <app-client-bottom-nav active="compte" />
+</div>

@@ -1,0 +1,43 @@
+<div class="ticket" [style.width.px]="largeurTicket" [style.font-size.px]="taillePolice" [style.font-family]="famillePolice" [style.text-align]="alignement">
+  @for (bloc of blocs; track bloc) {
+    @if (isVisible(bloc)) {
+      @switch (bloc) {
+        @case ('LOGO') {
+          <div class="ticket-logo">
+            @if (logo) { <img [src]="logo | mediaUrl" alt="Logo du restaurant" class="ticket-logo-img" /> }
+            @else { 🍽️ }
+          </div>
+        }
+        @case ('RESTAURANT') { <div class="ticket-restaurant">{{ nomRestaurant }}</div> }
+        @case ('ENTETE') { <div class="ticket-entete">{{ entete }}</div> }
+        @case ('ARTICLES') {
+          @if (afficherSeparateur) { <div class="ticket-sep"></div> }
+          @for (ligne of lignes; track $index) {
+            <div class="ticket-line"><span>{{ ligne.quantite }}x {{ ligne.nomProduit }}</span><span>{{ formatPrix(ligne.prixUnitaire * ligne.quantite) }}</span></div>
+            @if (afficherCategorie && ligneCategorie(ligne)) { <div class="ticket-detail">{{ ligneCategorie(ligne) }}</div> }
+            @if (afficherModificateurs && ligne.modificateurs?.length) { <div class="ticket-detail">+ {{ ligne.modificateurs?.join(', ') }}</div> }
+          }
+        }
+        @case ('TOTAL') {
+          @if (afficherSeparateur) { <div class="ticket-sep"></div> }
+          <div class="ticket-line ticket-total"><span>TOTAL</span><span>{{ formatPrix(total) }}</span></div>
+        }
+        @case ('CLIENT') {
+          @if (afficherSeparateur) { <div class="ticket-sep"></div> }
+          <div class="ticket-client">
+            @if (clientNom) { <div><strong>Client :</strong> {{ clientNom }}</div> }
+            @if (clientTelephone) { <div>Tél : {{ clientTelephone }}</div> }
+            @if (clientEmail) { <div>E-mail : {{ clientEmail }}</div> }
+          </div>
+        }
+        @case ('ADRESSE_LIVRAISON') {
+          @if (afficherSeparateur) { <div class="ticket-sep"></div> }
+          <div class="ticket-client ticket-address"><strong>Adresse de livraison :</strong><br />{{ adresseLivraison }}</div>
+        }
+        @case ('ALLERGIES') { <div class="ticket-allergies"><strong>⚠ Allergies :</strong> {{ allergies }}</div> }
+        @case ('COMMENTAIRE') { <div class="ticket-comment"><em>« {{ commentaire }} »</em></div> }
+        @case ('PIED_PAGE') { <div class="ticket-pied">{{ piedDePage }}</div> }
+      }
+    }
+  }
+</div>

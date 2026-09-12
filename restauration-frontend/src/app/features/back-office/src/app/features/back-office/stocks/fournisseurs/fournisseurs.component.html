@@ -1,0 +1,407 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        GESTION DE STOCK
+      </span>
+
+      <h1>
+        Fournisseurs
+      </h1>
+
+      <p>
+        Gérez la liste de vos fournisseurs et leurs informations de contact.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      *ngIf="canManageFournisseurs()"
+      (click)="nouveauFournisseur()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Nouveau fournisseur</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       STATISTIQUES
+  ====================================================== -->
+  <section class="stats">
+
+    <div class="stat-card">
+      <span class="stat-label">TOTAL FOURNISSEURS</span>
+      <span class="stat-value">{{ totalFournisseurs }}</span>
+    </div>
+
+    <div class="stat-card info">
+      <span class="stat-label">DÉLAI MOYEN DE LIVRAISON</span>
+      <span class="stat-value">{{ delaiMoyenGlobal }} j</span>
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="error"
+  >
+
+    {{ error }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadFournisseurs()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU PRINCIPAL
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- ===================================================
+         FILTRES
+    ==================================================== -->
+    <div class="filters">
+
+      <div class="search-box">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher un fournisseur (nom, email, adresse, téléphone)..."
+        />
+
+      </div>
+
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+    ==================================================== -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des fournisseurs...</p>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLEAU
+    ==================================================== -->
+    <div
+      class="table-container"
+      *ngIf="!loading && fournisseursFiltres.length > 0"
+    >
+
+      <table>
+
+        <thead>
+
+        <tr>
+          <th>Fournisseur</th>
+          <th>Téléphone</th>
+          <th>Adresse</th>
+          <th>Email</th>
+          <th class="text-center">Délai de livraison</th>
+          <th class="text-right">Actions</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let fournisseur of fournisseursFiltres; trackBy: trackByFournisseur"
+        >
+
+          <td>
+            <div class="fournisseur-name">{{ fournisseur.nom }}</div>
+          </td>
+
+          <td>
+            {{ fournisseur.numTel || '—' }}
+          </td>
+
+          <td>
+            {{ fournisseur.adresse || '—' }}
+          </td>
+
+          <td>
+            {{ fournisseur.email || '—' }}
+          </td>
+
+          <td class="text-center">
+            {{ fournisseur.delai_livraison_moyen }} jour(s)
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn edit"
+                *ngIf="canManageFournisseurs()"
+                (click)="modifierFournisseur(fournisseur)"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                class="action-btn delete"
+                *ngIf="canManageFournisseurs()"
+                (click)="supprimerFournisseur(fournisseur)"
+              >
+                Supprimer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ===================================================
+         EMPTY
+    ==================================================== -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && fournisseursFiltres.length === 0"
+    >
+
+      <h3>Aucun fournisseur trouvé</h3>
+
+      <p>Aucun fournisseur ne correspond aux critères sélectionnés.</p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser les filtres
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL - CRÉATION / MODIFICATION
+========================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="modalOuvert"
+  (click)="fermerModal()"
+>
+
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-header">
+
+      <h2>
+        {{ isEditMode ? 'Modifier le fournisseur' : 'Nouveau fournisseur' }}
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form
+      class="modal-body"
+      (ngSubmit)="enregistrer()"
+    >
+
+      <div
+        class="form-error"
+        *ngIf="formError"
+      >
+        {{ formError }}
+      </div>
+
+      <div class="form-grid">
+
+        <!-- NOM -->
+        <div class="form-group full">
+
+          <label for="nom">
+            Nom du fournisseur <span>*</span>
+          </label>
+
+          <input
+            id="nom"
+            type="text"
+            name="nom"
+            [(ngModel)]="formulaire.nom"
+            placeholder="Ex. Grossiste Alimentaire Tunis"
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- TELEPHONE -->
+        <div class="form-group">
+
+          <label for="numTel">
+            Téléphone <span>*</span>
+          </label>
+
+          <input
+            id="numTel"
+            type="text"
+            name="numTel"
+            [(ngModel)]="formulaire.numTel"
+            placeholder="Ex. 71 234 567"
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- EMAIL -->
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="formulaire.email"
+            placeholder="contact@fournisseur.tn"
+            autocomplete="off"
+          />
+
+        </div>
+
+
+        <!-- ADRESSE -->
+        <div class="form-group full">
+
+          <label for="adresse">
+            Adresse <span>*</span>
+          </label>
+
+          <input
+            id="adresse"
+            type="text"
+            name="adresse"
+            [(ngModel)]="formulaire.adresse"
+            placeholder="Ex. Zone Industrielle, Tunis"
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- DELAI DE LIVRAISON -->
+        <div class="form-group">
+
+          <label for="delai">
+            Délai de livraison moyen (jours) <span>*</span>
+          </label>
+
+          <input
+            id="delai"
+            type="number"
+            name="delai"
+            [(ngModel)]="formulaire.delai_livraison_moyen"
+            min="0"
+            step="1"
+            placeholder="0"
+            required
+          />
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="fermerModal()"
+          [disabled]="saving"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn-save"
+          *ngIf="canManageFournisseurs()"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Enregistrement...' : isEditMode ? 'Enregistrer' : 'Créer le fournisseur' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

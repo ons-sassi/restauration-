@@ -1,0 +1,392 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        PARAMÈTRES
+      </span>
+
+      <h1>
+        Appareils PDV
+      </h1>
+
+      <p *ngIf="restaurantConnecte">
+        Gérez les points de vente (caisses, tablettes, TPE...) du restaurant
+        <strong>{{ restaurantConnecte.nomRestaurant }}</strong>.
+      </p>
+
+      <p *ngIf="!restaurantConnecte">
+        Gérez les points de vente (caisses, tablettes, TPE...) liés à votre restaurant.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      *ngIf="canAjouter() && restaurantConnecte"
+      (click)="nouveauPdv()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Ajouter un appareil</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR / AUCUN RESTAURANT CONNECTÉ
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="error"
+  >
+
+    {{ error }}
+
+    <button
+      type="button"
+      class="retry-link"
+      *ngIf="restaurantConnecte"
+      (click)="loadAppareils()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <ng-container *ngIf="restaurantConnecte">
+
+    <!-- ===================================================
+         STATISTIQUES GLOBALES
+    ==================================================== -->
+    <section class="stats">
+
+      <div class="stat-card">
+        <span class="stat-label">TOTAL APPAREILS</span>
+        <span class="stat-value">{{ totalAppareils }}</span>
+      </div>
+
+      <div class="stat-card info">
+        <span class="stat-label">CONNECTÉS</span>
+        <span class="stat-value">{{ totalConnectes }}</span>
+      </div>
+
+      <div class="stat-card warning">
+        <span class="stat-label">DÉCONNECTÉS</span>
+        <span class="stat-value">{{ totalDeconnectes }}</span>
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         LISTE DES APPAREILS PDV
+    ==================================================== -->
+    <section class="table-card">
+
+      <!-- ================================================
+           FILTRES
+      ================================================= -->
+      <div class="filters">
+
+        <div class="search-box">
+
+          <span class="search-icon">⌕</span>
+
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Rechercher un appareil PDV (nom, matériel)..."
+          />
+
+        </div>
+
+        <select
+          class="filter-select"
+          [(ngModel)]="statutFiltre"
+        >
+          <option value="">Tous les statuts</option>
+          <option value="CONNECTE">Connecté</option>
+          <option value="DECONNECTE">Déconnecté</option>
+        </select>
+
+        <button
+          type="button"
+          class="btn-reset"
+          (click)="resetFiltres()"
+        >
+          Réinitialiser
+        </button>
+
+      </div>
+
+
+      <!-- ================================================
+           LOADING
+      ================================================= -->
+      <div
+        class="loading-container"
+        *ngIf="loading"
+      >
+
+        <div class="spinner"></div>
+
+        <p>Chargement des appareils PDV...</p>
+
+      </div>
+
+
+      <!-- ================================================
+           TABLEAU
+      ================================================= -->
+      <div
+        class="table-container"
+        *ngIf="!loading && appareilsFiltres.length > 0"
+      >
+
+        <table>
+
+          <thead>
+
+          <tr>
+            <th>Nom du point de vente</th>
+            <th>Appareil</th>
+            <th class="text-center">Statut</th>
+            <th class="text-right">Actions</th>
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr
+            *ngFor="let pdv of appareilsFiltres; trackBy: trackByPdv"
+          >
+
+            <td>
+              <div class="pdv-name">{{ pdv.nomPdv }}</div>
+            </td>
+
+            <td>
+              {{ pdv.appareil_pos || '—' }}
+            </td>
+
+            <td class="text-center">
+
+              <span
+                class="status-badge"
+                [class.unavailable]="!estConnecte(pdv.statutConnexion)"
+              >
+                <span class="status-dot"></span>
+                {{ libelleStatut(pdv.statutConnexion) }}
+              </span>
+
+            </td>
+
+            <td class="text-right">
+
+              <div class="row-actions">
+
+                <button
+                  type="button"
+                  class="action-btn edit"
+                  *ngIf="canModifier()"
+                  (click)="modifierPdv(pdv)"
+                >
+                  Modifier
+                </button>
+
+                <button
+                  type="button"
+                  class="action-btn delete"
+                  *ngIf="canSupprimer()"
+                  (click)="supprimerPdv(pdv)"
+                >
+                  Supprimer
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- ================================================
+           EMPTY
+      ================================================= -->
+      <div
+        class="empty-state"
+        *ngIf="!loading && appareilsFiltres.length === 0"
+      >
+
+        <h3>Aucun appareil PDV trouvé</h3>
+
+        <p>Aucun appareil ne correspond aux critères sélectionnés.</p>
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="resetFiltres()"
+        >
+          Réinitialiser les filtres
+        </button>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL - AJOUT / MODIFICATION
+========================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="modalOuvert"
+  (click)="fermerModal()"
+>
+
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-header">
+
+      <h2>
+        {{ isEditMode ? "Modifier l'appareil PDV" : 'Nouvel appareil PDV' }}
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form
+      class="modal-body"
+      (ngSubmit)="enregistrer()"
+    >
+
+      <div
+        class="form-error"
+        *ngIf="formError"
+      >
+        {{ formError }}
+      </div>
+
+      <div class="form-restaurant-info" *ngIf="restaurantConnecte">
+        Restaurant : <strong>{{ restaurantConnecte.nomRestaurant }}</strong>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- NOM DU PDV -->
+        <div class="form-group full">
+
+          <label for="nomPdv">
+            Nom du point de vente <span>*</span>
+          </label>
+
+          <input
+            id="nomPdv"
+            type="text"
+            name="nomPdv"
+            [(ngModel)]="formulaire.nomPdv"
+            placeholder="Ex. Caisse principale, Caisse comptoir..."
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- APPAREIL -->
+        <div class="form-group full">
+
+          <label for="appareil_pos">
+            Appareil <span>*</span>
+          </label>
+
+          <input
+            id="appareil_pos"
+            type="text"
+            name="appareil_pos"
+            [(ngModel)]="formulaire.appareil_pos"
+            placeholder="Ex. Tablette 1, TPE Ingenico, PC Caisse..."
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- STATUT DE CONNEXION -->
+        <div class="form-group full">
+
+          <label for="statutConnexion">
+            Statut de connexion
+          </label>
+
+          <select
+            id="statutConnexion"
+            name="statutConnexion"
+            [(ngModel)]="formulaire.statutConnexion"
+          >
+            <option value="CONNECTE">Connecté</option>
+            <option value="DECONNECTE">Déconnecté</option>
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="fermerModal()"
+          [disabled]="saving"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn-save"
+          *ngIf="isEditMode ? canModifier() : canAjouter()"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Enregistrement...' : isEditMode ? 'Enregistrer' : "Ajouter l'appareil" }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

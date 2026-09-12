@@ -1,0 +1,69 @@
+<div class="suggestions-page client-app with-bottom-nav">
+  <header class="client-topbar">
+    <button type="button" class="client-back-btn" (click)="retourMenu()">← Menu</button>
+    <h1>Mes suggestions</h1>
+    <span style="width: 70px"></span>
+  </header>
+
+  @if (submitSuccess) {
+    <div class="client-success-banner page-margin">✓ Merci, votre suggestion a bien été envoyée.</div>
+  }
+
+  <section class="client-card form-card page-margin">
+    <div class="field">
+      <label for="contenu">Une idée pour améliorer votre expérience ?</label>
+      <textarea
+        id="contenu"
+        rows="3"
+        [(ngModel)]="contenu"
+        placeholder="Partagez votre suggestion..."
+      ></textarea>
+    </div>
+
+    @if (submitError) {
+      <div class="client-error-banner">⚠️ {{ submitError }}</div>
+    }
+
+    <button
+      type="button"
+      class="client-btn client-btn-primary submit-btn"
+      [disabled]="!formulaireValide || submitting"
+      (click)="soumettre()"
+    >
+      {{ submitting ? 'Envoi...' : 'Envoyer' }}
+    </button>
+  </section>
+
+  @if (loading) {
+    <div class="client-state">
+      <div class="client-spinner large"></div>
+      <p>Chargement...</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="client-error-banner page-margin">⚠️ {{ errorMessage }}</div>
+  } @else if (suggestions.length === 0) {
+    <div class="client-state">
+      <div class="state-emoji">✨</div>
+      <h3>Aucune suggestion</h3>
+      <p>Vos idées envoyées apparaîtront ici.</p>
+    </div>
+  } @else {
+    <ul class="suggestions-list">
+      @for (suggestion of suggestions; track suggestion.id_suggestion) {
+        <li class="suggestion-card client-card">
+          <div class="suggestion-top">
+            <p class="suggestion-content">{{ suggestion.contenu }}</p>
+            @if (suggestion.priseEnCompte) {
+              <span class="client-badge client-badge-success">Prise en compte</span>
+            } @else {
+              <span class="client-badge client-badge-neutral">En attente</span>
+            }
+          </div>
+          <p class="suggestion-date">{{ suggestion.dateCreation | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </li>
+      }
+    </ul>
+  }
+
+  <app-client-bottom-nav />
+</div>

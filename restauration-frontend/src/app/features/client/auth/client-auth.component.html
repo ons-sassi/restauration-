@@ -1,0 +1,167 @@
+<div class="auth-page client-app">
+  <div class="auth-shell">
+
+    <header class="auth-header">
+      <div class="brand-mark">
+        <span class="brand-mark-icon">🍽</span>
+      </div>
+
+      <div class="header-copy">
+        <span class="eyebrow">ESPACE CLIENT</span>
+        <h1>{{ restaurant?.nomRestaurant || 'Votre restaurant' }}</h1>
+        <p>{{ restaurant?.adresse || 'Adresse non renseignée' }}</p>
+      </div>
+
+      <button type="button" class="change-button" (click)="changeRestaurant()">
+        Changer de restaurant
+      </button>
+    </header>
+
+    <section class="auth-card">
+
+      <div class="tabs">
+        <button
+          type="button"
+          class="tab"
+          [class.active]="activeTab === 'login'"
+          (click)="setTab('login')"
+        >
+          Se connecter
+        </button>
+        <button
+          type="button"
+          class="tab"
+          [class.active]="activeTab === 'register'"
+          (click)="setTab('register')"
+        >
+          Créer un compte
+        </button>
+      </div>
+
+      @if (errorMessage) {
+        <div class="state-message error">
+          <span class="state-icon">!</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      @if (activeTab === 'login') {
+        <form class="auth-form" (ngSubmit)="submitLogin()">
+          <label class="field">
+            <span>Email</span>
+            <input
+              type="email"
+              name="loginEmail"
+              [(ngModel)]="loginForm.email"
+              autocomplete="email"
+              placeholder="vous@exemple.com"
+            />
+          </label>
+
+          <label class="field">
+            <span>Mot de passe</span>
+            <input
+              type="password"
+              name="loginPassword"
+              [(ngModel)]="loginForm.mot_de_passe"
+              autocomplete="current-password"
+              placeholder="••••••••"
+            />
+          </label>
+
+          <button type="submit" class="submit-button" [disabled]="submitting">
+            @if (submitting) {
+              <span class="spinner small"></span>
+            } @else {
+              Se connecter
+            }
+          </button>
+        </form>
+      }
+
+      @if (activeTab === 'register') {
+        <form class="auth-form" (ngSubmit)="submitRegister()">
+          <div class="field-row">
+            <label class="field">
+              <span>Nom</span>
+              <input
+                type="text"
+                name="registerNom"
+                [(ngModel)]="registerForm.nom"
+                autocomplete="family-name"
+                placeholder="Nom"
+              />
+            </label>
+
+            <label class="field">
+              <span>Prénom</span>
+              <input
+                type="text"
+                name="registerPrenom"
+                [(ngModel)]="registerForm.prenom"
+                autocomplete="given-name"
+                placeholder="Prénom"
+              />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Email</span>
+            <input
+              type="email"
+              name="registerEmail"
+              [(ngModel)]="registerForm.email"
+              autocomplete="email"
+              placeholder="vous@exemple.com"
+            />
+          </label>
+
+          <label class="field">
+            <span>Téléphone</span>
+            <input
+              type="tel"
+              name="registerTelephone"
+              [(ngModel)]="registerForm.telephone"
+              autocomplete="tel"
+              placeholder="Optionnel"
+            />
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span>Mot de passe</span>
+              <input
+                type="password"
+                name="registerPassword"
+                [(ngModel)]="registerForm.mot_de_passe"
+                autocomplete="new-password"
+                placeholder="6 caractères min."
+              />
+            </label>
+
+            <label class="field">
+              <span>Confirmer</span>
+              <input
+                type="password"
+                name="registerPasswordConfirm"
+                [(ngModel)]="confirmMotDePasse"
+                autocomplete="new-password"
+                placeholder="••••••••"
+              />
+            </label>
+          </div>
+
+          <button type="submit" class="submit-button" [disabled]="submitting">
+            @if (submitting) {
+              <span class="spinner small"></span>
+            } @else {
+              Créer mon compte
+            }
+          </button>
+        </form>
+      }
+
+    </section>
+
+  </div>
+</div>

@@ -1,0 +1,283 @@
+:host {
+  display: block;
+}
+
+
+/* ================================
+   HEADER
+================================ */
+
+.pdv-header {
+  height: 78px;
+
+  padding: 0 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e6ebf1;
+}
+
+
+/* ================================
+   MENU BUTTON
+================================ */
+
+.menu-button {
+  display: none;
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.menu-button span {
+  display: block;
+
+  width: 20px;
+  height: 2px;
+
+  margin: 4px auto;
+
+  background: #4d596c;
+}
+
+
+/* ================================
+   TITLE
+================================ */
+
+.pdv-title {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.title-icon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: var(--app-primary-soft);
+
+  color: var(--app-primary);
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.title-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.title-content strong {
+  color: #252c3a;
+
+  font-size: 13px;
+}
+
+.title-content span {
+  margin-top: 3px;
+
+  color: #929baa;
+
+  font-size: 9px;
+}
+
+
+/* ================================
+   RIGHT
+================================ */
+
+.header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+}
+
+
+/* ================================
+   CONNECTION
+================================ */
+
+.connection-status {
+  height: 30px;
+
+  padding: 0 10px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  border-radius: 7px;
+
+  background: #f2faf5;
+
+  color: #4d8867;
+
+  font-size: 10px;
+}
+
+.connection-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #3bb273;
+}
+
+
+/* ================================
+   NOTIFICATIONS
+================================ */
+
+.notification-button {
+  width: 38px;
+  height: 38px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #566174;
+
+  cursor: pointer;
+
+  font-size: 16px;
+}
+
+.notification-button:hover {
+  background: #f5f8fb;
+
+  border-radius: 8px;
+}
+
+
+/* ================================
+   SEPARATOR
+================================ */
+
+.separator {
+  width: 1px;
+  height: 34px;
+
+  background: #e6ebf1;
+}
+
+
+/* ================================
+   USER
+================================ */
+
+.user {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--app-primary-soft);
+
+  color: var(--app-primary);
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.user-info {
+  min-width: 90px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info strong {
+  color: #303746;
+
+  font-size: 11px;
+}
+
+.user-info span {
+  margin-top: 3px;
+
+  color: #8d97a7;
+
+  font-size: 9px;
+}
+
+.logout-button {
+  width: 32px;
+  height: 32px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #8a94a4;
+
+  cursor: pointer;
+
+  font-size: 16px;
+}
+
+.logout-button:hover {
+  background: #f5f8fb;
+}
+
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 800px) {
+
+  .pdv-header {
+    padding: 0 14px;
+  }
+
+  .menu-button {
+    display: block;
+  }
+
+  .connection-status {
+    display: none;
+  }
+
+  .user-info,
+  .separator {
+    display: none;
+  }
+
+}

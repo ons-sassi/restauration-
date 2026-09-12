@@ -1,0 +1,43 @@
+@if (opened) {
+
+  <div class="dialog-backdrop">
+
+    <div class="dialog">
+
+      <div class="dialog-icon">
+        !
+      </div>
+
+      <h2>
+        {{ title }}
+      </h2>
+
+      <p>
+        {{ message }}
+      </p>
+
+      <div class="dialog-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="cancel()"
+        >
+          {{ cancelText }}
+        </button>
+
+        <button
+          type="button"
+          class="confirm-button"
+          (click)="confirm()"
+        >
+          {{ confirmText }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+}

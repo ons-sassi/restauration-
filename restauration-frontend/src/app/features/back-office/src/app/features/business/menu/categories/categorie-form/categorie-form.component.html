@@ -1,0 +1,490 @@
+<div class="category-form-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <span class="page-kicker">
+        MENU / CATÉGORIES
+      </span>
+
+      <h1>
+        {{ isEditMode ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
+      </h1>
+
+      <p>
+        {{
+          isEditMode
+            ? 'Modifiez les informations de votre catégorie.'
+            : 'Ajoutez une nouvelle catégorie à votre menu.'
+        }}
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-back"
+      (click)="cancel()"
+    >
+      <span>←</span>
+      Retour aux catégories
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+  <div
+    class="loading-card"
+    *ngIf="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <strong>
+      Chargement de la catégorie...
+    </strong>
+
+    <span>
+      Veuillez patienter
+    </span>
+
+  </div>
+
+
+  <!-- =====================================================
+       FORMULAIRE
+  ====================================================== -->
+  <form
+    *ngIf="!loading"
+    class="category-form"
+    (ngSubmit)="save()"
+  >
+
+    <!-- ===================================================
+         MESSAGES
+    ==================================================== -->
+
+    <div
+      class="message message-error"
+      *ngIf="errorMessage"
+    >
+
+      <div class="message-icon">
+        !
+      </div>
+
+      <div>
+        <strong>
+          Une erreur est survenue
+        </strong>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+      </div>
+
+    </div>
+
+
+    <div
+      class="message message-success"
+      *ngIf="successMessage"
+    >
+
+      <div class="message-icon">
+        ✓
+      </div>
+
+      <div>
+        <strong>
+          Opération réussie
+        </strong>
+
+        <p>
+          {{ successMessage }}
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         INFORMATIONS GENERALES
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          01
+        </div>
+
+        <div>
+
+          <h2>
+            Informations générales
+          </h2>
+
+          <p>
+            Définissez les informations principales de la catégorie.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <!-- NOM -->
+        <div class="field full">
+
+          <label for="nom">
+            Nom de la catégorie
+            <span>*</span>
+          </label>
+
+          <input
+            id="nom"
+            type="text"
+            name="nom"
+            [(ngModel)]="categorie.nom"
+            placeholder="Ex. Pizzas"
+            autocomplete="off"
+            required
+            [disabled]="!canSave() || saving"
+          />
+
+        </div>
+
+
+        <!-- DESCRIPTION -->
+        <div class="field full">
+
+          <label for="description">
+            Description
+          </label>
+
+          <textarea
+            id="description"
+            name="description"
+            [(ngModel)]="categorie.description_categorie"
+            rows="4"
+            placeholder="Décrivez brièvement la catégorie..."
+            [disabled]="!canSave() || saving"
+          ></textarea>
+
+          <small>
+            Une description courte permet de mieux présenter la catégorie.
+          </small>
+
+        </div>
+
+
+        <!-- ORDRE D'AFFICHAGE -->
+        <div class="field">
+
+          <label for="ordre">
+            Ordre d'affichage
+          </label>
+
+          <input
+            id="ordre"
+            type="number"
+            name="ordre"
+            [(ngModel)]="categorie.ordre_affichage"
+            min="0"
+            step="1"
+            placeholder="0"
+            [disabled]="!canSave() || saving"
+          />
+
+          <small>
+            Détermine la position de la catégorie dans le menu.
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         HIERARCHIE
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          02
+        </div>
+
+        <div>
+
+          <h2>
+            Hiérarchie
+          </h2>
+
+          <p>
+            Rattachez éventuellement cette catégorie à une catégorie parente.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <!-- CATEGORIE PARENTE -->
+        <div class="field">
+
+          <label for="categorieParent">
+            Catégorie parente
+          </label>
+
+          <select
+            id="categorieParent"
+            name="categorieParent"
+            [ngModel]="selectedCategorieParentId"
+            (change)="onCategorieParentChange($event)"
+            [disabled]="!canSave() || saving"
+          >
+
+            <option [ngValue]="null">
+              Aucune (catégorie racine)
+            </option>
+
+            <option
+              *ngFor="let parent of categoriesParentesDisponibles"
+              [value]="parent.id_element"
+            >
+              {{ parent.nom }}
+            </option>
+
+          </select>
+
+          <small>
+            Laissez vide pour créer une catégorie de premier niveau.
+          </small>
+
+        </div>
+
+
+        <!-- RESTAURANT -->
+        <div class="field">
+
+          <label>
+            Restaurant
+          </label>
+
+          <div class="readonly-field">
+
+            <span class="readonly-icon">
+              ●
+            </span>
+
+            <span>
+              {{ restaurantNom }}
+            </span>
+
+          </div>
+
+          <small>
+            Le restaurant est déterminé automatiquement.
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         IMAGE
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          03
+        </div>
+
+        <div>
+
+          <h2>
+            Image de la catégorie
+          </h2>
+
+          <p>
+            Ajoutez une image pour présenter cette catégorie dans le menu.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="image-upload-area">
+
+        <!-- IMAGE EXISTANTE -->
+        <div
+          class="image-preview"
+          *ngIf="categorie.image"
+        >
+
+          <img
+            [src]="categorie.image | mediaUrl"
+            [alt]="categorie.nom || 'Image de la catégorie'"
+          />
+
+          <div class="image-overlay">
+
+            <button
+              type="button"
+              class="remove-image"
+              (click)="supprimerImage()"
+              title="Supprimer l'image"
+              [disabled]="!canSave() || saving"
+            >
+              ×
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- UPLOAD -->
+        <label
+          class="upload-box"
+          *ngIf="!categorie.image && canSave()"
+        >
+
+          <div class="upload-icon">
+            ↑
+          </div>
+
+          <strong>
+            Ajouter une image
+          </strong>
+
+          <span>
+            Cliquez pour sélectionner une image
+          </span>
+
+          <small>
+            JPG, PNG ou WEBP · 2 Mo maximum
+          </small>
+
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            (change)="onImageSelected($event)"
+            [disabled]="saving"
+          />
+
+        </label>
+
+      </div>
+
+
+      <div
+        class="field-error"
+        *ngIf="imageError"
+      >
+        {{ imageError }}
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         ACTIONS
+    ==================================================== -->
+
+    <div class="form-actions">
+
+      <!-- ANNULER -->
+      <button
+        type="button"
+        class="btn-cancel"
+        (click)="cancel()"
+        [disabled]="saving"
+      >
+        Annuler
+      </button>
+
+
+      <!-- =================================================
+           CREATION
+      ================================================== -->
+
+      <button
+        *ngIf="!isEditMode && canAddCategory()"
+        type="submit"
+        class="btn-save"
+        [disabled]="saving"
+      >
+
+        <span
+          class="button-spinner"
+          *ngIf="saving"
+        ></span>
+
+        <span>
+          {{
+            saving
+              ? 'Création...'
+              : 'Créer la catégorie'
+          }}
+        </span>
+
+      </button>
+
+
+      <!-- =================================================
+           MODIFICATION
+      ================================================== -->
+
+      <button
+        *ngIf="isEditMode && canEditCategory()"
+        type="submit"
+        class="btn-save"
+        [disabled]="saving"
+      >
+
+        <span
+          class="button-spinner"
+          *ngIf="saving"
+        ></span>
+
+        <span>
+          {{
+            saving
+              ? 'Enregistrement...'
+              : 'Enregistrer les modifications'
+          }}
+        </span>
+
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

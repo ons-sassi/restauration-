@@ -1,0 +1,251 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        ADMINISTRATION
+      </span>
+
+      <h1>
+        Gestion des rôles
+      </h1>
+
+      <p>
+        Créez des rôles et choisissez leurs fonctionnalités
+        disponibles en Back Office et en PDV.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="retour()"
+      >
+        Retour
+      </button>
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="nouveauRole()"
+      >
+        <span class="btn-icon">+</span>
+        <span>Nouveau rôle</span>
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+
+    {{ errorMessage }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadRoles()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CARTE PRINCIPALE
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- LOADING -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des rôles...</p>
+
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div
+      class="table-container"
+      *ngIf="!loading && roles.length > 0"
+    >
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Nom du rôle</th>
+          <th>Description</th>
+          <th class="text-center">PDV</th>
+          <th class="text-center">Back Office</th>
+          <th class="text-right">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let role of roles">
+
+          <td>
+            <div class="role-name">{{ role.nom_role }}</div>
+          </td>
+
+          <td>
+            {{ role.description || '—' }}
+          </td>
+
+          <td class="text-center">
+              <span
+                class="status-badge"
+                [class.unavailable]="!role.acces_pdv"
+              >
+                <span class="status-dot"></span>
+                {{ role.acces_pdv ? 'Oui' : 'Non' }}
+              </span>
+          </td>
+
+          <td class="text-center">
+              <span
+                class="status-badge"
+                [class.unavailable]="!role.acces_backoffice"
+              >
+                <span class="status-dot"></span>
+                {{ role.acces_backoffice ? 'Oui' : 'Non' }}
+              </span>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn edit"
+                (click)="modifierRole(role)"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                class="action-btn delete"
+                (click)="demanderSuppression(role)"
+              >
+                Supprimer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && roles.length === 0 && !errorMessage"
+    >
+
+      <h3>Aucun rôle n'a encore été créé</h3>
+
+      <p>Commencez par créer un premier rôle et lui attribuer des fonctionnalités.</p>
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="nouveauRole()"
+      >
+        <span class="btn-icon">+</span>
+        <span>Nouveau rôle</span>
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION SUPPRESSION
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="roleToDelete"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Supprimer ce rôle ?</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="deleting"
+        (click)="annulerSuppression()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        Le rôle « {{ roleToDelete.nom_role }} » ainsi que toutes ses
+        permissions associées seront définitivement supprimés.
+      </p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="deleting"
+          (click)="annulerSuppression()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn-save danger"
+          [disabled]="deleting"
+          (click)="confirmerSuppression()"
+        >
+          {{ deleting ? 'Suppression...' : 'Supprimer' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

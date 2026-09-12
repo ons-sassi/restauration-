@@ -1,0 +1,220 @@
+<div class="checkout-page client-app">
+  @if (!confirmation) {
+    <header class="client-topbar">
+      <button type="button" class="client-back-btn" (click)="retourPanier()">← Panier</button>
+      <h1>Finaliser</h1>
+      <span style="width: 70px"></span>
+    </header>
+
+    <!-- ===================== RÉCAPITULATIF ===================== -->
+    <section class="recap-section client-card">
+      <h2>Récapitulatif</h2>
+
+      <div class="recap-list">
+        @for (item of items; track item.ligneId) {
+          <div class="recap-item">
+            <span class="recap-qte">{{ item.quantite }}×</span>
+            <span class="recap-nom">
+              {{ item.produit.nom }}
+              @if (item.modificateurs.length > 0) {
+                <span class="recap-modificateurs">({{ getModificateursLabel(item) }})</span>
+              }
+            </span>
+            <span class="recap-prix">{{ formatPrix(item.prixUnitaire * item.quantite) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="recap-total">
+        <span>Total</span>
+        <span>{{ formatPrix(total) }}</span>
+      </div>
+    </section>
+
+    <!-- ===================== MODE DE COMMANDE ===================== -->
+    <section class="mode-section">
+      <h2>Mode de commande</h2>
+
+      <div class="mode-options">
+        <label class="mode-option" [class.selected]="modeCommande === ModeCommande.A_EMPORTER">
+          <input
+            type="radio"
+            name="mode"
+            [value]="ModeCommande.A_EMPORTER"
+            [(ngModel)]="modeCommande"
+          />
+          <span class="mode-icon">🥡</span>
+          <span class="mode-label">À emporter</span>
+        </label>
+
+        <label class="mode-option" [class.selected]="modeCommande === ModeCommande.LIVRAISON">
+          <input
+            type="radio"
+            name="mode"
+            [value]="ModeCommande.LIVRAISON"
+            [(ngModel)]="modeCommande"
+          />
+          <span class="mode-icon">🚚</span>
+          <span class="mode-label">Livraison</span>
+        </label>
+
+        <label
+          class="mode-option"
+          [class.selected]="modeCommande === ModeCommande.SAISIE_MANUELLE_NUMERO_TABLE"
+        >
+          <input
+            type="radio"
+            name="mode"
+            [value]="ModeCommande.SAISIE_MANUELLE_NUMERO_TABLE"
+            [(ngModel)]="modeCommande"
+          />
+          <span class="mode-icon">🍽️</span>
+          <span class="mode-label">Sur place</span>
+        </label>
+      </div>
+
+      @if (modeCommande === ModeCommande.LIVRAISON) {
+        <div class="field delivery-address-field">
+          <label>Adresse de livraison</label>
+
+          <div class="delivery-address-options">
+            <label
+              class="delivery-address-option"
+              [class.selected]="utiliserAdresseCompte"
+              [class.disabled]="!adresseCompte"
+            >
+              <input
+                type="radio"
+                name="adresseLivraisonSource"
+                [checked]="utiliserAdresseCompte"
+                [disabled]="!adresseCompte"
+                (change)="choisirAdresseCompte()"
+              />
+              <span>
+                <strong>Utiliser mon adresse enregistrée</strong>
+                @if (adresseCompte) {
+                  <small>{{ adresseCompte }}</small>
+                } @else {
+                  <small>Aucune adresse enregistrée dans votre compte</small>
+                }
+              </span>
+            </label>
+
+            <label
+              class="delivery-address-option"
+              [class.selected]="!utiliserAdresseCompte"
+            >
+              <input
+                type="radio"
+                name="adresseLivraisonSource"
+                [checked]="!utiliserAdresseCompte"
+                (change)="choisirAutreAdresse()"
+              />
+              <span>
+                <strong>Livrer à une autre adresse</strong>
+                <small>Cette adresse sera utilisée uniquement pour cette commande.</small>
+              </span>
+            </label>
+          </div>
+
+          @if (!utiliserAdresseCompte) {
+            <textarea
+              id="adresse"
+              rows="3"
+              [(ngModel)]="adresseAlternative"
+              name="adresseAlternative"
+              placeholder="Numéro, rue, ville..."
+            ></textarea>
+          }
+
+          @if (utiliserAdresseCompte && adresseCompte) {
+            <div class="selected-address-preview">
+              <span>Adresse sélectionnée :</span>
+              <strong>{{ adresseCompte }}</strong>
+            </div>
+          }
+        </div>
+      }
+
+      @if (modeCommande === ModeCommande.SAISIE_MANUELLE_NUMERO_TABLE) {
+        <div class="field">
+          <label for="numeroTable">Table</label>
+
+          @if (chargementTables) {
+            <p class="tables-info">Chargement des tables disponibles...</p>
+          } @else if (erreurTables) {
+            <div class="client-error-banner">
+              {{ erreurTables }}
+              <button type="button" class="retry-link" (click)="chargerTablesDisponibles()">
+                Réessayer
+              </button>
+            </div>
+          } @else if (tablesDisponibles.length === 0) {
+            <p class="tables-info">Aucune table n'est disponible pour le moment.</p>
+          } @else {
+            <select id="numeroTable" [(ngModel)]="numeroTable" name="numeroTable">
+              <option [ngValue]="null">Choisissez une table...</option>
+              @for (table of tablesDisponibles; track table.id_table) {
+                <option [ngValue]="table.numeroTable">
+                  Table n°{{ table.numeroTable }} ({{ table.capacite }} pers.)
+                  @if (table.statut !== 'LIBRE') {
+                    — votre table actuelle
+                  }
+                </option>
+              }
+            </select>
+          }
+        </div>
+      }
+    </section>
+
+    @if (errorMessage) {
+      <div class="client-error-banner page-error">⚠️ {{ errorMessage }}</div>
+    }
+
+    <div class="confirm-bar">
+      <button
+        type="button"
+        class="client-btn client-btn-primary confirm-btn"
+        [disabled]="!formulaireValide || loading"
+        (click)="confirmerCommande()"
+      >
+        {{ loading ? 'Envoi en cours...' : 'Confirmer — ' + formatPrix(total) }}
+      </button>
+    </div>
+  } @else {
+    <!-- ===================== CONFIRMATION ===================== -->
+    <div class="confirmation-page">
+      <div class="confirmation-icon">✓</div>
+      <h1>Commande confirmée !</h1>
+      <p class="confirmation-numero">Commande n°{{ confirmation.id_commande }}</p>
+
+      <!-- ===================== REÇU ===================== -->
+      <app-receipt-ticket
+        [modele]="modeleRecu"
+        [restaurant]="restaurantRecu"
+        [lignes]="lignesRecu"
+        [total]="confirmation.montant_total"
+        [clientNom]="recuNomClient"
+        [clientTelephone]="recuTelephone"
+        [clientEmail]="recuEmail"
+        [adresseLivraison]="recuAdresseLivraison"
+        [afficherAdresseLivraison]="confirmation.modeCommande === ModeCommande.LIVRAISON"
+        [allergies]="recuAllergies"
+        commentaire=""
+      />
+
+      @if (confirmation.adresseLivraison) {
+        <p class="confirmation-detail">📍 Livraison : {{ confirmation.adresseLivraison }}</p>
+      }
+
+      @if (confirmation.numeroTable) {
+        <p class="confirmation-detail">🍽️ Table n°{{ confirmation.numeroTable }}</p>
+      }
+
+      <button type="button" class="client-btn client-btn-primary" (click)="retourMenu()">
+        Retour au menu
+      </button>
+    </div>
+  }
+</div>

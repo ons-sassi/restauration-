@@ -1,0 +1,315 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        RESSOURCES HUMAINES
+      </span>
+
+      <h1>
+        Gestion des employés
+      </h1>
+
+      <p>
+        Ajoutez, modifiez ou supprimez des employés et gérez
+        leur rôle (permissions) au sein du restaurant.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="retour()"
+      >
+        Retour
+      </button>
+
+      <button
+        type="button"
+        class="btn-primary"
+        *ngIf="canAddEmployee()"
+        (click)="nouvelEmployee()"
+      >
+        <span class="btn-icon">+</span>
+        <span>Nouvel employé</span>
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+
+    {{ errorMessage }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadEmployees()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       FILTRES
+  ====================================================== -->
+  <section class="filters-bar">
+
+    <div class="search-box">
+
+      <span class="search-icon">🔍</span>
+
+      <input
+        type="text"
+        placeholder="Rechercher par nom, prénom, email, matricule ou téléphone..."
+        [(ngModel)]="searchTerm"
+      />
+
+    </div>
+
+    <select [(ngModel)]="selectedStatutPresence">
+      <option value="tous">Toutes les présences</option>
+      <option *ngFor="let statut of statutsPresence" [value]="statut">
+        {{ statut }}
+      </option>
+    </select>
+
+    <select [(ngModel)]="selectedStatutCompte">
+      <option value="tous">Tous les statuts de compte</option>
+      <option *ngFor="let statut of statutsCompte" [value]="statut">
+        {{ statut }}
+      </option>
+    </select>
+
+  </section>
+
+
+  <!-- =====================================================
+       CARTE PRINCIPALE
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- LOADING -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des employés...</p>
+
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div
+      class="table-container"
+      *ngIf="!loading && employeesFiltres.length > 0"
+    >
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Employé</th>
+          <th>Matricule</th>
+          <th>Contact</th>
+          <th>Rôle</th>
+          <th>PDV affecté</th>
+          <th class="text-center">Présence</th>
+          <th class="text-center">Compte</th>
+          <th class="text-right">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let employee of employeesFiltres">
+
+          <td>
+            <div class="employee-name">{{ nomComplet(employee) }}</div>
+          </td>
+
+          <td>
+            {{ employee.matricule || '—' }}
+          </td>
+
+          <td>
+            <div class="contact-cell">
+              <span>{{ employee.email || '—' }}</span>
+              <span class="contact-secondary">{{ employee.telephone || '—' }}</span>
+            </div>
+          </td>
+
+          <td>
+            <span class="role-badge">
+              {{ roleNom(employee) }}
+            </span>
+          </td>
+
+          <td>
+            {{ pdvNom(employee) }}
+          </td>
+
+          <td class="text-center">
+              <span
+                class="status-badge"
+                [class.unavailable]="employee.statutPresence !== 'PRESENT'"
+              >
+                <span class="status-dot"></span>
+                {{ employee.statutPresence || '—' }}
+              </span>
+          </td>
+
+          <td class="text-center">
+              <span
+                class="status-badge"
+                [class.unavailable]="employee.statut !== 'ACTIF'"
+              >
+                <span class="status-dot"></span>
+                {{ employee.statut || '—' }}
+              </span>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn edit"
+                *ngIf="canEditEmployee()"
+                (click)="modifierEmployee(employee)"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                class="action-btn delete"
+                *ngIf="canDeleteEmployee()"
+                (click)="demanderSuppression(employee)"
+              >
+                Supprimer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && employeesFiltres.length === 0 && !errorMessage"
+    >
+
+      <h3>Aucun employé trouvé</h3>
+
+      <p>
+        {{
+          employees.length === 0
+            ? 'Commencez par ajouter un premier employé.'
+            : 'Aucun employé ne correspond à votre recherche.'
+        }}
+      </p>
+
+      <button
+        type="button"
+        class="btn-primary"
+        *ngIf="canAddEmployee() && employees.length === 0"
+        (click)="nouvelEmployee()"
+      >
+        <span class="btn-icon">+</span>
+        <span>Nouvel employé</span>
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION SUPPRESSION
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="employeeToDelete"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Supprimer cet employé ?</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="deleting"
+        (click)="annulerSuppression()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        L'employé « {{ nomComplet(employeeToDelete) }} » sera définitivement supprimé.
+        Cette action est irréversible.
+      </p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="deleting"
+          (click)="annulerSuppression()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn-save danger"
+          [disabled]="deleting"
+          (click)="confirmerSuppression()"
+        >
+          {{ deleting ? 'Suppression...' : 'Supprimer' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

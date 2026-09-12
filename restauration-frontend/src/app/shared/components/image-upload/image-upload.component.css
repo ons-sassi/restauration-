@@ -1,0 +1,118 @@
+.upload {
+  width: 180px;
+  height: 150px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  border: 1.5px dashed #cbd5e1;
+
+  border-radius: 10px;
+
+  background: var(--app-bg);
+
+  cursor: pointer;
+
+  overflow: hidden;
+}
+
+.upload:hover {
+  border-color: var(--app-primary);
+
+  background: #f5faff;
+}
+
+.upload img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.upload-icon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--app-primary-soft);
+
+  color: var(--app-primary);
+
+  font-size: 23px;
+}
+
+.upload strong {
+  color: #455166;
+
+  font-size: 12px;
+}
+
+.upload small {
+  color: #929baa;
+
+  font-size: 10px;
+}
+
+.upload input {
+  display: none;
+}
+
+
+/* =========================================================
+   UNIFIED COMPONENT OVERRIDES
+   ========================================================= */
+.page-header, .page-heading {
+  gap: 16px;
+}
+
+.page-header h1, .page-heading h2 {
+  font-weight: 700;
+}
+
+.filters, .filters-card {
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.btn-primary, .primary-button {
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+  color: #fff;
+}
+
+.btn-secondary, .secondary-button, .refresh-button {
+  background: #fff;
+  border-color: var(--app-border-input);
+  color: var(--app-text-secondary);
+}
+
+.table-card, .products-card, .stat-card, .panel {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.field input, .field select, .filter-field input, .filter-field select,
+.filter-group input, .filter-group select, .form-group input,
+.form-group select, .form-group textarea, .search-box input {
+  border-color: var(--app-border-input);
+  border-radius: var(--app-radius-sm);
+}
+
+.field input:focus, .field select:focus, .filter-field input:focus,
+.filter-field select:focus, .filter-group input:focus, .filter-group select:focus,
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus,
+.search-box input:focus {
+  border-color: #80b9e8;
+  box-shadow: 0 0 0 3px rgba(22,117,209,.09);
+}

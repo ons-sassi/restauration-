@@ -1,0 +1,477 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        RESSOURCES HUMAINES
+      </span>
+
+      <h1>
+        Gestion des tables
+      </h1>
+
+      <p>
+        Attribution et suivi des tables et de leur employé responsable.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        *ngIf="authService.hasPermission('EMPLOYES_TABLES')"
+        (click)="ouvrirAjoutTable()"
+      >
+        + Ajouter une table
+      </button>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="retour()"
+      >
+        Retour
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+
+    {{ errorMessage }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadData()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       SUCCÈS
+  ====================================================== -->
+  <div
+    class="success-message"
+    *ngIf="successMessage"
+  >
+    {{ successMessage }}
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU (masqué pendant le chargement)
+  ====================================================== -->
+  <ng-container *ngIf="!loading">
+
+    <!-- =====================================================
+         RÉSUMÉ
+    ====================================================== -->
+    <section class="stats">
+
+      <div class="stat-card">
+        <span class="stat-label">TABLES</span>
+        <span class="stat-value">{{ totalTables }}</span>
+      </div>
+
+      <div class="stat-card success">
+        <span class="stat-label">TABLES ATTRIBUÉES</span>
+        <span class="stat-value">{{ totalAttribuees }}</span>
+      </div>
+
+      <div class="stat-card warning">
+        <span class="stat-label">NON ATTRIBUÉES</span>
+        <span class="stat-value">{{ totalNonAttribuees }}</span>
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PAR EMPLOYÉ
+    ====================================================== -->
+    <section
+      class="employee-stats"
+      *ngIf="statsParEmploye.length > 0"
+    >
+
+      <span
+        class="employee-stat-chip"
+        *ngFor="let stat of statsParEmploye"
+      >
+        <strong>{{ stat.nom }}</strong>
+        <span>{{ stat.count }} table{{ stat.count > 1 ? 's' : '' }}</span>
+      </span>
+
+    </section>
+
+
+    <!-- =====================================================
+         FILTRES
+    ====================================================== -->
+    <section class="filter-tabs">
+
+      <button
+        type="button"
+        *ngFor="let filtre of filtres"
+        class="filter-tab"
+        [class.active]="selectedFiltre === filtre.value"
+        (click)="selectionnerFiltre(filtre.value)"
+      >
+        {{ filtre.label }}
+      </button>
+
+    </section>
+
+
+    <!-- =====================================================
+         PLAN DU RESTAURANT
+    ====================================================== -->
+    <section class="tables-panel">
+
+      <div class="plan-header">
+        <h2>Plan du restaurant</h2>
+        <p>Faites glisser une table pour reproduire sa disposition réelle.</p>
+      </div>
+
+      <div
+        class="plan-canvas"
+        #planCanvas
+        [style.height.px]="planHeight"
+        *ngIf="tablesFiltrees.length > 0"
+      >
+
+        <div
+          class="table-card"
+          *ngFor="let table of tablesFiltrees"
+          [class.dragging]="draggingTableId === table.id_table"
+          [style.left.px]="getPosition(table).x"
+          [style.top.px]="getPosition(table).y"
+          role="button"
+          tabindex="0"
+          (pointerdown)="onCardPointerDown($event, table)"
+          (click)="onCardClick(table)"
+          (keydown.enter)="ouvrirDetails(table)"
+        >
+
+          <div class="table-item-header">
+            <span class="table-number">Table {{ table.numeroTable }}</span>
+
+            <span
+              class="statut-badge"
+              [ngClass]="statutClass(table.statut)"
+            >
+              {{ statutLabel(table.statut) }}
+            </span>
+          </div>
+
+          <div class="table-capacity">
+            {{ table.capacite }} places
+          </div>
+
+          <div
+            class="table-employee"
+            [class.unassigned]="!table.serveurAttribue"
+          >
+            {{ table.serveurAttribue ? nomComplet(table.serveurAttribue) : 'Non attribuée' }}
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- EMPTY -->
+      <div
+        class="empty-state"
+        *ngIf="tablesFiltrees.length === 0"
+      >
+
+        <h3>Aucune table trouvée</h3>
+
+        <p>
+          {{
+            tables.length === 0
+              ? "Aucune table n'a encore été créée pour ce restaurant."
+              : 'Aucune table ne correspond à ce filtre.'
+          }}
+        </p>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+  <div
+    class="loading-container"
+    *ngIf="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <p>Chargement des tables...</p>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL DÉTAILS D'UNE TABLE
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="selectedTable"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Table {{ selectedTable.numeroTable }}</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="saving"
+        (click)="fermerModal()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="detail-row">
+        <span class="detail-label">Capacité</span>
+        <span class="detail-value">{{ selectedTable.capacite }} places</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Statut</span>
+        <span
+          class="statut-badge"
+          [ngClass]="statutClass(selectedTable.statut)"
+        >
+          {{ statutLabel(selectedTable.statut) }}
+        </span>
+      </div>
+
+      <div
+        class="modal-error"
+        *ngIf="modalError"
+      >
+        {{ modalError }}
+      </div>
+
+      <div class="form-group">
+        <label>Employé responsable</label>
+        <select
+          [(ngModel)]="selectedEmployeeId"
+          name="employeeId"
+          [disabled]="saving"
+        >
+          <option [ngValue]="null">Non attribuée</option>
+          <option
+            *ngFor="let employe of employes"
+            [ngValue]="employe.id_utilisateur"
+          >
+            {{ nomComplet(employe) }}
+          </option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-remove"
+          [disabled]="saving || !selectedTable.serveurAttribue"
+          (click)="retirerAffectation()"
+        >
+          Retirer l'affectation
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          [disabled]="saving || !selectedEmployeeId"
+          (click)="enregistrerAffectation()"
+        >
+          {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+
+      </div>
+
+
+      <!-- =====================================================
+           SUPPRESSION DE LA TABLE
+      ====================================================== -->
+      <div class="danger-zone">
+
+        <ng-container *ngIf="!confirmingSuppression">
+          <button
+            type="button"
+            class="btn-danger-link"
+            [disabled]="saving || deleting"
+            (click)="demanderConfirmationSuppression()"
+          >
+            Supprimer la table
+          </button>
+        </ng-container>
+
+        <div class="confirm-suppression" *ngIf="confirmingSuppression">
+
+          <p>Voulez-vous vraiment supprimer la Table {{ selectedTable.numeroTable }} ?</p>
+
+          <div class="confirm-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              [disabled]="deleting"
+              (click)="annulerSuppression()"
+            >
+              Annuler
+            </button>
+
+            <button
+              type="button"
+              class="btn-danger"
+              [disabled]="deleting"
+              (click)="confirmerSuppression()"
+            >
+              {{ deleting ? 'Suppression...' : 'Supprimer' }}
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL AJOUT D'UNE TABLE
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="showAddModal"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Ajouter une table</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="addSaving"
+        (click)="fermerAjoutTable()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div
+        class="modal-error"
+        *ngIf="addError"
+      >
+        {{ addError }}
+      </div>
+
+      <div class="form-group">
+        <label>Numéro de table</label>
+        <input
+          type="number"
+          [(ngModel)]="newTableNumero"
+          name="newTableNumero"
+          min="1"
+          [disabled]="addSaving"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Capacité</label>
+        <input
+          type="number"
+          [(ngModel)]="newTableCapacite"
+          name="newTableCapacite"
+          min="1"
+          [disabled]="addSaving"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Employé responsable</label>
+        <select
+          [(ngModel)]="newTableEmployeeId"
+          name="newTableEmployeeId"
+          [disabled]="addSaving"
+        >
+          <option [ngValue]="null">Aucun</option>
+          <option
+            *ngFor="let employe of employes"
+            [ngValue]="employe.id_utilisateur"
+          >
+            {{ nomComplet(employe) }}
+          </option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-secondary"
+          [disabled]="addSaving"
+          (click)="fermerAjoutTable()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          [disabled]="addSaving || !newTableNumero || !newTableCapacite"
+          (click)="confirmerAjoutTable()"
+        >
+          {{ addSaving ? 'Ajout...' : 'Ajouter' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

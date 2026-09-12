@@ -1,0 +1,162 @@
+<aside
+  class="pdv-sidebar"
+  [class.collapsed]="collapsed"
+>
+
+  <!-- LOGO -->
+  <div class="pdv-brand">
+
+    <div class="brand-logo">
+      R
+    </div>
+
+    @if (!collapsed) {
+
+      <div class="brand-text">
+
+        <strong>
+          Restaurant
+        </strong>
+
+        <span>
+          Point de vente
+        </span>
+
+      </div>
+
+    }
+
+  </div>
+
+
+  <!-- MENU -->
+  <nav class="pdv-navigation">
+
+    <div class="navigation-title">
+
+      @if (!collapsed) {
+        MENU
+      }
+
+    </div>
+
+
+    <!-- VENTE -->
+    <a
+      routerLink="/pdv"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="pdv-menu-item"
+    >
+
+      <span class="pdv-menu-icon">
+        🛒
+      </span>
+
+      @if (!collapsed) {
+        <span class="menu-label">
+          Vente
+        </span>
+      }
+
+    </a>
+
+
+    <!-- COMMANDES -->
+    <a
+      routerLink="/pdv/commandes"
+      routerLinkActive="active"
+      class="pdv-menu-item"
+    >
+
+      <span class="pdv-menu-icon">
+        📋
+      </span>
+
+      @if (!collapsed) {
+        <span class="menu-label">
+          Commandes
+        </span>
+      }
+
+    </a>
+
+
+    <!-- TABLES -->
+    <a
+      routerLink="/pdv/tables"
+      routerLinkActive="active"
+      class="pdv-menu-item"
+    >
+
+      <span class="pdv-menu-icon">
+        🪑
+      </span>
+
+      @if (!collapsed) {
+        <span class="menu-label">
+          Tables
+        </span>
+      }
+
+    </a>
+
+
+    <!-- CAISSE -->
+    <a
+      routerLink="/pdv/caisse"
+      routerLinkActive="active"
+      class="pdv-menu-item"
+    >
+
+      <span class="pdv-menu-icon">
+        💰
+      </span>
+
+      @if (!collapsed) {
+        <span class="menu-label">
+          Caisse
+        </span>
+      }
+
+    </a>
+
+
+    <!-- PAIEMENTS -->
+    <a
+      routerLink="/pdv/paiements"
+      routerLinkActive="active"
+      class="pdv-menu-item"
+    >
+
+      <span class="pdv-menu-icon">
+        💳
+      </span>
+
+      @if (!collapsed) {
+        <span class="menu-label">
+          Paiements
+        </span>
+      }
+
+    </a>
+
+  </nav>
+
+
+  <!-- STATUT -->
+  <div class="pdv-status">
+
+    <span class="status-dot"></span>
+
+    @if (!collapsed) {
+
+      <span>
+        PDV connecté
+      </span>
+
+    }
+
+  </div>
+
+</aside>

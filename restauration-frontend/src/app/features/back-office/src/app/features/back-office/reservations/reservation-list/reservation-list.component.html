@@ -1,0 +1,753 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        GESTION DES RÉSERVATIONS
+      </span>
+
+      <h1>
+        Réservations
+      </h1>
+
+      <p>
+        Consultez toutes les réservations, modifiez leurs informations
+        ou annulez-les si nécessaire.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        *ngIf="canCreer()"
+        (click)="ouvrirCreation()"
+      >
+        <span class="btn-icon">+</span>
+        Nouvelle réservation
+      </button>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="retour()"
+      >
+        Retour
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+
+    {{ errorMessage }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadReservations()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       FILTRES
+  ====================================================== -->
+  <section class="filters-bar">
+
+    <div class="search-box">
+
+      <span class="search-icon">🔍</span>
+
+      <input
+        type="text"
+        placeholder="Rechercher par nom, prénom ou email du client..."
+        [(ngModel)]="searchTerm"
+      />
+
+    </div>
+
+    <select [(ngModel)]="selectedStatut">
+      <option value="tous">Tous les statuts</option>
+      <option *ngFor="let statut of statutsReservation" [value]="statut">
+        {{ statut }}
+      </option>
+    </select>
+
+    <input
+      type="date"
+      class="date-filter"
+      [(ngModel)]="selectedDate"
+    />
+
+  </section>
+
+
+  <!-- =====================================================
+       CARTE PRINCIPALE
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- LOADING -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des réservations...</p>
+
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div
+      class="table-container"
+      *ngIf="!loading && reservationsFiltrees.length > 0"
+    >
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Client</th>
+          <th
+            class="sortable"
+            (click)="basculerSensTriDate()"
+          >
+            Date &amp; heure
+            <span class="sort-icon">
+              {{ sensTriDate === 'desc' ? '▼' : '▲' }}
+            </span>
+          </th>
+          <th class="text-center">Personnes</th>
+          <th>Table</th>
+          <th class="text-center">Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let reservation of reservationsFiltrees" [ngClass]="classeLigne(reservation)">
+
+          <td>
+            <div class="client-name">{{ nomCompletClient(reservation) }}</div>
+            <div class="contact-secondary">{{ reservation.client?.email || '—' }}</div>
+          </td>
+
+          <td>
+            <div class="date-cell">
+              <span>{{ reservation.dateReservation }}</span>
+              <span class="contact-secondary">{{ reservation.heureReservation }}</span>
+            </div>
+          </td>
+
+          <td class="text-center">
+            {{ reservation.nombre_personnes }}
+          </td>
+
+          <td>
+            {{ libelleTable(reservation) }}
+          </td>
+
+          <td class="text-center">
+              <span
+                class="status-badge"
+                [ngClass]="classeBadgeStatut(reservation)"
+              >
+                <span class="status-dot"></span>
+                {{ reservation.statut }}
+              </span>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn details"
+                (click)="voirDetails(reservation)"
+              >
+                Détails
+              </button>
+
+              <button
+                type="button"
+                class="action-btn view"
+                *ngIf="canModifier()"
+                (click)="ouvrirEdition(reservation)"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                class="action-btn confirm"
+                *ngIf="canModifier() && peutConfirmer(reservation)"
+                (click)="ouvrirConfirmation(reservation)"
+              >
+                Confirmer
+              </button>
+
+              <button
+                type="button"
+                class="action-btn cancel"
+                *ngIf="canAnnuler() && peutAnnuler(reservation)"
+                (click)="demanderAnnulation(reservation)"
+              >
+                Annuler
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && reservationsFiltrees.length === 0 && !errorMessage"
+    >
+
+      <h3>Aucune réservation trouvée</h3>
+
+      <p>
+        {{
+          reservations.length === 0
+            ? 'Aucune réservation n’a encore été enregistrée.'
+            : 'Aucune réservation ne correspond à votre recherche.'
+        }}
+      </p>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =====================================================
+     DÉTAILS (lecture seule)
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="reservationEnDetails"
+>
+
+  <div class="modal modal-large">
+
+    <div class="modal-header">
+      <h2>Détails de la réservation</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerDetails()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="details-grid">
+
+        <div class="details-field">
+          <span class="details-label">Client</span>
+          <span class="details-value">{{ nomCompletClient(reservationEnDetails) }}</span>
+        </div>
+
+        <div class="details-field">
+          <span class="details-label">N° client</span>
+          <span class="details-value">{{ reservationEnDetails.client?.id_utilisateur ?? '—' }}</span>
+        </div>
+
+        <div class="details-field">
+          <span class="details-label">Email</span>
+          <span class="details-value">{{ reservationEnDetails.client?.email || '—' }}</span>
+        </div>
+
+        <div class="details-field">
+          <span class="details-label">Téléphone</span>
+          <span class="details-value">{{ reservationEnDetails.client?.telephone || '—' }}</span>
+        </div>
+
+        <div class="details-field">
+          <span class="details-label">Date &amp; heure</span>
+          <span class="details-value">
+            {{ reservationEnDetails.dateReservation }} à {{ reservationEnDetails.heureReservation }}
+          </span>
+        </div>
+
+        <div class="details-field">
+          <span class="details-label">Personnes</span>
+          <span class="details-value">{{ reservationEnDetails.nombre_personnes }}</span>
+        </div>
+
+        <div class="details-field">
+          <span class="details-label">Statut</span>
+          <span
+            class="status-badge"
+            [ngClass]="classeBadgeStatut(reservationEnDetails)"
+          >
+            <span class="status-dot"></span>
+            {{ reservationEnDetails.statut }}
+          </span>
+        </div>
+
+        <div class="details-field">
+          <span class="details-label">Table</span>
+          <span class="details-value">{{ libelleTable(reservationEnDetails) }}</span>
+        </div>
+
+        <div class="details-field details-field-full">
+          <span class="details-label">Commentaire du client</span>
+          <span class="details-value details-comment">
+            {{ reservationEnDetails.commentaire_client || 'Aucun commentaire.' }}
+          </span>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="fermerDetails()"
+        >
+          Fermer
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION D'UNE RESERVATION (table obligatoire)
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="reservationAConfirmer"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Confirmer la réservation</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="processingConfirmation"
+        (click)="fermerConfirmation()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        Réservation de « {{ nomCompletClient(reservationAConfirmer) }} » du
+        {{ reservationAConfirmer.dateReservation }} à {{ reservationAConfirmer.heureReservation }}
+        pour {{ reservationAConfirmer.nombre_personnes }} personne(s).
+      </p>
+
+      <div
+        class="edition-error"
+        *ngIf="errorConfirmation"
+      >
+        {{ errorConfirmation }}
+      </div>
+
+      <div class="form-field">
+        <label>Table à assigner *</label>
+        <select
+          [(ngModel)]="tableIdConfirmation"
+          [disabled]="loadingTablesConfirmation"
+        >
+          <option [ngValue]="null">
+            {{ loadingTablesConfirmation ? 'Chargement des tables...' : 'Sélectionner une table' }}
+          </option>
+          <option
+            *ngFor="let table of tablesDisponiblesConfirmation"
+            [ngValue]="table.id_table"
+          >
+            Table {{ table.numeroTable }} ({{ table.capacite }} places)
+          </option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="processingConfirmation"
+          (click)="fermerConfirmation()"
+        >
+          Retour
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          [disabled]="processingConfirmation || !tableIdConfirmation"
+          (click)="validerConfirmation()"
+        >
+          {{ processingConfirmation ? 'Confirmation...' : 'Confirmer la réservation' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION ANNULATION
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="reservationAAnnuler"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Annuler cette réservation ?</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="processingAnnulation"
+        (click)="fermerAnnulation()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        La réservation de « {{ nomCompletClient(reservationAAnnuler) }} » du
+        {{ reservationAAnnuler.dateReservation }} à {{ reservationAAnnuler.heureReservation }}
+        sera annulée. Cette action est irréversible.
+      </p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="processingAnnulation"
+          (click)="fermerAnnulation()"
+        >
+          Retour
+        </button>
+
+        <button
+          type="button"
+          class="btn-save danger"
+          [disabled]="processingAnnulation"
+          (click)="confirmerAnnulation()"
+        >
+          {{ processingAnnulation ? 'Traitement...' : 'Annuler la réservation' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODIFICATION D'UNE RESERVATION
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="reservationEnEdition && formEdition"
+>
+
+  <div class="modal modal-large">
+
+    <div class="modal-header">
+      <h2>Modifier la réservation</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="processingEdition"
+        (click)="fermerEdition()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        Client : <strong>{{ nomCompletClient(reservationEnEdition) }}</strong>
+      </p>
+
+      <p class="confirm-hint">
+        Le commentaire laissé par le client est visible via le bouton « Détails ».
+      </p>
+
+      <div
+        class="edition-error"
+        *ngIf="errorEdition"
+      >
+        {{ errorEdition }}
+      </div>
+
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label>Nombre de personnes</label>
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="formEdition.nombre_personnes"
+          />
+        </div>
+
+        <div class="form-field">
+          <label>Statut</label>
+          <select [(ngModel)]="formEdition.statut">
+            <option *ngFor="let statut of statutsReservation" [value]="statut">
+              {{ statut }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Date</label>
+          <input
+            type="date"
+            [(ngModel)]="formEdition.dateReservation"
+          />
+        </div>
+
+        <div class="form-field">
+          <label>Heure</label>
+          <input
+            type="time"
+            [(ngModel)]="formEdition.heureReservation"
+          />
+        </div>
+
+        <div class="form-field">
+          <label>Table</label>
+          <select
+            [(ngModel)]="formEdition.tableId"
+            [disabled]="loadingTables"
+          >
+            <option [ngValue]="null">Non assignée</option>
+            <option
+              *ngFor="let table of tablesDisponibles"
+              [ngValue]="table.id_table"
+            >
+              Table {{ table.numeroTable }} ({{ table.capacite }} places)
+            </option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="processingEdition"
+          (click)="fermerEdition()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          [disabled]="processingEdition"
+          (click)="enregistrerEdition()"
+        >
+          {{ processingEdition ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CRÉATION D'UNE NOUVELLE RESERVATION
+====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="creationOuverte"
+>
+
+  <div class="modal modal-large">
+
+    <div class="modal-header">
+      <h2>Nouvelle réservation</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="processingCreation"
+        (click)="fermerCreation()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div
+        class="edition-error"
+        *ngIf="errorCreation"
+      >
+        {{ errorCreation }}
+      </div>
+
+      <div class="form-grid">
+
+        <div class="form-field form-field-full">
+          <label>Client</label>
+          <select
+            [(ngModel)]="formCreation.clientId"
+            [disabled]="loadingClients"
+          >
+            <option [ngValue]="null">
+              {{ loadingClients ? 'Chargement des clients...' : 'Sélectionner un client' }}
+            </option>
+            <option
+              *ngFor="let client of clientsDisponibles"
+              [ngValue]="client.id_utilisateur"
+            >
+              {{ client.prenom }} {{ client.nom }} — {{ client.email }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Nombre de personnes</label>
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="formCreation.nombre_personnes"
+          />
+        </div>
+
+        <div class="form-field">
+          <label>Table (optionnel)</label>
+          <select
+            [(ngModel)]="formCreation.tableId"
+            [disabled]="loadingTables"
+          >
+            <option [ngValue]="null">Non assignée</option>
+            <option
+              *ngFor="let table of tablesDisponibles"
+              [ngValue]="table.id_table"
+            >
+              Table {{ table.numeroTable }} ({{ table.capacite }} places)
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Date</label>
+          <input
+            type="date"
+            [(ngModel)]="formCreation.dateReservation"
+          />
+        </div>
+
+        <div class="form-field">
+          <label>Heure</label>
+          <input
+            type="time"
+            [(ngModel)]="formCreation.heureReservation"
+          />
+        </div>
+
+        <div class="form-field form-field-full">
+          <label>Commentaire du client (optionnel)</label>
+          <textarea
+            rows="3"
+            [(ngModel)]="formCreation.commentaire_client"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="processingCreation"
+          (click)="fermerCreation()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          [disabled]="processingCreation"
+          (click)="enregistrerCreation()"
+        >
+          {{ processingCreation ? 'Création...' : 'Créer la réservation' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

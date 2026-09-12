@@ -1,0 +1,300 @@
+<div class="employee-page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>
+        {{ isEditMode ? 'Modifier l’employé' : 'Nouvel employé' }}
+      </h1>
+
+      <p>
+        Renseignez les informations de l'employé et attribuez-lui
+        un rôle pour définir ses permissions d'accès.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-secondary"
+      (click)="cancel()">
+
+      Retour
+    </button>
+
+  </div>
+
+
+  <!-- MESSAGES -->
+
+  <div
+    *ngIf="errorMessage"
+    class="alert error">
+
+    {{ errorMessage }}
+
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="alert success">
+
+    {{ successMessage }}
+
+  </div>
+
+
+  <!-- LOADING -->
+
+  <div
+    *ngIf="loading"
+    class="loading">
+
+    Chargement de l'employé...
+
+  </div>
+
+
+  <form
+    *ngIf="!loading"
+    (ngSubmit)="save()">
+
+    <!-- =====================================================
+         INFORMATIONS PERSONNELLES
+    ====================================================== -->
+
+    <section class="card">
+
+      <div class="card-title">
+        <h2>Informations personnelles</h2>
+      </div>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Nom *</label>
+          <input
+            type="text"
+            [(ngModel)]="employee.nom"
+            name="nom"
+            placeholder="Nom de famille"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Prénom *</label>
+          <input
+            type="text"
+            [(ngModel)]="employee.prenom"
+            name="prenom"
+            placeholder="Prénom"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Email *</label>
+          <input
+            type="email"
+            [(ngModel)]="employee.email"
+            name="email"
+            placeholder="exemple&#64;restaurant.com"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input
+            type="tel"
+            [(ngModel)]="employee.telephone"
+            name="telephone"
+            placeholder="+216 00 000 000"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ isEditMode ? 'Nouveau mot de passe' : 'Mot de passe *' }}</label>
+          <input
+            type="password"
+            [(ngModel)]="nouveauMotDePasse"
+            name="nouveauMotDePasse"
+            [placeholder]="isEditMode ? 'Laisser vide pour ne pas changer' : 'Mot de passe'"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Statut du compte</label>
+          <select
+            [(ngModel)]="employee.statut"
+            name="statut">
+            <option *ngFor="let statut of statutsCompte" [value]="statut">
+              {{ statut }}
+            </option>
+          </select>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INFORMATIONS EMPLOYÉ
+    ====================================================== -->
+
+    <section class="card">
+
+      <div class="card-title">
+        <h2>Informations employé</h2>
+      </div>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Matricule *</label>
+          <input
+            type="text"
+            [(ngModel)]="employee.matricule"
+            name="matricule"
+            placeholder="Ex : EMP-0001"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Date d'embauche</label>
+          <input
+            type="date"
+            [ngModel]="dateEmbaucheInput"
+            (ngModelChange)="dateEmbaucheInput = $event"
+            name="dateEmbauche"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Code PIN {{ isEditMode ? '' : '(POS)' }}</label>
+          <input
+            type="password"
+            [(ngModel)]="nouveauCodePin"
+            name="nouveauCodePin"
+            [placeholder]="isEditMode ? 'Laisser vide pour ne pas changer' : 'Code PIN à 4 chiffres'"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Salaire de base</label>
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="employee.salaire_base"
+            name="salaireBase"
+            placeholder="0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Statut de présence</label>
+          <select
+            [(ngModel)]="employee.statutPresence"
+            name="statutPresence">
+            <option *ngFor="let statut of statutsPresence" [value]="statut">
+              {{ statut }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Point de vente affecté</label>
+          <select
+            [ngModel]="selectedPdvId"
+            (change)="onPdvChange($event)"
+            name="pdvAffecte">
+            <option [ngValue]="null">Non affecté</option>
+            <option *ngFor="let pdv of pointsDeVente" [value]="pdv.id_pdv">
+              {{ pdv.nomPdv }}
+            </option>
+          </select>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RÔLE & PERMISSIONS
+    ====================================================== -->
+
+    <section class="card">
+
+      <div class="card-title">
+        <h2>Rôle & permissions</h2>
+        <p>
+          Le rôle détermine les fonctionnalités et permissions
+          accessibles à cet employé en Back Office et en PDV.
+        </p>
+      </div>
+
+      <div class="form-grid single">
+
+        <div class="form-group">
+          <label>Rôle *</label>
+          <select
+            [ngModel]="selectedRoleId"
+            (change)="onRoleChange($event)"
+            name="role">
+            <option [ngValue]="null">Sélectionner un rôle...</option>
+            <option *ngFor="let role of roles" [value]="role.id_role">
+              {{ role.nom_role }}
+            </option>
+          </select>
+        </div>
+
+        <p class="role-description" *ngIf="employee.role?.description">
+          {{ employee.role.description }}
+        </p>
+
+        <a
+          class="roles-link"
+          routerLink="/back-office/roles"
+        >
+          Gérer les rôles et leurs permissions →
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- ACTIONS -->
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="cancel()">
+
+        Annuler
+
+      </button>
+
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="saving">
+
+        <span *ngIf="!saving">
+          {{ isEditMode ? 'Enregistrer les modifications' : 'Créer l’employé' }}
+        </span>
+
+        <span *ngIf="saving">
+          Enregistrement...
+        </span>
+
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

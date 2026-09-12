@@ -1,0 +1,344 @@
+<div class="role-page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>
+        {{ editMode ? 'Modifier le rôle' : 'Créer un rôle' }}
+      </h1>
+
+      <p>
+        Définissez les accès et les fonctionnalités
+        disponibles pour ce rôle.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-secondary"
+      (click)="cancel()">
+
+      Retour
+    </button>
+
+  </div>
+
+
+  <!-- MESSAGES -->
+
+  <div
+    *ngIf="errorMessage"
+    class="alert error">
+
+    {{ errorMessage }}
+
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="alert success">
+
+    {{ successMessage }}
+
+  </div>
+
+
+  <!-- INFORMATIONS ROLE -->
+
+  <section class="card">
+
+    <div class="card-title">
+
+      <h2>Informations du rôle</h2>
+
+    </div>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+
+        <label>
+          Nom du rôle
+        </label>
+
+        <input
+          type="text"
+          [(ngModel)]="nomRole"
+          placeholder="Ex : Serveur"
+        />
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Description
+        </label>
+
+        <input
+          type="text"
+          [(ngModel)]="description"
+          placeholder="Description du rôle"
+        />
+
+      </div>
+
+    </div>
+
+
+    <div class="interfaces">
+
+      <label class="interface-option">
+
+        <input
+          type="checkbox"
+          [(ngModel)]="accesPdv"
+        />
+
+        <span>
+          PDV
+        </span>
+
+      </label>
+
+
+      <label class="interface-option">
+
+        <input
+          type="checkbox"
+          [(ngModel)]="accesBackoffice"
+        />
+
+        <span>
+          Back Office
+        </span>
+
+      </label>
+
+    </div>
+
+  </section>
+
+
+  <!-- LOADING -->
+
+  <div
+    *ngIf="loading"
+    class="loading">
+
+    Chargement des fonctionnalités...
+
+  </div>
+
+
+  <!-- PERMISSIONS -->
+
+  <section
+    *ngIf="!loading"
+    class="card permissions-card">
+
+    <div class="card-title">
+
+      <div>
+
+        <h2>
+          Fonctionnalités
+        </h2>
+
+        <p>
+          Sélectionnez les fonctionnalités autorisées.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- MODULES / FONCTIONNALITES -->
+
+    <div
+      class="module-group"
+      *ngFor="let module of getModules()">
+
+      <h3 class="module-title">
+        {{ module.nomModule }}
+      </h3>
+
+      <div
+        class="feature-list"
+        *ngFor="let parent of getFonctionnalitesParentPourModule(module)">
+
+        <!-- PARENT -->
+
+        <div class="feature-parent">
+
+          <div class="feature-name">
+
+            <strong>
+              {{ parent.nomFonctionnalite }}
+            </strong>
+
+            <small>
+              {{ parent.codeFonctionnalite }}
+              <span *ngIf="isLocked(parent)">— toujours actif</span>
+            </small>
+
+          </div>
+
+
+          <div class="permission-columns">
+
+            <!-- PDV -->
+
+            <div
+              class="permission-box"
+              *ngIf="accesPdv && disponiblePdv(parent)">
+
+              <input
+                type="checkbox"
+                [checked]="isPdvChecked(parent)"
+                (change)="togglePdv(parent)"
+              />
+
+              <span>PDV</span>
+
+            </div>
+
+
+            <!-- BACK OFFICE -->
+
+            <div
+              class="permission-box"
+              *ngIf="accesBackoffice && disponibleBackoffice(parent)">
+
+              <input
+                type="checkbox"
+                [checked]="isBackofficeChecked(parent)"
+                [disabled]="isPdvChecked(parent) || isLocked(parent)"
+                (change)="toggleBackoffice(parent)"
+              />
+
+              <span>Back Office</span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- SOUS-FONCTIONNALITES -->
+
+        <div
+          class="children"
+          *ngIf="getChildren(parent).length > 0 && (isPdvChecked(parent) || isBackofficeChecked(parent))">
+
+          <div
+            class="feature-child"
+            *ngFor="let child of getChildren(parent)">
+
+            <div class="child-name">
+
+              <span>
+                {{ child.nomFonctionnalite }}
+              </span>
+
+              <small>
+                {{ child.codeFonctionnalite }}
+                <span *ngIf="isLocked(child)">— toujours actif</span>
+              </small>
+
+            </div>
+
+
+            <div class="permission-columns">
+
+              <!-- PDV -->
+
+              <div
+                class="permission-box"
+                *ngIf="accesPdv && disponiblePdv(child)">
+
+                <input
+                  type="checkbox"
+                  [checked]="isPdvChecked(child)"
+                  (change)="togglePdv(child)"
+                />
+
+                <span>
+                  PDV
+                </span>
+
+              </div>
+
+
+              <!-- BACK OFFICE -->
+
+              <div
+                class="permission-box"
+                *ngIf="accesBackoffice && disponibleBackoffice(child)">
+
+                <input
+                  type="checkbox"
+                  [checked]="isBackofficeChecked(child)"
+                  [disabled]="isPdvChecked(child) || isLocked(child)"
+                  (change)="toggleBackoffice(child)"
+                />
+
+                <span>
+                  Back Office
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ACTIONS -->
+
+  <div
+    *ngIf="!loading"
+    class="actions">
+
+    <button
+      type="button"
+      class="btn-secondary"
+      (click)="cancel()">
+
+      Annuler
+
+    </button>
+
+
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="saving"
+      (click)="save()">
+
+      <span *ngIf="!saving">
+        {{ editMode ? 'Enregistrer les modifications' : 'Créer le rôle' }}
+      </span>
+
+      <span *ngIf="saving">
+        Enregistrement...
+      </span>
+
+    </button>
+
+  </div>
+
+</div>

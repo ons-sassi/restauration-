@@ -1,0 +1,156 @@
+<div class="page">
+
+  <div class="page-card">
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
+    <div class="header">
+
+      <div class="header-top">
+
+        <div class="brand-icon">
+          🛡️
+        </div>
+
+        <button type="button" class="logout-button" (click)="logout()">
+          Se déconnecter
+        </button>
+
+      </div>
+
+      <h1>
+        Supervision plateforme
+      </h1>
+
+      <p>
+        Choisissez un restaurant pour ouvrir directement son
+        Back Office avec votre compte Super Admin.
+      </p>
+
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Rechercher un restaurant (nom ou adresse)..."
+        [(ngModel)]="searchKeyword"
+        (keyup.enter)="onSearch()"
+      />
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- ERREUR CHARGEMENT -->
+    <!-- ===================================================== -->
+
+    @if (!loading && errorMessage) {
+
+      <div class="error">
+        <span>!</span>
+        {{ errorMessage }}
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- ERREUR ENTREE -->
+    <!-- ===================================================== -->
+
+    @if (enterErrorMessage) {
+
+      <div class="error">
+        <span>!</span>
+        {{ enterErrorMessage }}
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- LOADING -->
+    <!-- ===================================================== -->
+
+    @if (loading) {
+
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Chargement des restaurants...</p>
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- RESTAURANTS -->
+    <!-- ===================================================== -->
+
+    @if (!loading && !errorMessage && restaurants.length > 0) {
+
+      <div class="section-title">
+        <span>Tous les restaurants</span>
+        <span>{{ restaurants.length }}</span>
+      </div>
+
+      <div class="restaurants">
+
+        @for (restaurant of restaurants; track restaurant.id_restaurant) {
+
+          <div class="restaurant-item">
+
+            <div class="restaurant-icon">
+              🏪
+            </div>
+
+            <div class="restaurant-info">
+              <strong>{{ restaurant.nomRestaurant }}</strong>
+
+              @if (restaurant.adresse) {
+                <span>{{ restaurant.adresse }}</span>
+              }
+
+              @if (restaurant.statut) {
+                <span class="statut-badge">{{ restaurant.statut }}</span>
+              }
+            </div>
+
+            <button
+              type="button"
+              class="enter-button"
+              [disabled]="enteringRestaurantId === restaurant.id_restaurant"
+              (click)="enterRestaurant(restaurant)"
+            >
+              @if (enteringRestaurantId === restaurant.id_restaurant) {
+                <span class="spinner small"></span>
+              } @else {
+                Entrer →
+              }
+            </button>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- EMPTY -->
+    <!-- ===================================================== -->
+
+    @if (!loading && !errorMessage && restaurants.length === 0) {
+
+      <div class="empty">
+        <div class="empty-icon">🏪</div>
+        <h3>Aucun restaurant</h3>
+        <p>Aucun restaurant ne correspond à votre recherche.</p>
+      </div>
+
+    }
+
+  </div>
+
+</div>

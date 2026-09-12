@@ -1,0 +1,397 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+      <span class="page-kicker">GESTION DES CLIENTS</span>
+      <h1>Commandes</h1>
+      <p>
+        Consultez les commandes passées chaque jour et annulez-en une si
+        nécessaire. Si la commande est liée à une réservation de table,
+        celle-ci sera annulée et la table libérée automatiquement.
+      </p>
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       SUCCÈS / ERREUR
+  ====================================================== -->
+  <div class="success-message" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+
+    <button type="button" class="retry-link" (click)="loadCommandes()">
+      Réessayer
+    </button>
+  </div>
+
+
+  <!-- =====================================================
+       CALENDRIER (SÉLECTION DU JOUR)
+  ====================================================== -->
+  <section class="calendar-bar">
+
+    <button type="button" class="nav-btn" (click)="jourPrecedent()">
+      ‹
+    </button>
+
+    <input
+      type="date"
+      class="date-input"
+      [(ngModel)]="selectedDate"
+      (change)="onDateChange()"
+    />
+
+    <button type="button" class="nav-btn" (click)="jourSuivant()">
+      ›
+    </button>
+
+    <button type="button" class="btn-secondary" (click)="aujourdHui()">
+      Aujourd'hui
+    </button>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTRES
+  ====================================================== -->
+  <section class="filters-bar">
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+
+      <input
+        type="text"
+        placeholder="Rechercher par client, table ou n° de commande..."
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+
+    <select [(ngModel)]="selectedStatut">
+      <option value="tous">Tous les statuts</option>
+      <option *ngFor="let statut of statuts" [value]="statut">
+        {{ statut }}
+      </option>
+    </select>
+
+    <select [(ngModel)]="selectedMode">
+      <option value="tous">Tous les modes</option>
+      <option *ngFor="let mode of modes" [value]="mode.value">
+        {{ mode.label }}
+      </option>
+    </select>
+
+  </section>
+
+
+  <!-- =====================================================
+       CARTE PRINCIPALE
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- LOADING -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Chargement des commandes...</p>
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div class="table-container" *ngIf="!loading && commandesFiltrees.length > 0">
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>N°</th>
+          <th>Heure</th>
+          <th>Client</th>
+          <th>Table</th>
+          <th>Mode</th>
+          <th class="text-right">Montant</th>
+          <th class="text-center">Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let commande of commandesFiltrees">
+
+          <td>#{{ commande.id_commande }}</td>
+
+          <td>{{ heureCommande(commande) }}</td>
+
+          <td>{{ nomClient(commande) }}</td>
+
+          <td>{{ tableLabel(commande) }}</td>
+
+          <td>{{ modeLabel(commande) }}</td>
+
+          <td class="text-right montant">
+            {{ commande.montant_total != null ? (commande.montant_total | number: '1.2-2') + ' DT' : '—' }}
+          </td>
+
+          <td class="text-center">
+              <span
+                class="status-badge"
+                [ngClass]="{
+                  'annulee': commande.statut === 'ANNULEE',
+                  'payee': commande.statut === 'PAYEE',
+                  'servie': commande.statut === 'SERVIE'
+                }"
+              >
+                <span class="status-dot"></span>
+                {{ commande.statut || '—' }}
+              </span>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn view"
+                *ngIf="canVoirCommandes()"
+                (click)="voirDetail(commande)"
+              >
+                Voir détails
+              </button>
+
+              <button
+                type="button"
+                class="action-btn unblock"
+                *ngIf="canChangerStatutCommande() && canBeMarkedReady(commande)"
+                [disabled]="idEnCoursDeMiseAJour === commande.id_commande"
+                (click)="marquerPrete(commande)"
+              >
+                {{ idEnCoursDeMiseAJour === commande.id_commande ? '...' : 'Marquer prêt' }}
+              </button>
+
+              <button
+                type="button"
+                class="action-btn free-table"
+                *ngIf="canGererTable() && commande.table && tableEstOccupee(commande)"
+                [disabled]="idTableEnCoursDeMiseAJour === commande.table.id_table"
+                (click)="libererTable(commande)"
+              >
+                {{ idTableEnCoursDeMiseAJour === commande.table.id_table ? '...' : 'Table vidée' }}
+              </button>
+
+              <button
+                type="button"
+                class="action-btn cancel"
+                *ngIf="canAnnulerCommande() && canBeCancelled(commande)"
+                (click)="demanderAnnulation(commande)"
+              >
+                Marquer annulé
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div class="empty-state" *ngIf="!loading && commandesFiltrees.length === 0 && !errorMessage">
+      <h3>Aucune commande</h3>
+      <p>
+        {{
+          commandes.length === 0
+            ? 'Aucune commande n\'a été passée ce jour-là.'
+            : 'Aucune commande ne correspond à votre recherche.'
+        }}
+      </p>
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION ANNULATION
+====================================================== -->
+<div class="modal-overlay" *ngIf="commandeAAnnuler">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Annuler cette commande ?</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="annulation"
+        (click)="annulerAnnulation()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        La commande <strong>#{{ commandeAAnnuler.id_commande }}</strong> de
+        « {{ nomClient(commandeAAnnuler) }} » sera annulée.
+        <ng-container *ngIf="commandeAAnnuler.table">
+          Si une réservation active existe pour la
+          {{ tableLabel(commandeAAnnuler) }} à cette date, elle sera également
+          annulée et la table sera libérée.
+        </ng-container>
+        Cette action est irréversible.
+      </p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="annulation"
+          (click)="annulerAnnulation()"
+        >
+          Retour
+        </button>
+
+        <button
+          type="button"
+          class="btn-save danger"
+          [disabled]="annulation"
+          (click)="confirmerAnnulation()"
+        >
+          {{ annulation ? 'Annulation...' : 'Annuler la commande' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     DÉTAIL D'UNE COMMANDE
+====================================================== -->
+<div class="modal-overlay" *ngIf="commandeSelectionnee">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Commande #{{ commandeSelectionnee.id_commande }}</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerDetail()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        <strong>Client :</strong> {{ nomClient(commandeSelectionnee) }}<br />
+        <strong>Téléphone :</strong> {{ telephoneClient(commandeSelectionnee) }}<br />
+        <strong>Email :</strong> {{ emailClient(commandeSelectionnee) }}<br />
+        <strong>Allergies :</strong> {{ allergieClient(commandeSelectionnee) }}<br />
+
+        <ng-container *ngIf="estLivraison(commandeSelectionnee); else infoTable">
+          <strong>Adresse de livraison :</strong>
+          {{ adresseLivraisonAffichee(commandeSelectionnee) }}<br />
+        </ng-container>
+        <ng-template #infoTable>
+          <strong>Table :</strong> {{ tableLabel(commandeSelectionnee) }}<br />
+        </ng-template>
+
+        <strong>Heure :</strong> {{ heureCommande(commandeSelectionnee) }}<br />
+        <strong>Mode :</strong> {{ modeLabel(commandeSelectionnee) }}<br />
+        <strong>Statut :</strong> {{ commandeSelectionnee.statut || '—' }}<br />
+        <strong>Montant total :</strong>
+        {{
+          commandeSelectionnee.montant_total != null
+            ? (commandeSelectionnee.montant_total | number: '1.2-2') + ' DT'
+            : '—'
+        }}
+      </p>
+
+      <!-- LOADING LIGNES -->
+      <div class="loading-container" *ngIf="chargementLignes">
+        <div class="spinner"></div>
+        <p>Chargement des articles...</p>
+      </div>
+
+      <!-- ERREUR LIGNES -->
+      <div class="error-message" *ngIf="!chargementLignes && erreurLignes">
+        {{ erreurLignes }}
+      </div>
+
+      <!-- LISTE DES LIGNES -->
+      <div
+        class="table-container"
+        *ngIf="!chargementLignes && !erreurLignes && lignesCommandeSelectionnee.length > 0"
+      >
+        <table>
+          <thead>
+          <tr>
+            <th>Produit</th>
+            <th class="text-center">Qté</th>
+            <th class="text-right">Prix unit.</th>
+            <th>Remarque</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let ligne of lignesCommandeSelectionnee">
+            <td>{{ ligne.produit?.nom || '—' }}</td>
+            <td class="text-center">{{ ligne.quantite }}</td>
+            <td class="text-right montant">
+              {{ ligne.prix_unitaire != null ? (ligne.prix_unitaire | number: '1.2-2') + ' DT' : '—' }}
+            </td>
+            <td>{{ ligne.remarque || '—' }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- AUCUNE LIGNE -->
+      <p
+        class="muted-text"
+        *ngIf="!chargementLignes && !erreurLignes && lignesCommandeSelectionnee.length === 0"
+      >
+        Aucun article trouvé pour cette commande.
+      </p>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="fermerDetail()"
+        >
+          Fermer
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

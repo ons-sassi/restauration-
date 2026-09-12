@@ -1,0 +1,98 @@
+<div class="selection-page">
+  <div class="selection-shell">
+
+    <header class="selection-header">
+      <div class="brand-mark">
+        <span class="brand-mark-icon">🍽</span>
+      </div>
+
+      <div class="header-copy">
+        <span class="eyebrow">{{ isSuperAdmin ? 'ESPACE SUPER ADMIN' : 'ESPACE BACK OFFICE' }}</span>
+        <h1>{{ title }}</h1>
+        <p>{{ subtitle }}</p>
+      </div>
+
+      <button type="button" class="logout-button" (click)="logout()">
+        Se déconnecter
+      </button>
+    </header>
+
+    @if (!loading && errorMessage) {
+      <div class="state-message error">
+        <span class="state-icon">!</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    @if (loading) {
+      <div class="state-loading">
+        <div class="spinner"></div>
+        <p>Chargement des restaurants...</p>
+      </div>
+    }
+
+    @if (!loading && !errorMessage && restaurants.length > 0) {
+      <section class="restaurants-section">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">{{ isSuperAdmin ? 'VOS ÉTABLISSEMENTS' : 'ÉTABLISSEMENT' }}</span>
+            <h2>{{ isSuperAdmin ? 'Tous vos restaurants' : 'Restaurant disponible' }}</h2>
+          </div>
+          <span class="count-badge">{{ restaurants.length }}</span>
+        </div>
+
+        <div class="restaurant-grid">
+          @for (restaurant of restaurants; track restaurant.id_restaurant) {
+            <button
+              type="button"
+              class="restaurant-card"
+              [class.selected]="selectedRestaurantId === restaurant.id_restaurant"
+              [disabled]="selecting"
+              (click)="selectRestaurant(restaurant)"
+            >
+              <div class="restaurant-identity">
+                @if (logoUrl(restaurant)) {
+                  <img [src]="logoUrl(restaurant)" alt="" class="restaurant-logo" />
+                } @else {
+                  <div class="restaurant-logo placeholder">
+                    {{ restaurant.nomRestaurant?.charAt(0) || 'R' }}
+                  </div>
+                }
+
+                <div class="restaurant-copy">
+                  <strong>{{ restaurant.nomRestaurant }}</strong>
+                  <span>{{ restaurant.adresse || 'Adresse non renseignée' }}</span>
+
+                  @if (restaurant.statut) {
+                    <span class="status-pill">{{ restaurant.statut }}</span>
+                  }
+                </div>
+              </div>
+
+              <span class="open-action">
+                @if (selecting && selectedRestaurantId === restaurant.id_restaurant) {
+                  <span class="spinner small"></span>
+                } @else {
+                  Ouvrir <span>→</span>
+                }
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (!loading && !errorMessage && restaurants.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🏪</div>
+        <h2>Aucun restaurant</h2>
+        <p>
+          {{ isSuperAdmin
+            ? 'Aucun restaurant n’est encore associé à votre plateforme.'
+            : 'Aucun restaurant n’est associé à votre compte.' }}
+        </p>
+      </div>
+    }
+
+  </div>
+</div>

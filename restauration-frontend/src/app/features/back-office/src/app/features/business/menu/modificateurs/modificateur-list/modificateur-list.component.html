@@ -1,0 +1,419 @@
+<div class="modificateurs-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+  <header class="page-header">
+
+    <div class="page-title">
+
+      <span class="page-kicker">
+        MENU
+      </span>
+
+      <h1>
+        Modificateurs
+      </h1>
+
+      <p>
+        Gérez les options supplémentaires proposées sur vos produits.
+      </p>
+
+    </div>
+
+    <button
+      *ngIf="canAddModificateur()"
+      type="button"
+      class="btn-primary"
+      (click)="nouveauModificateur()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Nouveau modificateur</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       STATISTIQUES
+  ====================================================== -->
+  <section class="stats">
+
+    <!-- TOTAL -->
+    <article class="stat-card">
+
+      <div class="stat-icon blue">
+        <span>●</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          TOTAL MODIFICATEURS
+        </span>
+
+        <strong>
+          {{ modificateurs.length }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <!-- PRODUITS CONCERNES -->
+    <article class="stat-card">
+
+      <div class="stat-icon green">
+        <span>▦</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          PRODUITS CONCERNÉS
+        </span>
+
+        <strong>
+          {{ produitsDistinctsCount }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <!-- PRIX MOYEN -->
+    <article class="stat-card">
+
+      <div class="stat-icon orange">
+        <span>€</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          SUPPLÉMENT MOYEN
+        </span>
+
+        <strong>
+          {{ prixMoyen | number: '1.2-2' }} €
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <!-- PRIX MAX -->
+    <article class="stat-card">
+
+      <div class="stat-icon purple">
+        <span>▲</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          SUPPLÉMENT MAX
+        </span>
+
+        <strong>
+          {{ prixSupplementaireMax | number: '1.2-2' }} €
+        </strong>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-box"
+    *ngIf="error"
+  >
+
+    <div class="error-icon">
+      !
+    </div>
+
+    <div class="error-content">
+
+      <strong>
+        Une erreur est survenue
+      </strong>
+
+      <span>
+        {{ error }}
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="error-button"
+      (click)="loadModificateurs()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU PRINCIPAL
+  ====================================================== -->
+  <section class="modificateurs-card">
+
+    <!-- ===================================================
+         BARRE DE FILTRES
+    ==================================================== -->
+    <div class="filters">
+
+      <!-- RECHERCHE -->
+      <div class="search-box">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher un modificateur ou un produit..."
+        />
+
+      </div>
+
+
+      <!-- PRODUIT -->
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedProduitId"
+      >
+
+        <option value="tous">
+          Tous les produits
+        </option>
+
+        <option
+          *ngFor="let produit of produits"
+          [value]="produit.id_element"
+        >
+          {{ produit.nom }}
+        </option>
+
+      </select>
+
+
+      <!-- RESET -->
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         BARRE RESULTATS
+    ==================================================== -->
+    <div
+      class="results-bar"
+      *ngIf="!loading"
+    >
+
+      <span>
+        Modificateurs affichés :
+      </span>
+
+      <strong>
+        {{ modificateursFiltres.length }}
+      </strong>
+
+      <span>
+        sur {{ modificateurs.length }}
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+    ==================================================== -->
+    <div
+      class="loading-box"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <strong>
+        Chargement des modificateurs...
+      </strong>
+
+      <span>
+        Veuillez patienter
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         EMPTY
+    ==================================================== -->
+    <div
+      class="empty-box"
+      *ngIf="!loading && modificateursFiltres.length === 0"
+    >
+
+      <div class="empty-icon">
+        ●
+      </div>
+
+      <h3>
+        Aucun modificateur trouvé
+      </h3>
+
+      <p>
+        Aucun modificateur ne correspond aux critères sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser les filtres
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLEAU MODIFICATEURS
+    ==================================================== -->
+    <div
+      class="table-wrapper"
+      *ngIf="!loading && modificateursFiltres.length > 0"
+    >
+
+      <table class="modificateurs-table">
+
+        <thead>
+        <tr>
+          <th>Modificateur</th>
+          <th>Produit associé</th>
+          <th>Prix supplémentaire</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="
+              let modificateur of modificateursFiltres;
+              trackBy: trackByModificateur
+            "
+        >
+
+          <!-- NOM -->
+          <td>
+            <div class="modificateur-name">
+
+              <div class="modificateur-avatar">
+                <span>✎</span>
+              </div>
+
+              <strong>
+                {{ modificateur.nom_modificateur }}
+              </strong>
+
+            </div>
+          </td>
+
+
+          <!-- PRODUITS -->
+          <td>
+              <span class="produits-badges">
+                <span
+                  class="produit-badge"
+                  *ngFor="let produit of modificateur.produits"
+                >
+                  {{ produit.nom }}
+                </span>
+
+                <span
+                  class="produit-badge produit-badge-empty"
+                  *ngIf="!modificateur.produits?.length"
+                >
+                  Aucun produit
+                </span>
+              </span>
+          </td>
+
+
+          <!-- PRIX -->
+          <td>
+              <span class="price">
+                + {{ modificateur.prix_supplementaire | number: '1.2-2' }} €
+              </span>
+          </td>
+
+
+          <!-- ACTIONS -->
+          <td class="actions-col">
+
+            <div class="row-actions">
+
+              <button
+                *ngIf="canViewModificateurs()"
+                type="button"
+                class="action-btn view"
+                (click)="voirDetails(modificateur)"
+              >
+                Voir
+              </button>
+
+              <button
+                *ngIf="canEditModificateur()"
+                type="button"
+                class="action-btn edit"
+                (click)="modifierModificateur(modificateur)"
+              >
+                Modifier
+              </button>
+
+              <button
+                *ngIf="canDeleteModificateur()"
+                type="button"
+                class="action-btn delete"
+                (click)="supprimerModificateur(modificateur)"
+              >
+                Supprimer
+
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

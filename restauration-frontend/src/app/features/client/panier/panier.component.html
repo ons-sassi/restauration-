@@ -1,0 +1,60 @@
+<div class="panier-page client-app">
+  <header class="client-topbar">
+    <button type="button" class="client-back-btn" (click)="retourMenu()">← Menu</button>
+    <h1>Mon panier</h1>
+    <span style="width: 70px"></span>
+  </header>
+
+  @if (items.length === 0) {
+    <div class="client-state">
+      <div class="state-emoji">🛒</div>
+      <h3>Panier vide</h3>
+      <p>Ajoutez des plats depuis le menu pour commencer votre commande.</p>
+      <button type="button" class="client-btn client-btn-primary" (click)="retourMenu()">Voir le menu</button>
+    </div>
+  } @else {
+    <div class="panier-list">
+      @for (item of items; track item.ligneId) {
+        <div class="panier-item client-card">
+          <img
+            [src]="(item.produit.image | mediaUrl) || 'assets/images/default-product.png'"
+            [alt]="item.produit.nom"
+          />
+
+          <div class="item-body">
+            <p class="item-nom">{{ item.produit.nom }}</p>
+
+            @if (item.modificateurs.length > 0) {
+              <p class="item-modificateurs">{{ getModificateursLabel(item) }}</p>
+            }
+
+            <p class="item-prix">{{ formatPrix(item.prixUnitaire) }} / unité</p>
+
+            <div class="item-actions">
+              <div class="quantite-stepper">
+                <button type="button" (click)="decrementer(item)">−</button>
+                <span>{{ item.quantite }}</span>
+                <button type="button" (click)="incrementer(item)">+</button>
+              </div>
+
+              <button type="button" class="remove-btn" (click)="supprimer(item)">Supprimer</button>
+            </div>
+          </div>
+
+          <p class="item-sous-total">{{ formatPrix(getSousTotal(item)) }}</p>
+        </div>
+      }
+    </div>
+
+    <div class="panier-footer">
+      <div class="total-row">
+        <span>Total</span>
+        <span class="total-value">{{ formatPrix(total$ | async) }}</span>
+      </div>
+
+      <button type="button" class="client-btn client-btn-primary checkout-btn" (click)="passerCommande()">
+        Passer la commande →
+      </button>
+    </div>
+  }
+</div>

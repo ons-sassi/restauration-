@@ -1,0 +1,409 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+      <span class="page-kicker">GESTION DES CLIENTS</span>
+      <h1>Réclamations</h1>
+      <p>
+        Consultez les réclamations déposées par les clients et répondez-y.
+        Une réponse envoyée marque automatiquement la réclamation comme
+        résolue.
+      </p>
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       SUCCÈS / ERREUR
+  ====================================================== -->
+  <div class="success-message" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+
+    <button type="button" class="retry-link" (click)="loadReclamations()">
+      Réessayer
+    </button>
+  </div>
+
+
+  <!-- =====================================================
+       CARTES DE SYNTHÈSE
+  ====================================================== -->
+  <section class="stats-bar" *ngIf="!loading">
+
+    <div class="stat-card">
+      <span class="stat-value">{{ reclamations.length }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+
+    <div class="stat-card ouverte">
+      <span class="stat-value">{{ nombreOuvertes }}</span>
+      <span class="stat-label">Ouvertes</span>
+    </div>
+
+    <div class="stat-card en-attente">
+      <span class="stat-value">{{ nombreEnAttente }}</span>
+      <span class="stat-label">En attente</span>
+    </div>
+
+    <div class="stat-card resolue">
+      <span class="stat-value">{{ nombreResolues }}</span>
+      <span class="stat-label">Résolues</span>
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTRES
+  ====================================================== -->
+  <section class="filters-bar">
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+
+      <input
+        type="text"
+        placeholder="Rechercher par client, sujet ou n° de réclamation..."
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+
+    <select [(ngModel)]="selectedStatut">
+      <option value="tous">Tous les statuts</option>
+      <option *ngFor="let statut of statuts" [value]="statut">
+        {{ statut }}
+      </option>
+    </select>
+
+  </section>
+
+
+  <!-- =====================================================
+       CARTE PRINCIPALE
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- LOADING -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Chargement des réclamations...</p>
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div class="table-container" *ngIf="!loading && reclamationsFiltrees.length > 0">
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>N°</th>
+          <th>Client</th>
+          <th>Sujet</th>
+          <th>Commande liée</th>
+          <th>Date</th>
+          <th class="text-center">Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let reclamation of reclamationsFiltrees">
+
+          <td>#{{ reclamation.id_reclamation }}</td>
+
+          <td class="client-name">{{ nomClient(reclamation) }}</td>
+
+          <td class="sujet-cell">{{ reclamation.sujet || '—' }}</td>
+
+          <td>
+            {{ reclamation.commande ? '#' + reclamation.commande.id_commande : '—' }}
+          </td>
+
+          <td>{{ dateFormatee(reclamation.date_creation) }}</td>
+
+          <td class="text-center">
+              <span class="status-badge" [ngClass]="classeBadgeStatut(reclamation)">
+                <span class="status-dot"></span>
+                {{ reclamation.statut || '—' }}
+              </span>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn view"
+                (click)="voirDetail(reclamation)"
+              >
+                Voir
+              </button>
+
+              <button
+                type="button"
+                class="action-btn respond"
+                *ngIf="canRepondre() && !estResolue(reclamation)"
+                (click)="ouvrirReponse(reclamation)"
+              >
+                Répondre
+              </button>
+
+              <button
+                type="button"
+                class="action-btn block"
+                *ngIf="canSupprimer()"
+                (click)="demanderSuppression(reclamation)"
+              >
+                Supprimer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div class="empty-state" *ngIf="!loading && reclamationsFiltrees.length === 0 && !errorMessage">
+      <h3>Aucune réclamation</h3>
+      <p>
+        {{
+          reclamations.length === 0
+            ? "Aucune réclamation n'a été déposée pour le moment."
+            : 'Aucune réclamation ne correspond à votre recherche.'
+        }}
+      </p>
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =====================================================
+     DÉTAIL D'UNE RÉCLAMATION
+====================================================== -->
+<div class="modal-overlay" *ngIf="reclamationSelectionnee">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Réclamation #{{ reclamationSelectionnee.id_reclamation }}</h2>
+
+      <button type="button" class="modal-close" (click)="fermerDetail()">
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="detail-row">
+        <span class="detail-label">Client</span>
+        <span class="detail-value">{{ nomClient(reclamationSelectionnee) }}</span>
+      </div>
+
+      <div class="detail-row" *ngIf="reclamationSelectionnee.client?.email">
+        <span class="detail-label">Email</span>
+        <span class="detail-value">{{ reclamationSelectionnee.client.email }}</span>
+      </div>
+
+      <div class="detail-row" *ngIf="reclamationSelectionnee.commande">
+        <span class="detail-label">Commande liée</span>
+        <span class="detail-value">#{{ reclamationSelectionnee.commande.id_commande }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Date</span>
+        <span class="detail-value">{{ dateFormatee(reclamationSelectionnee.date_creation) }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Statut</span>
+        <span class="status-badge" [ngClass]="classeBadgeStatut(reclamationSelectionnee)">
+          <span class="status-dot"></span>
+          {{ reclamationSelectionnee.statut }}
+        </span>
+      </div>
+
+      <div class="detail-block">
+        <span class="detail-label">Sujet</span>
+        <p class="detail-text">{{ reclamationSelectionnee.sujet || '—' }}</p>
+      </div>
+
+      <div class="detail-block">
+        <span class="detail-label">Description</span>
+        <p class="detail-text">{{ reclamationSelectionnee.description || '—' }}</p>
+      </div>
+
+      <div class="detail-block reponse-block" *ngIf="reclamationSelectionnee.reponse_employee">
+        <span class="detail-label">Réponse envoyée</span>
+        <p class="detail-text">{{ reclamationSelectionnee.reponse_employee }}</p>
+        <span class="detail-date" *ngIf="reclamationSelectionnee.date_reponse">
+          Répondu le {{ dateFormatee(reclamationSelectionnee.date_reponse) }}
+        </span>
+      </div>
+
+      <div class="modal-actions">
+
+        <button type="button" class="btn-cancel" (click)="fermerDetail()">
+          Fermer
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          *ngIf="canRepondre() && !estResolue(reclamationSelectionnee)"
+          (click)="ouvrirReponse(reclamationSelectionnee)"
+        >
+          Répondre
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     RÉPONDRE À UNE RÉCLAMATION
+====================================================== -->
+<div class="modal-overlay" *ngIf="reclamationARepondre">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Répondre à la réclamation #{{ reclamationARepondre.id_reclamation }}</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="envoiReponse"
+        (click)="annulerReponse()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        <strong>{{ nomClient(reclamationARepondre) }}</strong> —
+        {{ reclamationARepondre.sujet }}
+      </p>
+
+      <div class="form-group">
+        <label for="reponse">Votre réponse</label>
+        <textarea
+          id="reponse"
+          rows="5"
+          placeholder="Rédigez votre réponse au client..."
+          [(ngModel)]="texteReponse"
+        ></textarea>
+      </div>
+
+      <p class="field-error" *ngIf="errorReponse">{{ errorReponse }}</p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="envoiReponse"
+          (click)="annulerReponse()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn-save"
+          [disabled]="envoiReponse"
+          (click)="confirmerReponse()"
+        >
+          {{ envoiReponse ? 'Envoi...' : 'Envoyer la réponse' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CONFIRMATION SUPPRESSION
+====================================================== -->
+<div class="modal-overlay" *ngIf="reclamationASupprimer">
+
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Supprimer cette réclamation ?</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        [disabled]="suppression"
+        (click)="annulerSuppression()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <p class="confirm-text">
+        La réclamation <strong>#{{ reclamationASupprimer.id_reclamation }}</strong> de
+        « {{ nomClient(reclamationASupprimer) }} » sera définitivement supprimée.
+        Cette action est irréversible.
+      </p>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="suppression"
+          (click)="annulerSuppression()"
+        >
+          Retour
+        </button>
+
+        <button
+          type="button"
+          class="btn-save danger"
+          [disabled]="suppression"
+          (click)="confirmerSuppression()"
+        >
+          {{ suppression ? 'Suppression...' : 'Supprimer' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,593 @@
+<div class="caisse-page">
+
+  <!-- ====================================================== -->
+  <!-- EN-TÊTE -->
+  <!-- ====================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Gestion caisse</h1>
+
+      <p>
+        Suivi des sessions de caisse (ouvertures, fermetures, écarts)
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- FILTRES -->
+  <!-- ====================================================== -->
+
+  <section class="filters-card">
+
+    <div class="filter-group">
+
+      <label for="dateDebut">
+        Date de début
+      </label>
+
+      <input
+        id="dateDebut"
+        type="date"
+        [(ngModel)]="dateDebut"
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="dateFin">
+        Date de fin
+      </label>
+
+      <input
+        id="dateFin"
+        type="date"
+        [(ngModel)]="dateFin"
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label>
+        Statut
+      </label>
+
+      <div class="segmented">
+
+        <button
+          type="button"
+          [class.active]="statut === 'TOUTES'"
+          (click)="changerStatut('TOUTES')"
+        >
+          Toutes
+        </button>
+
+        <button
+          type="button"
+          [class.active]="statut === 'OUVERTES'"
+          (click)="changerStatut('OUVERTES')"
+        >
+          Ouvertes
+        </button>
+
+        <button
+          type="button"
+          [class.active]="statut === 'FERMEES'"
+          (click)="changerStatut('FERMEES')"
+        >
+          Fermées
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="filter-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="rechercher()"
+        [disabled]="loading"
+      >
+
+        {{ loading ? 'Chargement...' : 'Rechercher' }}
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="reinitialiser()"
+        [disabled]="loading"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- ERREUR -->
+  <!-- ====================================================== -->
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+
+      <span>!</span>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- INDICATEURS -->
+  <!-- ====================================================== -->
+
+  <section class="stats-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Sessions
+      </div>
+
+      <div class="stat-value">
+        {{ sessionsFiltrees.length }}
+      </div>
+
+    </div>
+
+
+    <div class="stat-card" [class.warning]="nombreOuvertes > 0">
+
+      <div class="stat-label">
+        Caisses ouvertes
+      </div>
+
+      <div class="stat-value">
+        {{ nombreOuvertes }}
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Total ouvertures
+      </div>
+
+      <div class="stat-value">
+        {{ totalOuvertures | number:'1.2-2' }} DT
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Total fermetures
+      </div>
+
+      <div class="stat-value">
+        {{ totalFermetures | number:'1.2-2' }} DT
+      </div>
+
+    </div>
+
+
+    <div class="stat-card" [class.negative]="totalEcart < 0" [class.positive]="totalEcart > 0">
+
+      <div class="stat-label">
+        Écart total
+      </div>
+
+      <div class="stat-value">
+        {{ totalEcart | number:'1.2-2' }} DT
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- TABLEAU -->
+  <!-- ====================================================== -->
+
+  <section class="table-card">
+
+    <div class="table-header">
+
+      <div>
+
+        <h2>
+          Détail des sessions
+        </h2>
+
+        <span>
+          {{ sessionsFiltrees.length }} session(s)
+        </span>
+
+      </div>
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="loading-container">
+
+        <div class="spinner"></div>
+
+        <span>
+          Chargement des données...
+        </span>
+
+      </div>
+
+    }
+
+
+    @else if (sessionsFiltrees.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          —
+        </div>
+
+        <h3>
+          Aucune session trouvée
+        </h3>
+
+        <p>
+          Aucune session de caisse ne correspond aux filtres sélectionnés.
+        </p>
+
+      </div>
+
+    }
+
+
+    @else {
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+          <tr>
+
+            <th>
+              #
+            </th>
+
+            <th>
+              Point de vente
+            </th>
+
+            <th>
+              Employé
+            </th>
+
+            <th>
+              Ouverture
+            </th>
+
+            <th>
+              Fermeture
+            </th>
+
+            <th class="text-right">
+              Montant ouv.
+            </th>
+
+            <th class="text-right">
+              Montant ferm.
+            </th>
+
+            <th class="text-right">
+              Écart
+            </th>
+
+            <th>
+              Statut
+            </th>
+
+            <th></th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              session of sessionsFiltrees;
+              track session.id_session_caisse;
+              let i = $index
+              ) {
+
+              <tr>
+
+                <td class="index-cell">
+                  {{ i + 1 }}
+                </td>
+
+
+                <td>
+                  {{ session.pointDeVente?.nomPdv ?? '—' }}
+                </td>
+
+
+                <td>
+                  {{ nomEmploye(session) }}
+                </td>
+
+
+                <td>
+                  {{ session.dateOuverture | date:'dd/MM/yyyy HH:mm' }}
+                </td>
+
+
+                <td>
+
+                  @if (session.dateFermeture) {
+                    {{ session.dateFermeture | date:'dd/MM/yyyy HH:mm' }}
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+
+                </td>
+
+
+                <td class="text-right">
+                  {{ session.montantOuverture | number:'1.2-2' }} DT
+                </td>
+
+
+                <td class="text-right">
+
+                  @if (session.dateFermeture) {
+                    {{ session.montantFermeture | number:'1.2-2' }} DT
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+
+                </td>
+
+
+                <td
+                  class="text-right"
+                  [class.negative]="session.ecartCaisse < 0"
+                  [class.positive]="session.ecartCaisse > 0"
+                >
+
+                  @if (session.dateFermeture) {
+                    {{ session.ecartCaisse | number:'1.2-2' }} DT
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+
+                </td>
+
+
+                <td>
+
+                  @if (session.dateFermeture) {
+                    <span class="badge badge-closed">
+                      Fermée
+                    </span>
+                  } @else {
+                    <span class="badge badge-open">
+                      Ouverte
+                    </span>
+                  }
+
+                </td>
+
+
+                <td class="actions-cell">
+
+                  @if (!session.dateFermeture && canFermerCaisse()) {
+                    <button
+                      type="button"
+                      class="btn-close-session"
+                      (click)="ouvrirFormulaireFermeture(session)"
+                    >
+                      Fermer
+                    </button>
+                  }
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+
+          <tfoot>
+
+          <tr>
+
+            <td colspan="5">
+              Total
+            </td>
+
+            <td class="text-right">
+              {{ totalOuvertures | number:'1.2-2' }} DT
+            </td>
+
+            <td class="text-right">
+              {{ totalFermetures | number:'1.2-2' }} DT
+            </td>
+
+            <td
+              class="text-right"
+              [class.negative]="totalEcart < 0"
+              [class.positive]="totalEcart > 0"
+            >
+              {{ totalEcart | number:'1.2-2' }} DT
+            </td>
+
+            <td colspan="2"></td>
+
+          </tr>
+
+          </tfoot>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- MODALE DE FERMETURE -->
+  <!-- ====================================================== -->
+
+  @if (sessionEnFermeture) {
+
+    <div class="modal-backdrop" (click)="annulerFermeture()">
+
+      <div class="modal-card" (click)="$event.stopPropagation()">
+
+        <h3>
+          Fermer la caisse
+        </h3>
+
+        <p>
+          {{ sessionEnFermeture.pointDeVente?.nomPdv }} —
+          ouverte le {{ sessionEnFermeture.dateOuverture | date:'dd/MM/yyyy HH:mm' }}
+          avec {{ sessionEnFermeture.montantOuverture | number:'1.2-2' }} DT
+        </p>
+
+
+        <!-- ================================================ -->
+        <!-- RÉSUMÉ : TOTAL VENDU / MONTANT THÉORIQUE -->
+        <!-- ================================================ -->
+
+        @if (resumeEnCours) {
+
+          <div class="resume-loading">
+            Calcul du total des ventes...
+          </div>
+
+        } @else if (resumeErreur) {
+
+          <div class="resume-erreur">
+            {{ resumeErreur }}
+          </div>
+
+        } @else if (montantTheoriqueSession !== null) {
+
+          <div class="resume-session">
+
+            <div class="resume-ligne">
+              <span>Total vendu pendant la session</span>
+              <span>{{ totalVentesSession | number:'1.2-2' }} DT</span>
+            </div>
+
+            <div class="resume-ligne">
+              <span>Montant théorique attendu</span>
+              <span>{{ montantTheoriqueSession | number:'1.2-2' }} DT</span>
+            </div>
+
+          </div>
+
+        }
+
+
+        <label for="montantFermeture">
+          Montant compté en caisse
+        </label>
+
+        <input
+          id="montantFermeture"
+          type="number"
+          step="0.01"
+          [(ngModel)]="montantFermetureSaisi"
+        />
+
+
+        <!-- ================================================ -->
+        <!-- ÉCART PRÉVISIONNEL (surplus / manque en direct) -->
+        <!-- ================================================ -->
+
+        @if (ecartPrevisionnel !== null) {
+
+          <div
+            class="resume-ecart"
+            [class.negative]="ecartPrevisionnel < 0"
+            [class.positive]="ecartPrevisionnel > 0"
+          >
+
+            @if (ecartPrevisionnel > 0) {
+              Surplus de {{ ecartPrevisionnel | number:'1.2-2' }} DT
+            } @else if (ecartPrevisionnel < 0) {
+              Manque de {{ -ecartPrevisionnel | number:'1.2-2' }} DT
+            } @else {
+              Caisse juste (aucun écart)
+            }
+
+          </div>
+
+        }
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="annulerFermeture()"
+            [disabled]="fermetureEnCours"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="button"
+            class="btn-primary"
+            (click)="confirmerFermeture()"
+            [disabled]="fermetureEnCours || montantFermetureSaisi === null"
+          >
+            {{ fermetureEnCours ? 'Fermeture...' : 'Confirmer la fermeture' }}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

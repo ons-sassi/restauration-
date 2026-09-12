@@ -1,0 +1,330 @@
+<div class="reduction-form-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <span class="page-kicker">
+        MENU / RÉDUCTIONS
+      </span>
+
+      <h1>
+        {{ isEditMode ? 'Modifier la réduction' : 'Nouvelle réduction' }}
+      </h1>
+
+      <p>
+        {{
+          isEditMode
+            ? 'Modifiez les informations de cette réduction.'
+            : 'Créez une nouvelle réduction applicable sur les ventes.'
+        }}
+      </p>
+
+    </div>
+
+    <button type="button" class="btn-back" (click)="cancel()">
+      <span>←</span>
+      Retour aux réductions
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+  <div class="loading-card" *ngIf="loading">
+    <div class="spinner"></div>
+    <strong>Chargement de la réduction...</strong>
+    <span>Veuillez patienter</span>
+  </div>
+
+
+  <!-- =====================================================
+       FORMULAIRE
+  ====================================================== -->
+  <form *ngIf="!loading" class="reduction-form" (ngSubmit)="save()">
+
+    <!-- MESSAGES -->
+
+    <div class="message message-error" *ngIf="errorMessage">
+      <div class="message-icon">!</div>
+      <div>
+        <strong>Une erreur est survenue</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </div>
+
+    <div class="message message-success" *ngIf="successMessage">
+      <div class="message-icon">✓</div>
+      <div>
+        <strong>{{ successMessage }}</strong>
+      </div>
+    </div>
+
+
+    <!-- CARTE INFORMATIONS -->
+    <section class="form-card">
+
+      <h2>Informations générales</h2>
+
+      <div class="form-grid">
+
+        <div class="form-group span-2">
+          <label>Nom de la réduction *</label>
+          <input
+            type="text"
+            [(ngModel)]="reduction.nom_reduction"
+            name="nom_reduction"
+            placeholder="Ex : Happy Hour, Réduction fidélité..."
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Type de réduction *</label>
+          <select [(ngModel)]="reduction.type" name="type">
+            <option [value]="TypeReduction.POURCENTAGE">Pourcentage (%)</option>
+            <option [value]="TypeReduction.MONTANT_FIXE">Montant fixe (DT)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Valeur *</label>
+          <div class="input-suffix">
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="reduction.valeur"
+              name="valeur"
+              placeholder="0"
+            />
+            <span class="suffix">{{ suffixeValeur }}</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Date de début *</label>
+          <input
+            type="date"
+            [(ngModel)]="reduction.date_debut"
+            name="date_debut"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Date de fin *</label>
+          <input
+            type="date"
+            [(ngModel)]="reduction.date_fin"
+            name="date_fin"
+          />
+        </div>
+
+        <div class="form-group span-2">
+          <label>Conditions d’application</label>
+          <textarea
+            rows="3"
+            [(ngModel)]="reduction.conditions_application"
+            name="conditions_application"
+            placeholder="Ex : Valable sur les commandes de plus de 30 DT, réservé aux clients fidèles..."
+          ></textarea>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- CARTE APPLICATION AUTOMATIQUE -->
+    <section class="form-card">
+
+      <h2>Application automatique</h2>
+
+      <div class="form-grid">
+
+        <div class="form-group span-2">
+          <label class="checkbox-line">
+            <input
+              type="checkbox"
+              [(ngModel)]="reduction.automatique"
+              name="automatique"
+            />
+            Appliquer automatiquement cette réduction dès que les conditions
+            ci-dessous sont remplies (sans sélection manuelle en caisse)
+          </label>
+        </div>
+
+        <!-- PRODUITS CONCERNES -->
+        <div class="form-group span-2">
+          <label>Produits concernés *</label>
+
+          <div class="radio-line">
+            <label>
+              <input
+                type="radio"
+                name="application_produits"
+                [value]="ApplicationReduction.TOUS_PRODUITS"
+                [(ngModel)]="reduction.application_produits"
+              />
+              Tous les produits
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                name="application_produits"
+                [value]="ApplicationReduction.PRODUITS_SPECIFIQUES"
+                [(ngModel)]="reduction.application_produits"
+              />
+              Produits précis
+            </label>
+          </div>
+
+          <div
+            class="produits-picker"
+            *ngIf="reduction.application_produits === ApplicationReduction.PRODUITS_SPECIFIQUES"
+          >
+            <div *ngIf="produitsLoading" class="produits-picker-hint">
+              Chargement des produits...
+            </div>
+
+            <div *ngIf="produitsError" class="produits-picker-hint">
+              {{ produitsError }}
+            </div>
+
+            <div
+              *ngIf="!produitsLoading && !produitsError && produitsDisponibles.length === 0"
+              class="produits-picker-hint"
+            >
+              Aucun produit disponible.
+            </div>
+
+            <div
+              class="produits-picker-list"
+              *ngIf="!produitsLoading && produitsDisponibles.length > 0"
+            >
+              <label
+                class="checkbox-line"
+                *ngFor="let produit of produitsDisponibles"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="isProduitSelectionne(produit.id_element)"
+                  (change)="toggleProduit(produit.id_element, $any($event.target).checked)"
+                />
+                {{ produit.nom }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- MONTANT MINIMUM -->
+        <div class="form-group span-2">
+          <label>Montant minimum de la commande *</label>
+
+          <div class="radio-line">
+            <label>
+              <input
+                type="radio"
+                name="a_un_montant_minimum"
+                [value]="false"
+                [(ngModel)]="aUnMontantMinimum"
+              />
+              N’importe quel montant
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                name="a_un_montant_minimum"
+                [value]="true"
+                [(ngModel)]="aUnMontantMinimum"
+              />
+              À partir d’un certain montant
+            </label>
+          </div>
+
+          <div class="input-suffix" *ngIf="aUnMontantMinimum">
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="reduction.montant_minimum"
+              name="montant_minimum"
+              placeholder="Ex : 30"
+            />
+            <span class="suffix">DT</span>
+          </div>
+        </div>
+
+        <!-- NOMBRE D'APPLICATIONS AUTORISEES -->
+        <div class="form-group span-2">
+          <label>Nombre d’applications autorisées *</label>
+
+          <div class="radio-line">
+            <label>
+              <input
+                type="radio"
+                name="a_une_limite_applications"
+                [value]="false"
+                [(ngModel)]="aUneLimiteApplications"
+              />
+              Illimité
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                name="a_une_limite_applications"
+                [value]="true"
+                [(ngModel)]="aUneLimiteApplications"
+              />
+              Nombre précis
+            </label>
+          </div>
+
+          <div class="input-suffix" *ngIf="aUneLimiteApplications">
+            <input
+              type="number"
+              min="1"
+              step="1"
+              [(ngModel)]="reduction.nombre_applications_autorise"
+              name="nombre_applications_autorise"
+              placeholder="Ex : 100"
+            />
+            <span class="suffix">fois</span>
+          </div>
+
+          <p class="field-hint" *ngIf="isEditMode && reduction.nombre_applications_effectuees">
+            Déjà appliquée {{ reduction.nombre_applications_effectuees }} fois.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ACTIONS -->
+    <div class="form-actions">
+
+      <button type="button" class="btn-secondary" (click)="cancel()">
+        Annuler
+      </button>
+
+      <button type="submit" class="btn-primary" *ngIf="canSave()" [disabled]="saving">
+        <span *ngIf="!saving">
+          {{ isEditMode ? 'Enregistrer les modifications' : 'Créer la réduction' }}
+        </span>
+        <span *ngIf="saving">Enregistrement...</span>
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

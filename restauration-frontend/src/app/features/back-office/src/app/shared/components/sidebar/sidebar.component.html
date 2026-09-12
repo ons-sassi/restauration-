@@ -1,0 +1,119 @@
+<aside
+  class="sidebar"
+  [class.collapsed]="collapsed"
+>
+
+
+  <div class="sidebar-header">
+
+    <div class="brand">
+
+      <span class="brand-logo">
+        {{ initials }}
+      </span>
+
+      @if (!collapsed) {
+
+        <div class="brand-text">
+
+          <strong>
+            {{ title }}
+          </strong>
+
+          @if (subtitle) {
+            <small>
+              {{ subtitle }}
+            </small>
+          }
+
+        </div>
+
+      }
+
+    </div>
+
+
+    <button
+      type="button"
+      class="collapse-button"
+      (click)="toggle()"
+      aria-label="Réduire le menu"
+    >
+      {{ collapsed ? '›' : '‹' }}
+    </button>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- MENU -->
+  <!-- ========================= -->
+
+  <nav class="sidebar-menu">
+
+    @for (item of items; track item.route) {
+
+      <a
+        class="sidebar-item"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{
+          exact: false
+        }"
+        (click)="selectItem(item)"
+      >
+
+        <span
+          class="item-icon"
+          [attr.data-icon]="item.icon || 'default'"
+        >
+        </span>
+
+        @if (!collapsed) {
+
+          <span class="item-label">
+            {{ item.label }}
+          </span>
+
+        }
+
+      </a>
+
+    }
+
+  </nav>
+
+
+  <!-- ========================= -->
+  <!-- BOTTOM -->
+  <!-- ========================= -->
+
+  <div class="sidebar-bottom">
+
+    <div class="restaurant-card">
+
+      <span class="restaurant-icon">
+        ⌂
+      </span>
+
+      @if (!collapsed) {
+
+        <div class="restaurant-info">
+
+          <strong>
+            Mon restaurant
+          </strong>
+
+          <small>
+            Configuration
+          </small>
+
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+</aside>

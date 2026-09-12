@@ -1,0 +1,697 @@
+<div class="product-form-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <span class="page-kicker">
+        MENU / PRODUITS
+      </span>
+
+      <h1>
+        {{ isEditMode ? 'Modifier le produit' : 'Nouveau produit' }}
+      </h1>
+
+      <p>
+        {{
+          isEditMode
+            ? 'Modifiez les informations de votre produit.'
+            : 'Ajoutez un nouveau produit à votre menu.'
+        }}
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-back"
+      (click)="cancel()"
+    >
+      <span>←</span>
+      Retour aux produits
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+  <div
+    class="loading-card"
+    *ngIf="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <strong>
+      Chargement du produit...
+    </strong>
+
+    <span>
+      Veuillez patienter
+    </span>
+
+  </div>
+
+
+  <!-- =====================================================
+       FORMULAIRE
+  ====================================================== -->
+  <form
+    *ngIf="!loading"
+    class="product-form"
+    (ngSubmit)="save()"
+  >
+
+    <!-- ===================================================
+         MESSAGES
+    ==================================================== -->
+
+    <div
+      class="message message-error"
+      *ngIf="errorMessage"
+    >
+
+      <div class="message-icon">
+        !
+      </div>
+
+      <div>
+        <strong>
+          Une erreur est survenue
+        </strong>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+      </div>
+
+    </div>
+
+
+    <div
+      class="message message-success"
+      *ngIf="successMessage"
+    >
+
+      <div class="message-icon">
+        ✓
+      </div>
+
+      <div>
+        <strong>
+          Opération réussie
+        </strong>
+
+        <p>
+          {{ successMessage }}
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         INFORMATIONS GÉNÉRALES
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          01
+        </div>
+
+        <div>
+
+          <h2>
+            Informations générales
+          </h2>
+
+          <p>
+            Définissez les informations principales du produit.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <!-- NOM -->
+        <div class="field full">
+
+          <label for="nom">
+            Nom du produit
+            <span>*</span>
+          </label>
+
+          <input
+            id="nom"
+            type="text"
+            name="nom"
+            [(ngModel)]="produit.nom"
+            placeholder="Ex. Pizza Margherita"
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- DESCRIPTION -->
+        <div class="field full">
+
+          <label for="description">
+            Description
+          </label>
+
+          <textarea
+            id="description"
+            name="description"
+            [(ngModel)]="produit.description"
+            rows="4"
+            placeholder="Décrivez brièvement le produit..."
+          ></textarea>
+
+          <small>
+            Une description courte permet de mieux présenter le produit.
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         CATÉGORIE
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          02
+        </div>
+
+        <div>
+
+          <h2>
+            Catégorie
+          </h2>
+
+          <p>
+            Associez le produit à une catégorie et à votre restaurant.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <!-- CATEGORIE -->
+        <div class="field">
+
+          <label for="categorie">
+            Catégorie
+          </label>
+
+          <select
+            id="categorie"
+            name="categorie"
+            [ngModel]="selectedCategorieId"
+            (change)="onCategorieChange($event)"
+          >
+
+            <option [ngValue]="null">
+              Sélectionner une catégorie
+            </option>
+
+            <option
+              *ngFor="let categorie of categories"
+              [value]="categorie.id_element"
+            >
+              {{ categorie.nom }}
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- RESTAURANT -->
+        <div class="field">
+
+          <label>
+            Restaurant
+          </label>
+
+          <div class="readonly-field">
+
+            <span class="readonly-icon">
+              ●
+            </span>
+
+            <span>
+              {{ restaurantNom }}
+            </span>
+
+          </div>
+
+          <small>
+            Le restaurant est déterminé automatiquement.
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         TARIFICATION
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          03
+        </div>
+
+        <div>
+
+          <h2>
+            Tarification et préparation
+          </h2>
+
+          <p>
+            Définissez le prix de vente et le temps nécessaire.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <!-- PRIX -->
+        <div class="field">
+
+          <label for="prix">
+            Prix de vente
+            <span>*</span>
+          </label>
+
+          <div class="unit-input">
+
+            <input
+              id="prix"
+              type="number"
+              name="prix"
+              [(ngModel)]="produit.prix"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              required
+            />
+
+            <span>
+              DT
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- TEMPS -->
+        <div class="field">
+
+          <label for="temps">
+            Temps de préparation
+            <span>*</span>
+          </label>
+
+          <div class="unit-input">
+
+            <input
+              id="temps"
+              type="number"
+              name="temps"
+              [(ngModel)]="produit.temps_preparation"
+              min="0"
+              step="1"
+              placeholder="0"
+              required
+            />
+
+            <span>
+              min
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         IMAGE
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          04
+        </div>
+
+        <div>
+
+          <h2>
+            Image du produit
+          </h2>
+
+          <p>
+            Ajoutez une image pour présenter votre produit dans le menu.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="image-upload-area">
+
+        <!-- IMAGE EXISTANTE -->
+        <div
+          class="image-preview"
+          *ngIf="produit.image"
+        >
+
+          <img
+            [src]="produit.image | mediaUrl"
+            [alt]="produit.nom || 'Image du produit'"
+          />
+
+          <div class="image-overlay">
+
+            <button
+              type="button"
+              class="remove-image"
+              (click)="supprimerImage()"
+              title="Supprimer l'image"
+            >
+              ×
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- UPLOAD -->
+        <label
+          class="upload-box"
+          *ngIf="!produit.image"
+        >
+
+          <div class="upload-icon">
+            ↑
+          </div>
+
+          <strong>
+            Ajouter une image
+          </strong>
+
+          <span>
+            Cliquez pour sélectionner une image
+          </span>
+
+          <small>
+            JPG, PNG ou WEBP · 2 Mo maximum
+          </small>
+
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            (change)="onImageSelected($event)"
+          />
+
+        </label>
+
+      </div>
+
+
+      <div
+        class="field-error"
+        *ngIf="imageError"
+      >
+        {{ imageError }}
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         INGREDIENTS
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          05
+        </div>
+
+        <div>
+
+          <h2>
+            Ingrédients
+          </h2>
+
+          <p>
+            Sélectionnez les ingrédients utilisés dans ce produit.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- AJOUT -->
+      <div class="ingredient-add">
+
+        <select
+          name="ingredient"
+          [(ngModel)]="ingredientASelectionner"
+        >
+
+          <option [ngValue]="null">
+            Sélectionner un ingrédient
+          </option>
+
+          <option
+            *ngFor="let ingredient of ingredientsAAjouter"
+            [ngValue]="ingredient.id_ingredient"
+          >
+            {{ ingredient.nom }}
+          </option>
+
+        </select>
+
+
+        <button
+          type="button"
+          class="btn-add"
+          (click)="ajouterIngredient()"
+        >
+          <span>+</span>
+          Ajouter
+        </button>
+
+      </div>
+
+
+      <!-- LISTE -->
+      <div
+        class="ingredients-list"
+        *ngIf="produit.ingredients.length > 0"
+      >
+
+        <div
+          class="ingredient-item"
+          *ngFor="let ingredient of produit.ingredients"
+        >
+
+          <div class="ingredient-avatar">
+            {{ ingredient.nom.charAt(0).toUpperCase() }}
+          </div>
+
+          <div class="ingredient-info">
+
+            <strong>
+              {{ ingredient.nom }}
+            </strong>
+
+            <span>
+              {{ ingredient.unite_mesure }}
+            </span>
+
+          </div>
+
+          <button
+            type="button"
+            class="remove-ingredient"
+            (click)="retirerIngredient(ingredient)"
+            title="Retirer l'ingrédient"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- EMPTY -->
+      <div
+        class="ingredients-empty"
+        *ngIf="produit.ingredients.length === 0"
+      >
+
+        <span>
+          Aucun ingrédient ajouté
+        </span>
+
+        <small>
+          Sélectionnez un ingrédient ci-dessus pour l'ajouter.
+        </small>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         DISPONIBILITÉ
+    ==================================================== -->
+
+    <section class="form-card">
+
+      <div class="section-header">
+
+        <div class="section-number">
+          06
+        </div>
+
+        <div>
+
+          <h2>
+            Disponibilité
+          </h2>
+
+          <p>
+            Contrôlez si le produit peut être commandé.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <label class="availability-toggle">
+
+        <input
+          type="checkbox"
+          name="disponible"
+          [(ngModel)]="produit.disponible"
+        />
+
+        <span class="toggle"></span>
+
+        <span class="toggle-content">
+
+          <strong>
+            Produit disponible
+          </strong>
+
+          <small>
+            {{
+              produit.disponible
+                ? 'Le produit est actuellement disponible à la commande.'
+                : 'Le produit est masqué et ne peut pas être commandé.'
+            }}
+          </small>
+
+        </span>
+
+      </label>
+
+    </section>
+
+
+    <!-- ===================================================
+         ACTIONS
+    ==================================================== -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn-cancel"
+        (click)="cancel()"
+        [disabled]="saving"
+      >
+        Annuler
+      </button>
+
+      <button
+        *ngIf="canSave"
+        type="submit"
+        class="btn-save"
+        [disabled]="saving"
+      >
+
+        <span
+          class="button-spinner"
+          *ngIf="saving"
+        ></span>
+
+        <span>
+          {{
+            saving
+              ? 'Enregistrement...'
+              : isEditMode
+                ? 'Enregistrer les modifications'
+                : 'Créer le produit'
+          }}
+        </span>
+
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

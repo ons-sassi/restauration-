@@ -1,0 +1,347 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.selection-page {
+  min-height: 100vh;
+  padding: 34px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 90, 54, 0.10), transparent 34%),
+    var(--client-bg);
+}
+
+.selection-shell {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+}
+
+.selection-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  background: var(--client-surface);
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-lg);
+  box-shadow: var(--client-shadow-sm);
+}
+
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--client-primary-light);
+}
+
+.brand-mark-icon {
+  font-size: 23px;
+}
+
+.header-copy {
+  min-width: 0;
+}
+
+.eyebrow,
+.section-kicker {
+  color: var(--client-primary);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.header-copy h1 {
+  margin: 4px 0 4px;
+  color: var(--client-text);
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.header-copy p {
+  margin: 0;
+  color: var(--client-text-muted);
+  font-size: 13px;
+}
+
+.logout-button {
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-sm);
+  background: #fff;
+  color: var(--client-text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  color: var(--client-danger);
+  border-color: #eccaca;
+  background: var(--client-danger-soft);
+}
+
+.restaurants-section {
+  padding: 26px;
+  background: var(--client-surface);
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-lg);
+  box-shadow: var(--client-shadow-sm);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.section-heading h2 {
+  margin: 5px 0 0;
+  color: var(--client-text);
+  font-size: 17px;
+}
+
+.count-badge {
+  min-width: 32px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--client-primary-light);
+  color: var(--client-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.restaurant-card {
+  width: 100%;
+  min-height: 112px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 17px;
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-md);
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .12s ease;
+}
+
+.restaurant-card:hover:not(:disabled) {
+  border-color: #ffcbb5;
+  box-shadow: var(--client-shadow-md);
+  transform: translateY(-1px);
+}
+
+.restaurant-card.selected {
+  border-color: var(--client-primary);
+  box-shadow: 0 0 0 3px rgba(255, 90, 54, .12);
+}
+
+.restaurant-card:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+.restaurant-identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.restaurant-logo {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--client-border);
+}
+
+.restaurant-logo.placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--client-primary-light);
+  color: var(--client-primary);
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.restaurant-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.restaurant-copy strong {
+  overflow: hidden;
+  color: var(--client-text);
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.restaurant-copy > span:not(.status-pill) {
+  overflow: hidden;
+  color: var(--client-text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-pill {
+  width: fit-content;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--client-success-soft);
+  color: var(--client-success);
+  font-size: 9px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.open-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  color: var(--client-primary);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.state-loading,
+.empty-state {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--client-surface);
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-lg);
+  box-shadow: var(--client-shadow-sm);
+}
+
+.state-loading p,
+.empty-state p {
+  margin: 12px 0 0;
+  color: var(--client-text-muted);
+  font-size: 13px;
+}
+
+.empty-icon {
+  font-size: 34px;
+  margin-bottom: 6px;
+}
+
+.empty-state h2 {
+  margin: 0;
+  color: var(--client-text);
+  font-size: 17px;
+}
+
+.state-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid #f0d2d2;
+  border-radius: var(--client-radius-sm);
+  background: var(--client-danger-soft);
+  color: var(--client-danger);
+  font-size: 12.5px;
+}
+
+.state-icon {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 20px;
+  border-radius: 50%;
+  background: #fff;
+  font-weight: 800;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--client-border);
+  border-top-color: var(--client-primary);
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+}
+
+.spinner.small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 760px) {
+  .selection-page {
+    padding: 18px;
+  }
+
+  .selection-header {
+    grid-template-columns: auto 1fr;
+  }
+
+  .logout-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .restaurant-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .restaurants-section {
+    padding: 18px;
+  }
+
+  .selection-header {
+    padding: 20px;
+  }
+
+  .restaurant-card {
+    align-items: flex-start;
+  }
+
+  .open-action {
+    margin-top: 5px;
+  }
+}

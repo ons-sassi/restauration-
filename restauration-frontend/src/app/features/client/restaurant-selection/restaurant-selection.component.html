@@ -1,0 +1,70 @@
+<div class="selection-page client-app">
+  <div class="selection-shell">
+
+    <header class="selection-header">
+      <div class="brand-mark">
+        <span class="brand-mark-icon">🍽</span>
+      </div>
+
+      <div class="header-copy">
+        <span class="eyebrow">ESPACE CLIENT</span>
+        <h1>Choisir un restaurant</h1>
+        <p>Sélectionnez l'établissement où vous souhaitez commander.</p>
+      </div>
+    </header>
+
+    @if (!loading && errorMessage) {
+      <div class="state-message error">
+        <span class="state-icon">!</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    @if (loading) {
+      <div class="state-loading">
+        <div class="spinner"></div>
+        <p>Chargement des restaurants...</p>
+      </div>
+    }
+
+    @if (!loading && !errorMessage && restaurants.length > 0) {
+      <section class="restaurants-section">
+        <div class="restaurant-grid">
+          @for (restaurant of restaurants; track restaurant.id_restaurant) {
+            <button
+              type="button"
+              class="restaurant-card"
+              (click)="selectRestaurant(restaurant)"
+            >
+              <div class="restaurant-identity">
+                @if (logoUrl(restaurant)) {
+                  <img [src]="logoUrl(restaurant)" alt="" class="restaurant-logo" />
+                } @else {
+                  <div class="restaurant-logo placeholder">
+                    {{ restaurant.nomRestaurant?.charAt(0) || 'R' }}
+                  </div>
+                }
+
+                <div class="restaurant-copy">
+                  <strong>{{ restaurant.nomRestaurant }}</strong>
+                  <span>{{ restaurant.adresse || 'Adresse non renseignée' }}</span>
+                </div>
+              </div>
+
+              <span class="open-action">Choisir <span>→</span></span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (!loading && !errorMessage && restaurants.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🏪</div>
+        <h2>Aucun restaurant disponible</h2>
+        <p>Revenez un peu plus tard.</p>
+      </div>
+    }
+
+  </div>
+</div>

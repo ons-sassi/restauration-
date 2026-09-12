@@ -1,0 +1,80 @@
+.page-margin { margin: 18px 20px; }
+
+.favoris-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.favori-card {
+  background: var(--client-surface);
+  border: 1px solid var(--client-border);
+  border-radius: var(--client-radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--client-shadow-sm);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.favori-card:hover { transform: translateY(-3px); box-shadow: var(--client-shadow-md); }
+
+.favori-card.skeleton {
+  height: 210px;
+  background: linear-gradient(90deg, var(--client-bg) 25%, #f0ece6 37%, var(--client-bg) 63%);
+  background-size: 400% 100%;
+  animation: client-shimmer 1.4s ease infinite;
+}
+
+.favori-image-wrap { position: relative; }
+
+.favori-image-wrap img {
+  width: 100%;
+  height: 122px;
+  object-fit: cover;
+  display: block;
+  background: var(--client-bg);
+}
+
+.remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--client-primary);
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+
+.indispo-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(36,26,18,0.75);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--client-radius-pill);
+}
+
+.favori-info { padding: 10px 12px 14px; }
+
+.favori-name {
+  margin: 0 0 3px;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.favori-prix {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--client-primary);
+}

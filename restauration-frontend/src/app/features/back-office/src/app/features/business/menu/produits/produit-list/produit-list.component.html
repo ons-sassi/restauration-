@@ -1,0 +1,480 @@
+<div class="products-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+  <header class="page-header">
+
+    <div class="page-title">
+
+      <span class="page-kicker">
+        MENU
+      </span>
+
+      <h1>
+        Produits
+      </h1>
+
+      <p>
+        Gérez les produits proposés dans votre restaurant.
+      </p>
+
+    </div>
+
+    <!-- AJOUTER -->
+    <button
+      *ngIf="canAddProduct()"
+      type="button"
+      class="btn-primary"
+      (click)="nouveauProduit()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Nouveau produit</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       STATISTIQUES
+  ====================================================== -->
+  <section class="stats">
+
+    <article class="stat-card">
+
+      <div class="stat-icon blue">
+        <span>●</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          TOTAL PRODUITS
+        </span>
+
+        <strong>
+          {{ produits.length }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon green">
+        <span>✓</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          DISPONIBLES
+        </span>
+
+        <strong>
+          {{ produitsDisponibles }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon orange">
+        <span>!</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          INDISPONIBLES
+        </span>
+
+        <strong>
+          {{ produitsIndisponibles }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon purple">
+        <span>▦</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          CATÉGORIES
+        </span>
+
+        <strong>
+          {{ categorieCount }}
+        </strong>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-box"
+    *ngIf="error"
+  >
+
+    <div class="error-icon">
+      !
+    </div>
+
+    <div class="error-content">
+
+      <strong>
+        Une erreur est survenue
+      </strong>
+
+      <span>
+        {{ error }}
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="error-button"
+      (click)="loadProduits()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU PRINCIPAL
+  ====================================================== -->
+  <section class="products-card">
+
+    <!-- ===================================================
+         BARRE DE FILTRES
+    ==================================================== -->
+    <div class="filters">
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher un produit..."
+        />
+
+      </div>
+
+
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedCategorie"
+      >
+
+        <option [ngValue]="null">
+          Toutes les catégories
+        </option>
+
+        <option
+          *ngFor="let categorie of categories"
+          [ngValue]="categorie.id_element"
+        >
+          {{ categorie.nom }}
+        </option>
+
+      </select>
+
+
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedDisponibilite"
+      >
+
+        <option value="tous">
+          Toutes disponibilités
+        </option>
+
+        <option value="disponible">
+          Disponibles
+        </option>
+
+        <option value="indisponible">
+          Indisponibles
+        </option>
+
+      </select>
+
+
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         BARRE RESULTATS
+    ==================================================== -->
+    <div
+      class="results-bar"
+      *ngIf="!loading"
+    >
+
+      <span>
+        Produits affichés :
+      </span>
+
+      <strong>
+        {{ produitsFiltres.length }}
+      </strong>
+
+      <span>
+        sur {{ produits.length }}
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+    ==================================================== -->
+    <div
+      class="loading-box"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <strong>
+        Chargement des produits...
+      </strong>
+
+      <span>
+        Veuillez patienter
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         EMPTY
+    ==================================================== -->
+    <div
+      class="empty-box"
+      *ngIf="!loading && produitsFiltres.length === 0"
+    >
+
+      <div class="empty-icon">
+        🍽
+      </div>
+
+      <h3>
+        Aucun produit trouvé
+      </h3>
+
+      <p>
+        Aucun produit ne correspond aux critères sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser les filtres
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         PRODUITS
+    ==================================================== -->
+    <div
+      class="products-grid"
+      *ngIf="!loading && produitsFiltres.length > 0"
+    >
+
+      <article
+        class="product-card"
+        *ngFor="
+          let produit of produitsFiltres;
+          trackBy: trackByProduit
+        "
+      >
+
+        <!-- IMAGE -->
+        <div class="product-image">
+
+          <img
+            *ngIf="produit.image"
+            [src]="produit.image | mediaUrl"
+            [alt]="produit.nom"
+          />
+
+          <div
+            class="no-image"
+            *ngIf="!produit.image"
+          >
+            <span>🍽</span>
+          </div>
+
+
+          <!-- STATUT -->
+          <span
+            class="availability"
+            [class.unavailable]="!produit.disponible"
+          >
+
+            <span class="status-dot"></span>
+
+            {{
+              produit.disponible
+                ? 'Disponible'
+                : 'Indisponible'
+            }}
+
+          </span>
+
+        </div>
+
+
+        <!-- CONTENU -->
+        <div class="product-content">
+
+          <span class="product-category">
+            {{ getCategorieNom(produit) }}
+          </span>
+
+
+          <h2>
+            {{ produit.nom }}
+          </h2>
+
+
+          <p class="description">
+
+            {{
+              produit.description ||
+              'Aucune description disponible.'
+            }}
+
+          </p>
+
+
+          <div class="product-info">
+
+            <div class="info-item">
+
+              <span>
+                Prix
+              </span>
+
+              <strong class="price">
+                {{ produit.prix | number:'1.2-2' }} DT
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Préparation
+              </span>
+
+              <strong>
+                {{ produit.temps_preparation }} min
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="ingredients">
+
+            <span class="ingredient-icon">
+              ◆
+            </span>
+
+            <span>
+              {{ produit.ingredients?.length || 0 }}
+              ingrédient(s)
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ACTIONS PROTÉGÉES
+        ================================================== -->
+        <div class="product-actions">
+
+          <!-- VOIR -->
+          <button
+            *ngIf="canViewProducts()"
+            type="button"
+            class="action-btn view"
+            (click)="voirDetails(produit)"
+          >
+            <span>Voir</span>
+          </button>
+
+
+          <!-- MODIFIER -->
+          <button
+            *ngIf="canEditProduct()"
+            type="button"
+            class="action-btn edit"
+            (click)="modifierProduit(produit)"
+          >
+            <span>Modifier</span>
+          </button>
+
+
+          <!-- SUPPRIMER -->
+          <button
+            *ngIf="canDeleteProduct()"
+            type="button"
+            class="action-btn delete"
+            (click)="supprimerProduit(produit)"
+          >
+            <span>Supprimer</span>
+          </button>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+</div>

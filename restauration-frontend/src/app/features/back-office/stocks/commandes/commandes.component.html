@@ -1,0 +1,618 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        GESTION DE STOCK
+      </span>
+
+      <h1>
+        Commandes fournisseurs
+      </h1>
+
+      <p>
+        Suivez et gérez vos bons de commande auprès des fournisseurs.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      *ngIf="canAddCommande()"
+      (click)="nouvelleCommande()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Nouvelle commande</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       STATISTIQUES
+  ====================================================== -->
+  <section class="stats">
+
+    <div class="stat-card">
+      <span class="stat-label">TOTAL COMMANDES</span>
+      <span class="stat-value">{{ totalCommandes }}</span>
+    </div>
+
+    <div class="stat-card warning">
+      <span class="stat-label">EN ATTENTE</span>
+      <span class="stat-value">{{ totalEnAttente }}</span>
+    </div>
+
+    <div class="stat-card success">
+      <span class="stat-label">LIVRÉES</span>
+      <span class="stat-value">{{ totalLivrees }}</span>
+    </div>
+
+    <div class="stat-card danger">
+      <span class="stat-label">ANNULÉES</span>
+      <span class="stat-value">{{ totalAnnulees }}</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">MONTANT TOTAL</span>
+      <span class="stat-value">{{ montantTotalGlobal | number:'1.2-2' }} DT</span>
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="error"
+  >
+
+    {{ error }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadCommandes()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU PRINCIPAL
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- ===================================================
+         FILTRES
+    ==================================================== -->
+    <div class="filters">
+
+      <div class="search-box">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher par fournisseur..."
+        />
+
+      </div>
+
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedFournisseur"
+      >
+
+        <option [ngValue]="null">Tous les fournisseurs</option>
+
+        <option
+          *ngFor="let fournisseur of fournisseurs"
+          [ngValue]="fournisseur.id_fournisseur"
+        >
+          {{ fournisseur.nom }}
+        </option>
+
+      </select>
+
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedStatut"
+      >
+
+        <option value="tous">Tous les statuts</option>
+        <option [value]="StatutBonCommande.EN_ATTENTE">En attente</option>
+        <option [value]="StatutBonCommande.LIVRE">Livré</option>
+        <option [value]="StatutBonCommande.ANNULE">Annulé</option>
+
+      </select>
+
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+    ==================================================== -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des commandes...</p>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLEAU
+    ==================================================== -->
+    <div
+      class="table-container"
+      *ngIf="!loading && commandesFiltrees.length > 0"
+    >
+
+      <table>
+
+        <thead>
+
+        <tr>
+          <th>N°</th>
+          <th>Fournisseur</th>
+          <th>Date commande</th>
+          <th>Date livraison prévue</th>
+          <th class="text-right">Montant total</th>
+          <th>Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let commande of commandesFiltrees; trackBy: trackByCommande"
+        >
+
+          <td>
+            <div class="commande-num">#{{ commande.id_bon_commande }}</div>
+          </td>
+
+          <td>
+            {{ commande.fournisseur?.nom || 'Sans fournisseur' }}
+          </td>
+
+          <td>
+            {{ commande.dateCommande ? (commande.dateCommande | date:'dd/MM/yyyy') : '—' }}
+          </td>
+
+          <td>
+            {{ commande.dateDeLivraisonPrevu ? (commande.dateDeLivraisonPrevu | date:'dd/MM/yyyy') : '—' }}
+          </td>
+
+          <td class="text-right">
+            {{ (commande.montant_total ?? 0) | number:'1.2-2' }} DT
+          </td>
+
+          <td>
+            <app-status-badge
+              [status]="getStatutLabel(commande)"
+              [type]="getStatutType(commande)"
+            ></app-status-badge>
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn view"
+                (click)="voirDetails(commande)"
+              >
+                Détails
+              </button>
+
+              <button
+                type="button"
+                class="action-btn edit"
+                *ngIf="commande.statut === StatutBonCommande.EN_ATTENTE && canManageCommandes()"
+                (click)="marquerLivree(commande)"
+              >
+                Livrer
+              </button>
+
+              <button
+                type="button"
+                class="action-btn cancel"
+                *ngIf="commande.statut === StatutBonCommande.EN_ATTENTE && canManageCommandes()"
+                (click)="annulerCommande(commande)"
+              >
+                Annuler
+              </button>
+
+              <button
+                type="button"
+                class="action-btn delete"
+                *ngIf="canManageCommandes()"
+                (click)="supprimerCommande(commande)"
+              >
+                Supprimer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ===================================================
+         EMPTY
+    ==================================================== -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && commandesFiltrees.length === 0"
+    >
+
+      <h3>Aucune commande trouvée</h3>
+
+      <p>Aucune commande fournisseur ne correspond aux critères sélectionnés.</p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser les filtres
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL - NOUVELLE COMMANDE
+========================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="modalOuvert"
+  (click)="fermerModal()"
+>
+
+  <div
+    class="modal modal-large"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-header">
+
+      <h2>
+        Nouvelle commande fournisseur
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form
+      class="modal-body"
+      (ngSubmit)="passerCommande()"
+    >
+
+      <div
+        class="form-error"
+        *ngIf="formError"
+      >
+        {{ formError }}
+      </div>
+
+      <div class="form-grid">
+
+        <!-- FOURNISSEUR -->
+        <div class="form-group full">
+
+          <label for="fournisseurCommande">
+            Fournisseur <span>*</span>
+          </label>
+
+          <select
+            id="fournisseurCommande"
+            name="fournisseurCommande"
+            [(ngModel)]="fournisseurId"
+            (ngModelChange)="onFournisseurChange()"
+            required
+          >
+
+            <option [ngValue]="null">Sélectionner un fournisseur</option>
+
+            <option
+              *ngFor="let fournisseur of fournisseurs"
+              [ngValue]="fournisseur.id_fournisseur"
+            >
+              {{ fournisseur.nom }}
+            </option>
+
+          </select>
+
+          <small class="form-hint" *ngIf="fournisseurId === null">
+            Choisissez un fournisseur pour ne voir que les ingrédients qu'il fournit,
+            ou sélectionnez directement un ingrédient ci-dessous pour déduire son fournisseur.
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           LIGNES DE COMMANDE
+      ==================================================== -->
+      <div class="lignes-section">
+
+        <div class="lignes-header">
+          <h3>Ingrédients commandés</h3>
+
+          <button
+            type="button"
+            class="btn-add-ligne"
+            (click)="ajouterLigne()"
+          >
+            + Ajouter une ligne
+          </button>
+        </div>
+
+        <div class="lignes-table">
+
+          <div class="ligne-row ligne-row-header">
+            <span>Ingrédient</span>
+            <span>Quantité</span>
+            <span>Prix unitaire (DT)</span>
+            <span>Sous-total</span>
+            <span></span>
+          </div>
+
+          <div
+            class="ligne-row"
+            *ngFor="let ligne of lignes; let i = index; trackBy: trackByLigne"
+          >
+
+            <select
+              name="ingredient-{{ i }}"
+              [(ngModel)]="ligne.ingredientId"
+              (ngModelChange)="onIngredientChange(ligne)"
+              required
+            >
+              <option [ngValue]="null">Choisir un ingrédient</option>
+
+              <option
+                *ngFor="let ingredient of ingredientsDisponibles"
+                [ngValue]="ingredient.id_ingredient"
+              >
+                {{ ingredient.nom }} ({{ ingredient.unite_mesure }})
+              </option>
+            </select>
+
+            <input
+              type="number"
+              name="quantite-{{ i }}"
+              [(ngModel)]="ligne.quantite_commandee"
+              min="0"
+              step="0.01"
+              placeholder="0"
+              required
+            />
+
+            <input
+              type="number"
+              name="prix-{{ i }}"
+              [(ngModel)]="ligne.prix_unitaire"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              required
+            />
+
+            <span class="ligne-sous-total">
+              {{ ((ligne.quantite_commandee ?? 0) * (ligne.prix_unitaire ?? 0)) | number:'1.2-2' }} DT
+            </span>
+
+            <button
+              type="button"
+              class="btn-remove-ligne"
+              (click)="supprimerLigne(i)"
+              [disabled]="lignes.length === 1"
+              title="Supprimer cette ligne"
+            >
+              ×
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="lignes-total">
+          Total commande : <strong>{{ totalFormulaire | number:'1.2-2' }} DT</strong>
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="fermerModal()"
+          [disabled]="saving"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn-save"
+          *ngIf="canAddCommande()"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Envoi en cours...' : 'Passer la commande' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL - DÉTAILS D'UNE COMMANDE
+========================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="detailsOuvert"
+  (click)="fermerDetails()"
+>
+
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-header">
+
+      <h2>
+        Commande #{{ commandeSelectionnee?.id_bon_commande }}
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerDetails()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="details-infos" *ngIf="commandeSelectionnee as commande">
+
+        <div class="details-info">
+          <span class="details-label">Fournisseur</span>
+          <span>{{ commande.fournisseur?.nom || 'Sans fournisseur' }}</span>
+        </div>
+
+        <div class="details-info">
+          <span class="details-label">Statut</span>
+          <app-status-badge
+            [status]="getStatutLabel(commande)"
+            [type]="getStatutType(commande)"
+          ></app-status-badge>
+        </div>
+
+        <div class="details-info">
+          <span class="details-label">Date de commande</span>
+          <span>{{ commande.dateCommande ? (commande.dateCommande | date:'dd/MM/yyyy') : '—' }}</span>
+        </div>
+
+        <div class="details-info">
+          <span class="details-label">Livraison prévue</span>
+          <span>{{ commande.dateDeLivraisonPrevu ? (commande.dateDeLivraisonPrevu | date:'dd/MM/yyyy') : '—' }}</span>
+        </div>
+
+      </div>
+
+      <div
+        class="loading-container"
+        *ngIf="loadingDetails"
+      >
+        <div class="spinner"></div>
+        <p>Chargement des lignes...</p>
+      </div>
+
+      <div
+        class="table-container"
+        *ngIf="!loadingDetails && lignesDetails.length > 0"
+      >
+
+        <table>
+
+          <thead>
+          <tr>
+            <th>Ingrédient</th>
+            <th class="text-center">Quantité</th>
+            <th class="text-right">Prix unitaire</th>
+            <th class="text-right">Sous-total</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr
+            *ngFor="let ligne of lignesDetails; trackBy: trackByLigneDetail"
+          >
+            <td>{{ ligne.ingredient?.nom }}</td>
+            <td class="text-center">
+              {{ ligne.quantite_commandee }} {{ ligne.ingredient?.unite_mesure }}
+            </td>
+            <td class="text-right">{{ ligne.prix_unitaire | number:'1.2-2' }} DT</td>
+            <td class="text-right">
+              {{ (ligne.quantite_commandee * ligne.prix_unitaire) | number:'1.2-2' }} DT
+            </td>
+          </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div
+        class="empty-state"
+        *ngIf="!loadingDetails && lignesDetails.length === 0"
+      >
+        <p>Aucune ligne pour cette commande.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

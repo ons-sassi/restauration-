@@ -1,0 +1,53 @@
+<div class="favoris-page client-app with-bottom-nav">
+  <header class="client-topbar">
+    <button type="button" class="client-back-btn" (click)="retourMenu()">← Menu</button>
+    <h1>Mes favoris</h1>
+    <span style="width: 70px"></span>
+  </header>
+
+  @if (loading) {
+    <div class="favoris-grid">
+      @for (i of [1,2,3,4]; track i) { <div class="favori-card skeleton"></div> }
+    </div>
+  } @else if (errorMessage) {
+    <div class="client-error-banner page-margin">⚠️ {{ errorMessage }}</div>
+  } @else if (favoris.length === 0) {
+    <div class="client-state">
+      <div class="state-emoji">♡</div>
+      <h3>Aucun favori</h3>
+      <p>Ajoutez des plats à vos favoris depuis le menu en tapant sur le cœur.</p>
+      <button type="button" class="client-btn client-btn-primary" (click)="retourMenu()">Voir le menu</button>
+    </div>
+  } @else {
+    <div class="favoris-grid">
+      @for (favori of favoris; track favori.produitId) {
+        <div class="favori-card" (click)="openProduit(favori)">
+          <div class="favori-image-wrap">
+            <img [src]="getImage(favori)" [alt]="favori.nomProduit" />
+
+            <button
+              type="button"
+              class="remove-btn"
+              [disabled]="removingProduitId === favori.produitId"
+              (click)="retirer(favori, $event)"
+              title="Retirer des favoris"
+            >
+              ♥
+            </button>
+
+            @if (!favori.disponibleProduit) {
+              <span class="indispo-badge">Indisponible</span>
+            }
+          </div>
+
+          <div class="favori-info">
+            <p class="favori-name">{{ favori.nomProduit }}</p>
+            <p class="favori-prix">{{ formatPrix(favori.prixProduit) }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <app-client-bottom-nav active="favoris" />
+</div>

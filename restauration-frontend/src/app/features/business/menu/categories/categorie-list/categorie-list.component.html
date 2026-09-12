@@ -1,0 +1,430 @@
+<div class="products-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+  <header class="page-header">
+
+    <div class="page-title">
+
+      <span class="page-kicker">
+        MENU
+      </span>
+
+      <h1>
+        Catégories
+      </h1>
+
+      <p>
+        Organisez les catégories et sous-catégories de votre menu.
+      </p>
+
+    </div>
+
+    <!-- AJOUTER -->
+    <button
+      *ngIf="canAddCategory()"
+      type="button"
+      class="btn-primary"
+      (click)="nouvelleCategorie()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Nouvelle catégorie</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       STATISTIQUES
+  ====================================================== -->
+  <section class="stats">
+
+    <!-- TOTAL -->
+    <article class="stat-card">
+
+      <div class="stat-icon blue">
+        <span>●</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          TOTAL CATÉGORIES
+        </span>
+
+        <strong>
+          {{ categories.length }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <!-- RACINES -->
+    <article class="stat-card">
+
+      <div class="stat-icon green">
+        <span>▦</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          CATÉGORIES RACINES
+        </span>
+
+        <strong>
+          {{ categoriesRacines }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <!-- SOUS-CATEGORIES -->
+    <article class="stat-card">
+
+      <div class="stat-icon orange">
+        <span>↳</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          SOUS-CATÉGORIES
+        </span>
+
+        <strong>
+          {{ sousCategories }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <!-- AVEC DESCRIPTION -->
+    <article class="stat-card">
+
+      <div class="stat-icon purple">
+        <span>✎</span>
+      </div>
+
+      <div class="stat-content">
+
+        <span class="stat-label">
+          AVEC DESCRIPTION
+        </span>
+
+        <strong>
+          {{ categoriesAvecDescription }}
+        </strong>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-box"
+    *ngIf="error"
+  >
+
+    <div class="error-icon">
+      !
+    </div>
+
+    <div class="error-content">
+
+      <strong>
+        Une erreur est survenue
+      </strong>
+
+      <span>
+        {{ error }}
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="error-button"
+      (click)="loadCategories()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENU PRINCIPAL
+  ====================================================== -->
+  <section class="products-card">
+
+    <!-- ===================================================
+         BARRE DE FILTRES
+    ==================================================== -->
+    <div class="filters">
+
+      <!-- RECHERCHE -->
+      <div class="search-box">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher une catégorie..."
+        />
+
+      </div>
+
+
+      <!-- TYPE -->
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedType"
+      >
+
+        <option value="tous">
+          Tous les types
+        </option>
+
+        <option value="racine">
+          Catégories racines
+        </option>
+
+        <option value="sous-categorie">
+          Sous-catégories
+        </option>
+
+      </select>
+
+
+      <!-- RESET -->
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         BARRE RESULTATS
+    ==================================================== -->
+    <div
+      class="results-bar"
+      *ngIf="!loading"
+    >
+
+      <span>
+        Catégories affichées :
+      </span>
+
+      <strong>
+        {{ categoriesFiltrees.length }}
+      </strong>
+
+      <span>
+        sur {{ categories.length }}
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+    ==================================================== -->
+    <div
+      class="loading-box"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <strong>
+        Chargement des catégories...
+      </strong>
+
+      <span>
+        Veuillez patienter
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         EMPTY
+    ==================================================== -->
+    <div
+      class="empty-box"
+      *ngIf="!loading && categoriesFiltrees.length === 0"
+    >
+
+      <div class="empty-icon">
+        ▦
+      </div>
+
+      <h3>
+        Aucune catégorie trouvée
+      </h3>
+
+      <p>
+        Aucune catégorie ne correspond aux critères sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser les filtres
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         CATEGORIES
+    ==================================================== -->
+    <div
+      class="products-grid"
+      *ngIf="!loading && categoriesFiltrees.length > 0"
+    >
+
+      <article
+        class="product-card"
+        *ngFor="
+          let categorie of categoriesFiltrees;
+          trackBy: trackByCategorie
+        "
+      >
+
+        <!-- IMAGE -->
+        <div class="product-image">
+
+          <img
+            *ngIf="categorie.image"
+            [src]="categorie.image | mediaUrl"
+            [alt]="categorie.nom"
+          />
+
+          <div
+            class="no-image"
+            *ngIf="!categorie.image"
+          >
+            <span>▦</span>
+          </div>
+
+
+          <!-- TYPE -->
+          <span
+            class="availability"
+            [class.unavailable]="!!categorie.categorieParent"
+          >
+
+            <span class="status-dot"></span>
+
+            {{
+              categorie.categorieParent
+                ? 'Sous-catégorie'
+                : 'Catégorie racine'
+            }}
+
+          </span>
+
+        </div>
+
+
+        <!-- CONTENU -->
+        <div class="product-content">
+
+          <!-- CATEGORIE PARENTE -->
+          <span class="product-category">
+            {{ getParentNom(categorie) }}
+          </span>
+
+
+          <!-- NOM -->
+          <h2>
+            {{ categorie.nom }}
+          </h2>
+
+
+          <!-- DESCRIPTION -->
+          <p class="description">
+
+            {{
+              categorie.description_categorie ||
+              'Aucune description disponible.'
+            }}
+
+          </p>
+
+        </div>
+
+
+        <!-- =================================================
+             ACTIONS
+        ================================================== -->
+        <div
+          class="product-actions two-cols"
+          [class.three-actions]="canViewCategories() && canEditCategory() && canDeleteCategory()"
+        >
+
+          <!-- VOIR -->
+          <button
+            *ngIf="canViewCategories()"
+            type="button"
+            class="action-btn view"
+            (click)="voirDetails(categorie)"
+          >
+            <span>Voir</span>
+          </button>
+
+
+          <!-- MODIFIER -->
+          <button
+            *ngIf="canEditCategory()"
+            type="button"
+            class="action-btn edit"
+            (click)="modifierCategorie(categorie)"
+          >
+            <span>Modifier</span>
+          </button>
+
+
+          <!-- SUPPRIMER -->
+          <button
+            *ngIf="canDeleteCategory()"
+            type="button"
+            class="action-btn delete"
+            (click)="supprimerCategorie(categorie)"
+          >
+            <span>Supprimer</span>
+          </button>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+</div>

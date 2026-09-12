@@ -1,0 +1,107 @@
+:host {
+  display: block;
+
+  width: 100%;
+  min-height: 100vh;
+}
+
+
+/* ================================
+   LAYOUT
+================================ */
+
+.pdv-layout {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  background: var(--app-bg);
+}
+
+
+/* ================================
+   SIDEBAR
+================================ */
+
+.pdv-sidebar-container {
+  display: block;
+
+  width: 235px;
+  min-width: 235px;
+
+  height: 100vh;
+
+  flex-shrink: 0;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 100;
+
+  transition:
+    width 0.2s ease,
+    min-width 0.2s ease;
+}
+
+
+/* ================================
+   SIDEBAR COLLAPSED
+================================ */
+
+.pdv-layout.sidebar-collapsed
+.pdv-sidebar-container {
+
+  width: 72px;
+  min-width: 72px;
+
+}
+
+
+/* ================================
+   MAIN
+================================ */
+
+.pdv-main {
+  flex: 1;
+
+  min-width: 0;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ================================
+   CONTENT
+================================ */
+
+.pdv-content {
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 25px;
+
+  box-sizing: border-box;
+
+  overflow-x: auto;
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 800px) {
+
+  .pdv-sidebar-container {
+    display: none;
+  }
+
+  .pdv-content {
+    padding: 15px;
+  }
+
+}

@@ -1,0 +1,27 @@
+
+<!-- =================================================
+     ACTIONS
+================================================== -->
+
+<div class="details-actions">
+
+  <button
+    type="button"
+    class="btn-secondary"
+    (click)="retour()"
+  >
+    Retour
+  </button>
+
+  <!-- MODIFIER : MENU_CATEGORIES_MODIFIER -->
+  <button
+    *ngIf="canEditCategory()"
+    type="button"
+    class="btn-primary"
+    (click)="modifier()"
+  >
+    Modifier la catégorie
+  </button>
+
+</div>
+

@@ -1,0 +1,168 @@
+<aside
+  class="back-office-sidebar"
+  [class.collapsed]="collapsed"
+>
+
+  <!-- ===================================================== -->
+  <!-- LOGO -->
+  <!-- ===================================================== -->
+
+  <div class="sidebar-brand">
+
+    @if (restaurantLogo) {
+      <img
+        class="brand-logo brand-logo-image"
+        [src]="restaurantLogo | mediaUrl"
+        alt=""
+      />
+    } @else {
+      <div class="brand-logo">
+        {{ restaurantInitiale }}
+      </div>
+    }
+
+    @if (!collapsed) {
+
+      <div class="brand-content">
+
+        <strong>
+          Restaurant
+        </strong>
+
+        <span>
+          Back-office
+        </span>
+
+      </div>
+
+    }
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- NAVIGATION -->
+  <!-- ===================================================== -->
+
+  <nav class="sidebar-navigation">
+
+    @for (
+      group of visibleGroups;
+      track group.title
+      ) {
+
+      <div
+        class="menu-group"
+        [class.group-active]="isRouteActive(group)"
+      >
+
+        <!-- =============================================== -->
+        <!-- MODULE PARENT -->
+        <!-- =============================================== -->
+
+        <button
+          type="button"
+          class="module-button"
+          [class.active]="isRouteActive(group)"
+          (click)="toggleModule(group)"
+        >
+
+          <span
+            class="menu-icon"
+            [attr.data-icon]="group.icon"
+          >
+          </span>
+
+
+          @if (!collapsed) {
+
+            <span class="module-label">
+              {{ group.title }}
+            </span>
+
+
+            <span
+              class="module-arrow"
+              [class.open]="isModuleOpen(group)"
+            >
+              ›
+            </span>
+
+          }
+
+        </button>
+
+
+        <!-- =============================================== -->
+        <!-- SOUS-MENUS -->
+        <!-- =============================================== -->
+
+        @if (isModuleOpen(group)) {
+
+          <div class="submenu">
+
+            @for (
+              item of group.children;
+              track item.route
+              ) {
+
+              <a
+                class="submenu-item"
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{
+                  exact: true
+                }"
+              >
+
+                <span class="submenu-dot">
+                </span>
+
+                <span class="submenu-label">
+                  {{ item.label }}
+                </span>
+
+              </a>
+
+            }
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </nav>
+
+
+  <!-- ===================================================== -->
+  <!-- BAS -->
+  <!-- ===================================================== -->
+
+  <div class="sidebar-bottom">
+
+    <button
+      type="button"
+      class="collapse-button"
+      (click)="toggleSidebar()"
+    >
+
+      <span>
+        {{ collapsed ? '›' : '‹' }}
+      </span>
+
+      @if (!collapsed) {
+
+        <span>
+          Réduire le menu
+        </span>
+
+      }
+
+    </button>
+
+  </div>
+
+</aside>

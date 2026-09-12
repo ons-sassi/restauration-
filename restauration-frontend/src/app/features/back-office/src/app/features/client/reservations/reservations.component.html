@@ -1,0 +1,123 @@
+<div class="reservations-page client-app with-bottom-nav">
+  <header class="client-topbar">
+    <button type="button" class="client-back-btn" (click)="retourMenu()">← Menu</button>
+    <h1>Mes réservations</h1>
+    <button type="button" class="client-btn client-btn-primary new-btn" (click)="toggleForm()">
+      {{ showForm ? 'Annuler' : '+ Nouvelle' }}
+    </button>
+  </header>
+
+  @if (submitSuccess) {
+    <div class="client-success-banner page-margin">✓ Votre demande de réservation a bien été envoyée.</div>
+  }
+
+  @if (showForm) {
+    <section class="client-card form-card page-margin">
+      <div class="field-row">
+        <div class="field">
+          <label for="dateReservation">Date</label>
+          <input
+            id="dateReservation"
+            type="date"
+            [(ngModel)]="dateReservation"
+            [min]="dateMin"
+          />
+        </div>
+
+        <div class="field">
+          <label for="heureReservation">Heure</label>
+          <input id="heureReservation" type="time" [(ngModel)]="heureReservation" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="nombrePersonnes">Nombre de personnes</label>
+        <input
+          id="nombrePersonnes"
+          type="number"
+          min="1"
+          [(ngModel)]="nombrePersonnes"
+          placeholder="2"
+        />
+      </div>
+
+      <div class="field">
+        <label for="commentaire">Commentaire (optionnel)</label>
+        <textarea
+          id="commentaire"
+          rows="3"
+          [(ngModel)]="commentaire"
+          placeholder="Ex : table près de la fenêtre, anniversaire..."
+        ></textarea>
+      </div>
+
+      @if (submitError) {
+        <div class="client-error-banner">⚠️ {{ submitError }}</div>
+      }
+
+      <button
+        type="button"
+        class="client-btn client-btn-primary submit-btn"
+        [disabled]="!formulaireValide || submitting"
+        (click)="soumettre()"
+      >
+        {{ submitting ? 'Envoi...' : 'Demander la réservation' }}
+      </button>
+    </section>
+  }
+
+  @if (loading) {
+    <div class="client-state">
+      <div class="client-spinner large"></div>
+      <p>Chargement...</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="client-error-banner page-margin">⚠️ {{ errorMessage }}</div>
+  } @else if (reservations.length === 0) {
+    <div class="client-state">
+      <div class="state-emoji">📅</div>
+      <h3>Aucune réservation</h3>
+      <p>Envie de réserver une table ? Faites votre demande en un instant.</p>
+    </div>
+  } @else {
+    <ul class="reservations-list">
+      @for (reservation of reservations; track reservation.id_reservation) {
+        <li class="reservation-card client-card">
+          <div class="reservation-top">
+            <h3>{{ reservation.dateReservation | date: 'EEEE d MMMM' }}</h3>
+            <span class="client-badge" [class]="statutClass(reservation.statut)">
+              {{ statutLabel(reservation.statut) }}
+            </span>
+          </div>
+
+          <p class="reservation-meta">
+            🕒 {{ reservation.heureReservation.slice(0, 5) }}
+            &nbsp;·&nbsp;
+            👥 {{ reservation.nombre_personnes }}
+            {{ reservation.nombre_personnes > 1 ? 'personnes' : 'personne' }}
+            @if (reservation.numeroTable) {
+              &nbsp;·&nbsp; 🪑 Table {{ reservation.numeroTable }}
+            }
+          </p>
+
+          @if (reservation.commentaire_client) {
+            <p class="reservation-commentaire">{{ reservation.commentaire_client }}</p>
+          }
+
+          @if (peutAnnuler(reservation)) {
+            <button
+              type="button"
+              class="client-btn client-btn-secondary cancel-btn"
+              [disabled]="annulationEnCoursId === reservation.id_reservation"
+              (click)="annuler(reservation)"
+            >
+              {{ annulationEnCoursId === reservation.id_reservation ? 'Annulation...' : 'Annuler' }}
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <app-client-bottom-nav />
+</div>

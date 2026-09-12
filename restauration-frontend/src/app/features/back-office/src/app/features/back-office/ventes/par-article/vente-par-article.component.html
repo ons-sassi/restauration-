@@ -1,0 +1,426 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- EN-TÊTE -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Vente par article</h1>
+
+      <p>
+        Analyse des ventes regroupées par article
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- FILTRES -->
+  <!-- ===================================================== -->
+
+  <section class="filters">
+
+    <div class="field">
+
+      <label for="dateDebut">
+        Date début
+      </label>
+
+      <input
+        id="dateDebut"
+        type="date"
+        [(ngModel)]="dateDebut"
+      />
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="dateFin">
+        Date fin
+      </label>
+
+      <input
+        id="dateFin"
+        type="date"
+        [(ngModel)]="dateFin"
+      />
+
+    </div>
+
+
+    <div class="field">
+
+      <label for="pointDeVente">
+        Point de vente
+      </label>
+
+      <select
+        id="pointDeVente"
+        [(ngModel)]="pointDeVenteId"
+      >
+
+        <option [ngValue]="null">
+          Tous les points de vente
+        </option>
+
+        <option
+          *ngFor="let pdv of pointDeVentes"
+          [ngValue]="pdv.id_pdv"
+        >
+          {{ pdv.nomPdv }}
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="appliquerFiltres()"
+      [disabled]="loading"
+    >
+
+      <span *ngIf="!loading">
+        Appliquer
+      </span>
+
+      <span *ngIf="loading">
+        Chargement...
+      </span>
+
+    </button>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MESSAGE D'ERREUR -->
+  <!-- ===================================================== -->
+
+  <div
+    class="error-message"
+    *ngIf="error"
+  >
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CHARGEMENT -->
+  <!-- ===================================================== -->
+
+  <div
+    class="loading-container"
+    *ngIf="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <p>
+      Chargement des ventes par article...
+    </p>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENU -->
+  <!-- ===================================================== -->
+
+  <ng-container *ngIf="!loading && !error">
+
+
+    <!-- =================================================== -->
+    <!-- STATISTIQUES -->
+    <!-- =================================================== -->
+
+    <section class="stats">
+
+      <!-- CA -->
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Chiffre d'affaires
+        </div>
+
+        <div class="stat-value">
+          {{ totalChiffreAffaires | number:'1.2-2' }} DT
+        </div>
+
+      </div>
+
+
+      <!-- QUANTITÉ -->
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Articles vendus
+        </div>
+
+        <div class="stat-value">
+          {{ totalQuantite }}
+        </div>
+
+      </div>
+
+
+      <!-- COÛT -->
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Coût total
+        </div>
+
+        <div class="stat-value">
+          {{ totalCout | number:'1.2-2' }} DT
+        </div>
+
+      </div>
+
+
+      <!-- MARGE -->
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Marge brute
+        </div>
+
+        <div class="stat-value">
+          {{ totalMarge | number:'1.2-2' }} DT
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- TABLEAU -->
+    <!-- =================================================== -->
+
+    <section class="table-card">
+
+
+      <!-- EN-TÊTE TABLEAU -->
+
+      <div class="table-header">
+
+        <div>
+          <h2>
+            Articles vendus
+          </h2>
+
+          <p>
+            Détail des ventes par article
+          </p>
+        </div>
+
+        <span class="article-count">
+          {{ ventes.length }}
+          article(s)
+        </span>
+
+      </div>
+
+
+      <!-- TABLE -->
+
+      <div
+        class="table-container"
+        *ngIf="ventes.length > 0"
+      >
+
+        <table>
+
+          <thead>
+
+          <tr>
+
+            <th>
+              Article
+            </th>
+
+            <th>
+              Catégorie
+            </th>
+
+            <th class="text-center">
+              Quantité
+            </th>
+
+            <th class="text-right">
+              Chiffre d'affaires
+            </th>
+
+            <th class="text-right">
+              Coût
+            </th>
+
+            <th class="text-right">
+              Marge brute
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="let vente of ventes"
+          >
+
+            <td>
+
+              <div class="article-name">
+                {{ vente.article }}
+              </div>
+
+            </td>
+
+
+            <td>
+
+                <span class="category">
+                  {{ vente.categorie }}
+                </span>
+
+            </td>
+
+
+            <td class="text-center">
+
+              {{ vente.quantiteVendue }}
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{ vente.chiffreAffaires | number:'1.2-2' }}
+              DT
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{ vente.cout | number:'1.2-2' }}
+              DT
+
+            </td>
+
+
+            <td class="text-right">
+
+                <span class="margin-value">
+
+                  {{ vente.margeBrute | number:'1.2-2' }}
+                  DT
+
+                </span>
+
+            </td>
+
+          </tr>
+
+
+          <!-- TOTAL -->
+
+          <tr class="total-row">
+
+            <td colspan="2">
+
+              <strong>
+                Total
+              </strong>
+
+            </td>
+
+
+            <td class="text-center">
+
+              <strong>
+                {{ totalQuantite }}
+              </strong>
+
+            </td>
+
+
+            <td class="text-right">
+
+              <strong>
+                {{ totalChiffreAffaires | number:'1.2-2' }}
+                DT
+              </strong>
+
+            </td>
+
+
+            <td class="text-right">
+
+              <strong>
+                {{ totalCout | number:'1.2-2' }}
+                DT
+              </strong>
+
+            </td>
+
+
+            <td class="text-right">
+
+              <strong>
+                {{ totalMarge | number:'1.2-2' }}
+                DT
+              </strong>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- AUCUNE DONNÉE -->
+      <!-- ================================================= -->
+
+      <div
+        class="empty-state"
+        *ngIf="ventes.length === 0"
+      >
+
+        <h3>
+          Aucune vente trouvée
+        </h3>
+
+        <p>
+          Aucune vente par article n'a été trouvée
+          pour la période sélectionnée.
+        </p>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

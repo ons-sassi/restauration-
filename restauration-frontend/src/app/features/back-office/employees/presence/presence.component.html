@@ -1,0 +1,237 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        RESSOURCES HUMAINES
+      </span>
+
+      <h1>
+        Présence
+      </h1>
+
+      <p>
+        Marquez chaque employé Présent, Absent ou En congé pour la
+        journée sélectionnée, et suivez son nombre d'absences ce
+        mois-ci et cette année.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="retour()"
+      >
+        Retour
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+
+    {{ errorMessage }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadFeuille()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       FILTRES
+  ====================================================== -->
+  <section class="filters-bar">
+
+    <div class="search-box">
+
+      <span class="search-icon">🔍</span>
+
+      <input
+        type="text"
+        placeholder="Rechercher par nom, prénom ou matricule..."
+        [(ngModel)]="searchTerm"
+      />
+
+    </div>
+
+    <div class="date-box">
+      <label for="presence-date">Jour consulté</label>
+
+      <input
+        id="presence-date"
+        type="date"
+        [(ngModel)]="selectedDate"
+        (change)="onDateChange()"
+      />
+    </div>
+
+    <button
+      type="button"
+      class="btn-secondary"
+      (click)="allerAujourdhui()"
+    >
+      Aujourd'hui
+    </button>
+
+  </section>
+
+  <p class="date-affichee" *ngIf="!loading">
+    {{ dateAffichee | titlecase }}
+  </p>
+
+
+  <!-- =====================================================
+       CARTE PRINCIPALE
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- LOADING -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement de la feuille de présence...</p>
+
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div
+      class="table-container"
+      *ngIf="!loading && feuilleFiltree.length > 0"
+    >
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Employé</th>
+          <th>Rôle</th>
+          <th class="text-center">Statut du jour</th>
+          <th class="text-center">Absences ce mois</th>
+          <th class="text-center">Absences cette année</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let ligne of feuilleFiltree">
+
+          <td>
+            <div class="employee-name">{{ nomComplet(ligne) }}</div>
+            <div class="contact-secondary">{{ ligne.employee.matricule || '—' }}</div>
+          </td>
+
+          <td>
+            <span class="role-badge">
+              {{ roleNom(ligne) }}
+            </span>
+          </td>
+
+          <td class="text-center">
+
+            <div class="statut-actions">
+
+              <button
+                type="button"
+                class="statut-btn present"
+                [class.active]="estStatutActif(ligne, StatutPresence.PRESENT)"
+                [disabled]="savingEmployeeId === ligne.employee.id_utilisateur"
+                (click)="marquer(ligne, StatutPresence.PRESENT)"
+              >
+                Présent
+              </button>
+
+              <button
+                type="button"
+                class="statut-btn absent"
+                [class.active]="estStatutActif(ligne, StatutPresence.ABSENT)"
+                [disabled]="savingEmployeeId === ligne.employee.id_utilisateur"
+                (click)="marquer(ligne, StatutPresence.ABSENT)"
+              >
+                Absent
+              </button>
+
+              <button
+                type="button"
+                class="statut-btn conge"
+                [class.active]="estStatutActif(ligne, StatutPresence.CONGE)"
+                [disabled]="savingEmployeeId === ligne.employee.id_utilisateur"
+                (click)="marquer(ligne, StatutPresence.CONGE)"
+              >
+                Congé
+              </button>
+
+            </div>
+
+            <div class="statut-non-marque" *ngIf="!ligne.presenceDuJour">
+              Non marqué
+            </div>
+
+          </td>
+
+          <td class="text-center">
+            <span class="count-badge" [class.zero]="ligne.absencesMoisCourant === 0">
+              {{ ligne.absencesMoisCourant }}
+            </span>
+          </td>
+
+          <td class="text-center">
+            <span class="count-badge" [class.zero]="ligne.absencesAnneeCourante === 0">
+              {{ ligne.absencesAnneeCourante }}
+            </span>
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && feuilleFiltree.length === 0 && !errorMessage"
+    >
+
+      <h3>Aucun employé trouvé</h3>
+
+      <p>
+        {{
+          feuille.length === 0
+            ? "Aucun employé n'est enregistré pour le moment."
+            : 'Aucun employé ne correspond à votre recherche.'
+        }}
+      </p>
+
+    </div>
+
+  </section>
+
+</div>

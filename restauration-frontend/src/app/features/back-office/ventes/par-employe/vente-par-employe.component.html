@@ -1,0 +1,374 @@
+<div class="vente-employe-page">
+
+  <!-- ====================================================== -->
+  <!-- EN-TÊTE -->
+  <!-- ====================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Vente par employé</h1>
+
+      <p>
+        Analyse des ventes générées par chaque serveur ayant pris la commande
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- FILTRES -->
+  <!-- ====================================================== -->
+
+  <section class="filters-card">
+
+    <div class="filter-group">
+
+      <label for="dateDebut">
+        Date de début
+      </label>
+
+      <input
+        id="dateDebut"
+        type="date"
+        [(ngModel)]="dateDebut"
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="dateFin">
+        Date de fin
+      </label>
+
+      <input
+        id="dateFin"
+        type="date"
+        [(ngModel)]="dateFin"
+      />
+
+    </div>
+<div class="filter-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="rechercher()"
+        [disabled]="loading"
+      >
+
+        {{ loading ? 'Chargement...' : 'Rechercher' }}
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="reinitialiser()"
+        [disabled]="loading"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- ERREUR -->
+  <!-- ====================================================== -->
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+
+      <span>!</span>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- INDICATEURS -->
+  <!-- ====================================================== -->
+
+  <section class="stats-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Employés actifs
+      </div>
+
+      <div class="stat-value">
+        {{ ventes.length }}
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Nombre de ventes
+      </div>
+
+      <div class="stat-value">
+        {{ totalNombreVentes }}
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Chiffre d'affaires
+      </div>
+
+      <div class="stat-value">
+        {{ totalChiffreAffaires | number:'1.2-2' }} DT
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-label">
+        Meilleur employé
+      </div>
+
+      <div class="stat-value">
+        {{ ventes.length > 0 ? ventes[0].employee : '—' }}
+      </div>
+
+      @if (ventes.length > 0) {
+        <div class="stat-subvalue">
+          {{ ventes[0].pourcentageProductivite | number:'1.1-1' }} % du CA
+        </div>
+      }
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- TABLEAU -->
+  <!-- ====================================================== -->
+
+  <section class="table-card">
+
+    <div class="table-header">
+
+      <div>
+
+        <h2>
+          Détail des ventes par employé
+        </h2>
+
+        <span>
+          {{ ventes.length }} employé(s)
+        </span>
+
+      </div>
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="loading-container">
+
+        <div class="spinner"></div>
+
+        <span>
+          Chargement des données...
+        </span>
+
+      </div>
+
+    }
+
+
+    @else if (ventes.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          —
+        </div>
+
+        <h3>
+          Aucune vente trouvée
+        </h3>
+
+        <p>
+          Aucune vente ne correspond aux filtres sélectionnés.
+        </p>
+
+      </div>
+
+    }
+
+
+    @else {
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+          <tr>
+
+            <th>
+              #
+            </th>
+
+            <th>
+              Employé
+            </th>
+
+            <th>
+              Matricule
+            </th>
+
+            <th class="text-right">
+              Nombre de ventes
+            </th>
+
+            <th class="text-right">
+              Chiffre d'affaires
+            </th>
+
+            <th class="text-right">
+              Productivité
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              vente of ventes;
+              track vente.employeeId ?? $index;
+              let i = $index
+              ) {
+
+              <tr>
+
+                <td class="index-cell">
+                  {{ i + 1 }}
+                </td>
+
+
+                <td>
+
+                  <div class="employee-name">
+
+                    <span class="employee-avatar">
+                      {{ initiales(vente.employee) }}
+                    </span>
+
+                    <span>
+                      {{ vente.employee }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+                  {{ vente.matricule || '—' }}
+                </td>
+
+
+                <td class="text-right">
+
+                  <span class="quantity-badge">
+                    {{ vente.nombreVentes }}
+                  </span>
+
+                </td>
+
+
+                <td class="text-right amount">
+                  {{ vente.chiffreAffaires | number:'1.2-2' }} DT
+                </td>
+
+
+                <td class="text-right">
+
+                  <div class="productivity-cell">
+
+                    <div class="productivity-bar">
+                      <div
+                        class="productivity-bar-fill"
+                        [style.width.%]="vente.pourcentageProductivite"
+                      ></div>
+                    </div>
+
+                    <span>
+                      {{ vente.pourcentageProductivite | number:'1.1-1' }} %
+                    </span>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+
+          <tfoot>
+
+          <tr>
+
+            <td colspan="3">
+              Total
+            </td>
+
+            <td class="text-right">
+              {{ totalNombreVentes }}
+            </td>
+
+            <td class="text-right">
+              {{ totalChiffreAffaires | number:'1.2-2' }} DT
+            </td>
+
+            <td class="text-right">
+              100 %
+            </td>
+
+          </tr>
+
+          </tfoot>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

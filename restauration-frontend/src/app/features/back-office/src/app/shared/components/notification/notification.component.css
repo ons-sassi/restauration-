@@ -1,0 +1,167 @@
+.notification-panel {
+  width: 350px;
+
+  background: white;
+
+  border: 1px solid #e6ebf1;
+
+  border-radius: 12px;
+
+  box-shadow: 0 10px 35px rgba(25, 35, 50, .12);
+
+  overflow: hidden;
+}
+
+.notification-header {
+  min-height: 55px;
+
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid var(--app-border);
+}
+
+.notification-header h3 {
+  margin: 0;
+
+  color: #202737;
+
+  font-size: 15px;
+}
+
+.notification-header span {
+  color: var(--app-primary);
+
+  font-size: 11px;
+}
+
+.notification-list {
+  max-height: 400px;
+
+  overflow-y: auto;
+}
+
+.notification-item {
+  width: 100%;
+
+  padding: 13px 16px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  border: none;
+
+  border-bottom: 1px solid #f0f2f5;
+
+  background: white;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background: #f8fbfe;
+}
+
+.notification-item.unread {
+  background: #f4f9fe;
+}
+
+.notification-icon {
+  color: var(--app-primary);
+
+  font-size: 20px;
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.notification-content strong {
+  color: #303746;
+
+  font-size: 12px;
+}
+
+.notification-content small {
+  color: #737d8e;
+
+  font-size: 11px;
+}
+
+.notification-content em {
+  color: #a0a8b5;
+
+  font-size: 10px;
+
+  font-style: normal;
+}
+
+.empty {
+  padding: 40px 20px;
+
+  text-align: center;
+
+  color: #8b95a7;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   UNIFIED COMPONENT OVERRIDES
+   ========================================================= */
+.page-header, .page-heading {
+  gap: 16px;
+}
+
+.page-header h1, .page-heading h2 {
+  font-weight: 700;
+}
+
+.filters, .filters-card {
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.btn-primary, .primary-button {
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+  color: #fff;
+}
+
+.btn-secondary, .secondary-button, .refresh-button {
+  background: #fff;
+  border-color: var(--app-border-input);
+  color: var(--app-text-secondary);
+}
+
+.table-card, .products-card, .stat-card, .panel {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.field input, .field select, .filter-field input, .filter-field select,
+.filter-group input, .filter-group select, .form-group input,
+.form-group select, .form-group textarea, .search-box input {
+  border-color: var(--app-border-input);
+  border-radius: var(--app-radius-sm);
+}
+
+.field input:focus, .field select:focus, .filter-field input:focus,
+.filter-field select:focus, .filter-group input:focus, .filter-group select:focus,
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus,
+.search-box input:focus {
+  border-color: #80b9e8;
+  box-shadow: 0 0 0 3px rgba(22,117,209,.09);
+}

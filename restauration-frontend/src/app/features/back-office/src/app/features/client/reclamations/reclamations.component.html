@@ -1,0 +1,92 @@
+<div class="reclamations-page client-app with-bottom-nav">
+  <header class="client-topbar">
+    <button type="button" class="client-back-btn" (click)="retourMenu()">← Menu</button>
+    <h1>Mes réclamations</h1>
+    <button type="button" class="client-btn client-btn-primary new-btn" (click)="toggleForm()">
+      {{ showForm ? 'Annuler' : '+ Nouvelle' }}
+    </button>
+  </header>
+
+  @if (submitSuccess) {
+    <div class="client-success-banner page-margin">✓ Votre réclamation a bien été envoyée.</div>
+  }
+
+  @if (showForm) {
+    <section class="client-card form-card page-margin">
+      <div class="field">
+        <label for="sujet">Sujet</label>
+        <input
+          id="sujet"
+          type="text"
+          [(ngModel)]="sujet"
+          placeholder="Ex : Produit manquant, retard de livraison..."
+          maxlength="150"
+        />
+      </div>
+
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          rows="4"
+          [(ngModel)]="description"
+          placeholder="Décrivez votre problème en détail"
+        ></textarea>
+      </div>
+
+      @if (submitError) {
+        <div class="client-error-banner">⚠️ {{ submitError }}</div>
+      }
+
+      <button
+        type="button"
+        class="client-btn client-btn-primary submit-btn"
+        [disabled]="!formulaireValide || submitting"
+        (click)="soumettre()"
+      >
+        {{ submitting ? 'Envoi...' : 'Envoyer' }}
+      </button>
+    </section>
+  }
+
+  @if (loading) {
+    <div class="client-state">
+      <div class="client-spinner large"></div>
+      <p>Chargement...</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="client-error-banner page-margin">⚠️ {{ errorMessage }}</div>
+  } @else if (reclamations.length === 0) {
+    <div class="client-state">
+      <div class="state-emoji">📋</div>
+      <h3>Aucune réclamation</h3>
+      <p>Un souci avec une commande ? Ouvrez une réclamation en un instant.</p>
+    </div>
+  } @else {
+    <ul class="reclamations-list">
+      @for (reclamation of reclamations; track reclamation.id_reclamation) {
+        <li class="reclamation-card client-card">
+          <div class="reclamation-top">
+            <h3>{{ reclamation.sujet }}</h3>
+            <span class="client-badge" [class]="statutClass(reclamation.statut)">
+              {{ statutLabel(reclamation.statut) }}
+            </span>
+          </div>
+
+          <p class="reclamation-description">{{ reclamation.description }}</p>
+
+          <p class="reclamation-date">{{ reclamation.date_creation | date: 'dd/MM/yyyy HH:mm' }}</p>
+
+          @if (reclamation.reponse_employee) {
+            <div class="reponse-block">
+              <strong>Réponse du restaurant</strong>
+              <p>{{ reclamation.reponse_employee }}</p>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <app-client-bottom-nav />
+</div>

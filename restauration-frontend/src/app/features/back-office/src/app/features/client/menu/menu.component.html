@@ -1,0 +1,163 @@
+<div class="menu-page client-app with-bottom-nav">
+  <!-- ===================== TOPBAR ===================== -->
+  <header class="client-topbar menu-topbar">
+    <div class="restaurant-info">
+      @if (restaurant) {
+        <h1>{{ restaurant.nomRestaurant }}</h1>
+        <p>📍 {{ restaurant.adresse }}</p>
+      } @else {
+        <h1>Menu</h1>
+      }
+    </div>
+
+    <div class="topbar-actions">
+      <button type="button" class="icon-btn" (click)="openReservations()" title="Mes réservations">📅</button>
+      <button type="button" class="icon-btn" (click)="openSuggestions()" title="Mes suggestions">💡</button>
+      <button type="button" class="icon-btn" (click)="openReclamations()" title="Mes réclamations">📋</button>
+      <button type="button" class="icon-btn" (click)="logout()" title="Se déconnecter">⏻</button>
+    </div>
+  </header>
+
+  <!-- ===================== MEILLEURES VENTES ===================== -->
+  @if (loadingMeilleuresVentes || meilleuresVentes.length > 0) {
+    <section class="strip-section">
+      <div class="client-section-title"><h2>🔥 Meilleures ventes</h2></div>
+
+      @if (loadingMeilleuresVentes) {
+        <div class="strip">
+          @for (i of [1,2,3]; track i) { <div class="strip-card skeleton"></div> }
+        </div>
+      } @else {
+        <div class="strip">
+          @for (produit of meilleuresVentes; track produit.id_element) {
+            <div class="strip-card" (click)="openProduit(produit)">
+              <img [src]="getImage(produit)" [alt]="produit.nom" />
+              <p class="strip-name">{{ produit.nom }}</p>
+              <p class="strip-prix">{{ formatPrix(produit.prix) }}</p>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ===================== SUGGESTIONS ===================== -->
+  @if (loadingSuggestions || suggestions.length > 0) {
+    <section class="strip-section">
+      <div class="client-section-title"><h2>✨ Suggestions pour vous</h2></div>
+
+      @if (loadingSuggestions) {
+        <div class="strip">
+          @for (i of [1,2,3]; track i) { <div class="strip-card skeleton"></div> }
+        </div>
+      } @else {
+        <div class="strip">
+          @for (produit of suggestions; track produit.id_element) {
+            <div class="strip-card" (click)="openProduit(produit)">
+              <img [src]="getImage(produit)" [alt]="produit.nom" />
+              <p class="strip-name">{{ produit.nom }}</p>
+              <p class="strip-prix">{{ formatPrix(produit.prix) }}</p>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ===================== CATEGORIES ===================== -->
+  <nav class="categories-band">
+    <button
+      type="button"
+      class="client-chip"
+      [class.active]="isCategorieActive(null)"
+      (click)="selectCategorie(null)"
+    >
+      Tout
+    </button>
+
+    @for (categorie of categories; track categorie.id_element) {
+      <button
+        type="button"
+        class="client-chip"
+        [class.active]="isCategorieActive(categorie)"
+        (click)="selectCategorie(categorie)"
+      >
+        {{ categorie.nom }}
+      </button>
+    }
+  </nav>
+
+  <!-- ===================== SOUS-CATEGORIES ===================== -->
+  @if (sousCategories.length > 0) {
+    <nav class="categories-band sous-categories-band">
+      <button
+        type="button"
+        class="client-chip sous-chip"
+        [class.active]="isSousCategorieActive(null)"
+        (click)="selectSousCategorie(null)"
+      >
+        Toutes
+      </button>
+
+      @for (sousCategorie of sousCategories; track sousCategorie.id_element) {
+        <button
+          type="button"
+          class="client-chip sous-chip"
+          [class.active]="isSousCategorieActive(sousCategorie)"
+          (click)="selectSousCategorie(sousCategorie)"
+        >
+          {{ sousCategorie.nom }}
+        </button>
+      }
+    </nav>
+  }
+
+  <!-- ===================== PRODUITS ===================== -->
+  <section class="produits-section">
+    @if (errorMessage) {
+      <div class="client-error-banner">⚠️ {{ errorMessage }}</div>
+    }
+
+    @if (loadingProduits) {
+      <div class="produits-grid">
+        @for (i of [1,2,3,4,5,6]; track i) { <div class="produit-card skeleton"></div> }
+      </div>
+    } @else if (produits.length === 0) {
+      <div class="client-state">
+        <div class="state-emoji">🍽️</div>
+        <h3>Rien par ici</h3>
+        <p>Aucun produit disponible dans cette catégorie pour le moment.</p>
+      </div>
+    } @else {
+      <div class="produits-grid">
+        @for (produit of produits; track produit.id_element) {
+          <div class="produit-card" (click)="openProduit(produit)">
+            <div class="produit-image-wrap">
+              <img [src]="getImage(produit)" [alt]="produit.nom" />
+
+              <button
+                type="button"
+                class="favori-badge"
+                [class.active]="isFavori(produit)"
+                [disabled]="favoriEnCoursId === produit.id_element"
+                (click)="toggleFavori(produit, $event)"
+                [title]="isFavori(produit) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+              >
+                {{ isFavori(produit) ? '♥' : '♡' }}
+              </button>
+            </div>
+            <div class="produit-info">
+              <p class="produit-name">{{ produit.nom }}</p>
+              @if (produit.description) {
+                <p class="produit-description">{{ produit.description }}</p>
+              }
+              <p class="produit-prix">{{ formatPrix(produit.prix) }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <app-client-bottom-nav active="menu" />
+</div>

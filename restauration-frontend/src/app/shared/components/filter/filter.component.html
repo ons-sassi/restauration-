@@ -1,0 +1,26 @@
+<div class="filter">
+
+  <label>
+    {{ label }}
+  </label>
+
+  <select
+    [value]="value"
+    (change)="change($event)"
+  >
+
+    <option value="">
+      Tous
+    </option>
+
+    @for (option of options; track option.value) {
+
+      <option [value]="option.value">
+        {{ option.label }}
+      </option>
+
+    }
+
+  </select>
+
+</div>

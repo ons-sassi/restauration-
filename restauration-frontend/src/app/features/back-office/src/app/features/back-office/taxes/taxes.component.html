@@ -1,0 +1,518 @@
+<div class="page">
+
+  <!-- =====================================================
+       EN-TÊTE
+  ====================================================== -->
+  <header class="page-header">
+
+    <div>
+
+      <span class="page-kicker">
+        GESTION DES TAXES
+      </span>
+
+      <h1>
+        Taxes
+      </h1>
+
+      <p>
+        Gérez les taxes applicables à vos produits et services.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      *ngIf="canAddTaxe()"
+      (click)="nouvelleTaxe()"
+    >
+      <span class="btn-icon">+</span>
+      <span>Nouvelle taxe</span>
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       ERREUR
+  ====================================================== -->
+  <div
+    class="error-message"
+    *ngIf="error"
+  >
+
+    {{ error }}
+
+    <button
+      type="button"
+      class="retry-link"
+      (click)="loadTaxes()"
+    >
+      Réessayer
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       STATISTIQUES GLOBALES
+  ====================================================== -->
+  <section class="stats">
+
+    <div class="stat-card">
+      <span class="stat-label">TOTAL TAXES</span>
+      <span class="stat-value">{{ totalTaxes }}</span>
+    </div>
+
+    <div class="stat-card info">
+      <span class="stat-label">TAXES ACTIVES</span>
+      <span class="stat-value">{{ totalTaxesActives }}</span>
+    </div>
+
+    <div class="stat-card warning">
+      <span class="stat-label">TAXES INACTIVES</span>
+      <span class="stat-value">{{ totalTaxesInactives }}</span>
+    </div>
+
+    <div class="stat-card" *ngIf="canViewStatistiques()">
+      <span class="stat-label">TAUX MOYEN</span>
+      <span class="stat-value">{{ tauxMoyen }}%</span>
+    </div>
+
+    <div
+      class="stat-card"
+      *ngIf="canViewStatistiques() && tauxMax"
+    >
+      <span class="stat-label">TAUX LE PLUS ÉLEVÉ</span>
+      <span class="stat-value">{{ tauxMax?.taux }}%</span>
+      <span class="stat-sub">{{ tauxMax?.nom_taxe }}</span>
+    </div>
+
+    <div
+      class="stat-card"
+      *ngIf="canViewStatistiques() && tauxMin"
+    >
+      <span class="stat-label">TAUX LE PLUS BAS</span>
+      <span class="stat-value">{{ tauxMin?.taux }}%</span>
+      <span class="stat-sub">{{ tauxMin?.nom_taxe }}</span>
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       LISTE DES TAXES
+  ====================================================== -->
+  <section class="table-card">
+
+    <!-- ===================================================
+         FILTRES
+    ==================================================== -->
+    <div class="filters">
+
+      <div class="search-box">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher une taxe (nom, application)..."
+        />
+
+      </div>
+
+      <select
+        class="filter-select"
+        [(ngModel)]="statutFiltre"
+      >
+        <option value="">Tous les statuts</option>
+        <option value="ACTIF">Actif</option>
+        <option value="INACTIF">Inactif</option>
+      </select>
+
+      <button
+        type="button"
+        class="btn-reset"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+    ==================================================== -->
+    <div
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <p>Chargement des taxes...</p>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLEAU
+    ==================================================== -->
+    <div
+      class="table-container"
+      *ngIf="!loading && taxesFiltrees.length > 0"
+    >
+
+      <table>
+
+        <thead>
+
+        <tr>
+          <th>Taxe</th>
+          <th class="text-center">Taux</th>
+          <th>Applicable à</th>
+          <th>Date de création</th>
+          <th class="text-center">Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let taxe of taxesFiltrees; trackBy: trackByTaxe"
+        >
+
+          <td>
+            <div class="taxe-name">{{ taxe.nom_taxe }}</div>
+          </td>
+
+          <td class="text-center">
+            {{ taxe.taux }}%
+          </td>
+
+          <td>
+            {{ taxe.applicable_a || '—' }}
+          </td>
+
+          <td>
+            {{ taxe.date_creation | date: 'dd/MM/yyyy' }}
+          </td>
+
+          <td class="text-center">
+
+            <button
+              type="button"
+              class="status-badge"
+              [class.unavailable]="(taxe.statut | uppercase) !== 'ACTIF'"
+              [disabled]="!canEditTaxe()"
+              (click)="basculerStatut(taxe)"
+            >
+              <span class="status-dot"></span>
+              {{ (taxe.statut | uppercase) === 'ACTIF' ? 'Actif' : 'Inactif' }}
+            </button>
+
+          </td>
+
+          <td class="text-right">
+
+            <div class="row-actions">
+
+              <button
+                type="button"
+                class="action-btn edit"
+                *ngIf="canEditTaxe()"
+                (click)="modifierTaxe(taxe)"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                class="action-btn delete"
+                *ngIf="canDeleteTaxe()"
+                (click)="supprimerTaxe(taxe)"
+              >
+                Supprimer
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ===================================================
+         EMPTY
+    ==================================================== -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && taxesFiltrees.length === 0"
+    >
+
+      <h3>Aucune taxe trouvée</h3>
+
+      <p>Aucune taxe ne correspond aux critères sélectionnés.</p>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetFiltres()"
+      >
+        Réinitialiser les filtres
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       RÉPARTITION PAR APPLICATION
+  ====================================================== -->
+  <section
+    class="table-card repartition-card"
+    *ngIf="!loading && canViewStatistiques() && repartitionParApplication.length > 0"
+  >
+
+    <div class="card-header">
+      <h2>Répartition par application</h2>
+      <p>Nombre de taxes et taux moyen selon leur domaine d'application.</p>
+    </div>
+
+    <div class="table-container">
+
+      <table>
+
+        <thead>
+
+        <tr>
+          <th>Applicable à</th>
+          <th class="text-center">Nombre de taxes</th>
+          <th class="text-center">Part</th>
+          <th class="text-center">Taux moyen</th>
+          <th>Répartition</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let item of repartitionParApplication; trackBy: trackByApplication"
+        >
+
+          <td>
+            <div class="taxe-name">{{ item.applicable_a }}</div>
+          </td>
+
+          <td class="text-center">
+            {{ item.nombre }}
+          </td>
+
+          <td class="text-center">
+            {{ item.pourcentage }}%
+          </td>
+
+          <td class="text-center">
+            {{ item.tauxMoyen }}%
+          </td>
+
+          <td>
+            <div class="bar-track">
+              <div
+                class="bar-fill"
+                [style.width.%]="item.pourcentage"
+              ></div>
+            </div>
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL - CRÉATION / MODIFICATION
+========================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="modalOuvert"
+  (click)="fermerModal()"
+>
+
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-header">
+
+      <h2>
+        {{ isEditMode ? 'Modifier la taxe' : 'Nouvelle taxe' }}
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fermerModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form
+      class="modal-body"
+      (ngSubmit)="enregistrer()"
+    >
+
+      <div
+        class="form-error"
+        *ngIf="formError"
+      >
+        {{ formError }}
+      </div>
+
+      <div class="form-grid">
+
+        <!-- NOM -->
+        <div class="form-group full">
+
+          <label for="nom_taxe">
+            Nom de la taxe <span>*</span>
+          </label>
+
+          <input
+            id="nom_taxe"
+            type="text"
+            name="nom_taxe"
+            [(ngModel)]="formulaire.nom_taxe"
+            placeholder="Ex. TVA Standard"
+            autocomplete="off"
+            required
+          />
+
+        </div>
+
+
+        <!-- TAUX -->
+        <div class="form-group">
+
+          <label for="taux">
+            Taux (%) <span>*</span>
+          </label>
+
+          <input
+            id="taux"
+            type="number"
+            name="taux"
+            [(ngModel)]="formulaire.taux"
+            min="0"
+            max="100"
+            step="0.01"
+            placeholder="0"
+            required
+          />
+
+        </div>
+
+
+        <!-- STATUT -->
+        <div class="form-group">
+
+          <label for="statut">
+            Statut
+          </label>
+
+          <select
+            id="statut"
+            name="statut"
+            [(ngModel)]="formulaire.statut"
+          >
+            <option value="ACTIF">Actif</option>
+            <option value="INACTIF">Inactif</option>
+          </select>
+
+        </div>
+
+
+        <!-- APPLICABLE A -->
+        <div class="form-group full">
+
+          <label for="applicable_a">
+            Applicable à <span>*</span>
+          </label>
+
+          <select
+            id="applicable_a"
+            name="applicable_a"
+            [(ngModel)]="formulaire.applicable_a"
+            required
+          >
+            <option
+              value=""
+              disabled
+            >
+              Sélectionner...
+            </option>
+
+            <option
+              *ngFor="let option of optionsApplicableA"
+              [value]="option"
+            >
+              {{ option }}
+            </option>
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="fermerModal()"
+          [disabled]="saving"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn-save"
+          *ngIf="isEditMode ? canEditTaxe() : canAddTaxe()"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Enregistrement...' : isEditMode ? 'Enregistrer' : 'Créer la taxe' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

@@ -1,0 +1,23 @@
+@if (imageUrl) {
+
+  <img
+    class="avatar"
+    [class.small]="size === 'small'"
+    [class.medium]="size === 'medium'"
+    [class.large]="size === 'large'"
+    [src]="imageUrl"
+    [alt]="name"
+  />
+
+} @else {
+
+  <span
+    class="avatar initials"
+    [class.small]="size === 'small'"
+    [class.medium]="size === 'medium'"
+    [class.large]="size === 'large'"
+  >
+    {{ initials }}
+  </span>
+
+}
